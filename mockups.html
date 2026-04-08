@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JobFinder — Mockups Logo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:#F0F2F5;color:#1a1a1a;min-height:100vh;padding:40px 24px}
+
+h1{font-size:26px;font-weight:800;color:#1E3A5F;margin-bottom:6px}
+.subtitle{font-size:14px;color:#6B7280;margin-bottom:48px}
+
+/* Section */
+.section{margin-bottom:60px}
+.section-label{
+  font-size:11px;font-weight:700;color:#9CA3AF;letter-spacing:.12em;
+  text-transform:uppercase;margin-bottom:18px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:#E2EAF4}
+
+/* ─── FAVICON SIZES ─── */
+.sizes-row{display:flex;align-items:flex-end;gap:28px;flex-wrap:wrap}
+.size-item{display:flex;flex-direction:column;align-items:center;gap:10px}
+.size-label{font-size:11px;color:#9CA3AF;font-weight:600;text-align:center}
+.favicon-bg{
+  background:#fff;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 12px rgba(0,0,0,.12);
+}
+
+/* ─── BROWSER TAB MOCKUP ─── */
+.browser-mockup{
+  background:#DEE1E6;border-radius:16px 16px 0 0;overflow:hidden;
+  width:680px;max-width:100%;box-shadow:0 8px 40px rgba(0,0,0,.15);
+}
+.browser-chrome{
+  background:#DEE1E6;padding:10px 12px 0;display:flex;flex-direction:column;gap:8px;
+}
+.browser-controls{display:flex;gap:6px;padding:0 4px 4px}
+.browser-dot{width:12px;height:12px;border-radius:50%}
+.bd-red{background:#FF5F57}.bd-yellow{background:#FEBC2E}.bd-green{background:#28C840}
+.tabs-row{display:flex;gap:2px;align-items:flex-end}
+.tab{
+  display:flex;align-items:center;gap:7px;padding:8px 18px 8px 12px;
+  border-radius:8px 8px 0 0;font-size:12.5px;font-weight:500;
+  min-width:0;max-width:200px;cursor:default;
+  background:#fff;color:#333;
+  box-shadow:0 -1px 0 rgba(0,0,0,.06);position:relative;
+}
+.tab.inactive{background:#C9CDD4;color:#6B7280}
+.tab.inactive:hover{background:#D4D7DC}
+.tab-title{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:'Inter',sans-serif}
+.tab-close{margin-left:auto;color:#9CA3AF;font-size:11px;line-height:1;width:14px;height:14px;display:flex;align-items:center;justify-content:center;border-radius:50%}
+.tab.inactive .tab-close:hover{background:rgba(0,0,0,.12)}
+.address-bar-row{padding:6px 8px 8px;display:flex;gap:8px;align-items:center}
+.nav-btn{width:28px;height:28px;border-radius:50%;background:rgba(0,0,0,.06);display:flex;align-items:center;justify-content:center;font-size:13px;color:#5F6368;cursor:default}
+.address-bar{
+  flex:1;background:#fff;border-radius:20px;padding:6px 16px;
+  font-size:13px;color:#202124;display:flex;align-items:center;gap:8px;
+  font-family:'Roboto',sans-serif;box-shadow:0 1px 3px rgba(0,0,0,.1);
+}
+.lock-icon{color:#4B8043;font-size:12px}
+.browser-body{background:#F7F9FC;height:140px;display:flex;align-items:flex-start;padding:20px}
+
+/* ─── GOOGLE SEARCH MOCKUP ─── */
+.google-mockup{
+  background:#fff;border-radius:12px;overflow:hidden;
+  width:680px;max-width:100%;box-shadow:0 2px 20px rgba(0,0,0,.08);
+  font-family:'Arial',sans-serif;
+}
+.google-header{
+  background:#fff;padding:14px 20px 0;display:flex;align-items:center;gap:18px;
+  border-bottom:1px solid #e8eaed;
+}
+.google-logo{font-size:22px;font-weight:700;letter-spacing:-1px}
+.g-blue{color:#4285F4}.g-red{color:#EA4335}.g-yellow{color:#FBBC04}.g-green{color:#34A853}
+.google-search-bar{
+  flex:1;display:flex;align-items:center;border:1px solid #dfe1e5;border-radius:24px;
+  padding:7px 14px;gap:10px;font-size:14px;color:#202124;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);
+}
+.google-search-icon{color:#9AA0A6;font-size:16px}
+.google-tabs{display:flex;gap:0;padding:0 20px;border-bottom:1px solid #e8eaed;margin-top:8px}
+.gtab{padding:12px 16px;font-size:13px;color:#5F6368;cursor:default;border-bottom:2px solid transparent}
+.gtab.active{color:#1A73E8;border-bottom-color:#1A73E8;font-weight:500}
+.google-results{padding:16px 20px;display:flex;flex-direction:column;gap:0}
+.gresult{padding:14px 0;border-bottom:1px solid #f1f3f4}
+.gresult:last-child{border-bottom:none}
+.gresult-source{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.gresult-favicon{width:18px;height:18px;border-radius:4px;flex-shrink:0}
+.gresult-domain{font-size:13px;color:#4D5156;font-family:'Arial',sans-serif}
+.gresult-title{font-size:20px;color:#1A0DAB;font-weight:400;margin-bottom:4px;line-height:1.3;cursor:pointer}
+.gresult-title:hover{text-decoration:underline}
+.gresult-desc{font-size:14px;color:#4D5156;line-height:1.58}
+.gresult-desc strong{color:#202124;font-weight:700}
+.gresult-sponsored{
+  display:flex;align-items:center;gap:8px;margin-bottom:3px;
+}
+.sponsored-label{font-size:11px;color:#70757A;border:1px solid #70757A;border-radius:4px;padding:1px 5px}
+.gresult-sitelinks{display:flex;gap:16px;margin-top:8px;flex-wrap:wrap}
+.gresult-sitelink{font-size:13px;color:#1A0DAB;cursor:pointer}
+.gresult-sitelink:hover{text-decoration:underline}
+
+/* ─── MOBILE APP ICON ─── */
+.mobile-mockup{
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  border-radius:44px;width:280px;height:500px;
+  overflow:hidden;position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,.3),0 0 0 2px rgba(255,255,255,.15);
+}
+.phone-notch{
+  width:100px;height:26px;background:#000;border-radius:0 0 16px 16px;
+  position:absolute;top:0;left:50%;transform:translateX(-50%);z-index:10;
+}
+.phone-screen{
+  position:absolute;inset:0;padding:48px 16px 16px;
+  display:flex;flex-direction:column;
+}
+.phone-time{
+  font-size:28px;font-weight:200;color:#fff;text-align:center;margin-bottom:6px;
+}
+.phone-date{font-size:13px;color:rgba(255,255,255,.7);text-align:center;margin-bottom:24px;}
+.app-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;padding:0 4px}
+.app-icon-wrap{display:flex;flex-direction:column;align-items:center;gap:5px}
+.app-icon{width:52px;height:52px;border-radius:12px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.app-label{font-size:10px;color:#fff;font-weight:500;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.3)}
+.app-icon.jf{
+  background:linear-gradient(135deg,#3a6cc0,#2F5DA8);
+  display:flex;align-items:center;justify-content:center;
+}
+.app-icon.grey{background:linear-gradient(135deg,#8E8E93,#636366)}
+.app-icon.green{background:linear-gradient(135deg,#34C759,#248A3D)}
+.app-icon.red{background:linear-gradient(135deg,#FF3B30,#C0392B)}
+.app-icon.orange{background:linear-gradient(135deg,#FF9500,#BF6900)}
+.app-icon.teal{background:linear-gradient(135deg,#5AC8FA,#0A84FF)}
+.app-icon.pink{background:linear-gradient(135deg,#FF2D55,#BF0445)}
+.app-icon.purple{background:linear-gradient(135deg,#AF52DE,#7430A8)}
+.phone-dock{
+  margin-top:auto;padding:12px;background:rgba(255,255,255,.15);
+  border-radius:22px;backdrop-filter:blur(20px);
+  display:flex;justify-content:space-around;
+}
+
+/* ─── OG IMAGE ─── */
+.og-mockup{
+  width:600px;max-width:100%;
+  aspect-ratio:1200/630;
+  background:linear-gradient(135deg,#1E3A5F 0%,#2F5DA8 50%,#1a3054 100%);
+  border-radius:16px;overflow:hidden;position:relative;
+  box-shadow:0 8px 40px rgba(0,0,0,.2);
+  display:flex;align-items:center;justify-content:center;
+}
+.og-circles{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.og-c1{
+  position:absolute;width:500px;height:500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(255,255,255,.05) 0%,transparent 70%);
+  top:-150px;right:-100px;
+}
+.og-c2{
+  position:absolute;width:350px;height:350px;border-radius:50%;
+  background:radial-gradient(circle,rgba(91,185,140,.12) 0%,transparent 70%);
+  bottom:-100px;left:-50px;
+}
+.og-content{
+  display:flex;align-items:center;gap:36px;padding:40px;position:relative;z-index:1;
+}
+.og-logo-mark{
+  width:110px;height:110px;border-radius:28px;
+  background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);
+  display:flex;align-items:center;justify-content:center;
+  backdrop-filter:blur(4px);flex-shrink:0;
+  box-shadow:0 4px 24px rgba(0,0,0,.2);
+}
+.og-text{display:flex;flex-direction:column;gap:8px}
+.og-title{font-size:42px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1.1}
+.og-tagline{font-size:17px;color:rgba(255,255,255,.65);font-weight:400;line-height:1.4}
+.og-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  margin-top:8px;padding:6px 14px;border-radius:20px;
+  background:rgba(91,185,140,.2);border:1px solid rgba(91,185,140,.35);
+  color:#7DE4B0;font-size:13px;font-weight:600;width:fit-content;
+}
+
+/* ─── CARD LAYOUT ─── */
+.cards-row{display:flex;gap:24px;flex-wrap:wrap}
+.card{
+  background:#fff;border-radius:16px;padding:28px 24px;
+  box-shadow:0 2px 20px rgba(0,0,0,.06);
+  display:flex;flex-direction:column;gap:16px;
+}
+</style>
+</head>
+<body>
+
+<h1>JobFinder — Mockups</h1>
+<p class="subtitle">Rendus du logo dans tous les contextes d'utilisation</p>
+
+<!-- ══ FAVICON SIZES ══ -->
+<div class="section">
+  <div class="section-label">Favicon — toutes tailles</div>
+  <div class="sizes-row">
+
+    <!-- 16×16 -->
+    <div class="size-item">
+      <div class="favicon-bg" style="width:32px;height:32px">
+        <svg viewBox="0 0 32 32" width="16" height="16" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="7" fill="#2F5DA8"/>
+          <path d="M6 13Q6 11 8 11H24Q26 11 26 13V22Q26 24 24 24H18L16 27L14 24H8Q6 24 6 22Z" fill="white"/>
+          <path d="M13 11V10Q13 9 14 9H18Q19 9 19 10V11" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="16" cy="17" r="4" fill="#5BB98C"/>
+          <circle cx="16" cy="17" r="2.2" fill="white"/>
+          <circle cx="16" cy="17" r="0.9" fill="#5BB98C"/>
+        </svg>
+      </div>
+      <div class="size-label">16×16<br>Onglet</div>
+    </div>
+
+    <!-- 32×32 -->
+    <div class="size-item">
+      <div class="favicon-bg" style="width:48px;height:48px">
+        <svg viewBox="0 0 32 32" width="32" height="32" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="32" rx="7" fill="#2F5DA8"/>
+          <path d="M6 13Q6 11 8 11H24Q26 11 26 13V22Q26 24 24 24H18L16 27L14 24H8Q6 24 6 22Z" fill="white"/>
+          <path d="M13 11V10Q13 9 14 9H18Q19 9 19 10V11" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="16" cy="17" r="4" fill="#5BB98C"/>
+          <circle cx="16" cy="17" r="2.2" fill="white"/>
+          <circle cx="16" cy="17" r="0.9" fill="#5BB98C"/>
+        </svg>
+      </div>
+      <div class="size-label">32×32<br>Favori</div>
+    </div>
+
+    <!-- 64×64 -->
+    <div class="size-item">
+      <div class="favicon-bg" style="width:80px;height:80px">
+        <svg viewBox="0 0 64 64" width="64" height="64" xmlns="http://www.w3.org/2000/svg">
+          <rect width="64" height="64" rx="14" fill="#2F5DA8"/>
+          <path d="M12 26Q12 22 16 22H48Q52 22 52 26V44Q52 48 48 48H36L32 54L28 48H16Q12 48 12 44Z" fill="white"/>
+          <path d="M26 22V20Q26 18 28 18H36Q38 18 38 20V22" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <circle cx="32" cy="34" r="8" fill="#5BB98C"/>
+          <circle cx="32" cy="34" r="4.5" fill="white"/>
+          <circle cx="32" cy="34" r="1.8" fill="#5BB98C"/>
+          <line x1="20" y1="34" x2="25" y2="34" stroke="white" stroke-width="2"/>
+          <line x1="39" y1="34" x2="44" y2="34" stroke="white" stroke-width="2"/>
+          <line x1="32" y1="22" x2="32" y2="27" stroke="white" stroke-width="2"/>
+          <line x1="32" y1="41" x2="32" y2="46" stroke="white" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="size-label">64×64<br>HD</div>
+    </div>
+
+    <!-- 180×180 Apple Touch -->
+    <div class="size-item">
+      <div class="favicon-bg" style="width:100px;height:100px">
+        <svg viewBox="0 0 180 180" width="100" height="100" xmlns="http://www.w3.org/2000/svg">
+          <rect width="180" height="180" rx="40" fill="#2F5DA8"/>
+          <path d="M34 74Q34 62 46 62H134Q146 62 146 74V125Q146 137 134 137H100L90 152L80 137H46Q34 137 34 125Z" fill="white"/>
+          <path d="M72 62V56Q72 50 78 50H102Q108 50 108 56V62" fill="none" stroke="white" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="90" cy="98" r="22" fill="#5BB98C"/>
+          <circle cx="90" cy="98" r="12" fill="white"/>
+          <circle cx="90" cy="98" r="5" fill="#5BB98C"/>
+          <line x1="62" y1="98" x2="74" y2="98" stroke="white" stroke-width="5"/>
+          <line x1="106" y1="98" x2="118" y2="98" stroke="white" stroke-width="5"/>
+          <line x1="90" y1="70" x2="90" y2="82" stroke="white" stroke-width="5"/>
+          <line x1="90" y1="114" x2="90" y2="126" stroke="white" stroke-width="5"/>
+        </svg>
+      </div>
+      <div class="size-label">180×180<br>Apple Touch</div>
+    </div>
+
+    <!-- 512×512 PWA -->
+    <div class="size-item">
+      <div class="favicon-bg" style="width:120px;height:120px">
+        <svg viewBox="0 0 512 512" width="120" height="120" xmlns="http://www.w3.org/2000/svg">
+          <rect width="512" height="512" rx="112" fill="#2F5DA8"/>
+          <rect width="512" height="512" rx="112" fill="url(#grad)"/>
+          <defs>
+            <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#3a6cc0"/>
+              <stop offset="100%" stop-color="#1E3A5F"/>
+            </linearGradient>
+          </defs>
+          <path d="M96 208Q96 176 128 176H384Q416 176 416 208V352Q416 384 384 384H282L256 424L230 384H128Q96 384 96 352Z" fill="white"/>
+          <path d="M205 176V158Q205 144 218 144H294Q307 144 307 158V176" fill="none" stroke="white" stroke-width="22" stroke-linecap="round"/>
+          <circle cx="256" cy="278" r="64" fill="#5BB98C"/>
+          <circle cx="256" cy="278" r="36" fill="white"/>
+          <circle cx="256" cy="278" r="14" fill="#5BB98C"/>
+          <line x1="176" y1="278" x2="210" y2="278" stroke="white" stroke-width="14"/>
+          <line x1="302" y1="278" x2="336" y2="278" stroke="white" stroke-width="14"/>
+          <line x1="256" y1="198" x2="256" y2="232" stroke="white" stroke-width="14"/>
+          <line x1="256" y1="324" x2="256" y2="358" stroke="white" stroke-width="14"/>
+        </svg>
+      </div>
+      <div class="size-label">512×512<br>PWA Store</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══ BROWSER TAB ══ -->
+<div class="section">
+  <div class="section-label">Onglet navigateur (Chrome / Safari)</div>
+  <div class="browser-mockup">
+    <div class="browser-chrome">
+      <div class="browser-controls">
+        <div class="browser-dot bd-red"></div>
+        <div class="browser-dot bd-yellow"></div>
+        <div class="browser-dot bd-green"></div>
+      </div>
+      <div class="tabs-row">
+        <!-- Tab JobFinder (actif) -->
+        <div class="tab">
+          <svg viewBox="0 0 32 32" width="16" height="16" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+            <rect width="32" height="32" rx="7" fill="#2F5DA8"/>
+            <path d="M6 13Q6 11 8 11H24Q26 11 26 13V22Q26 24 24 24H18L16 27L14 24H8Q6 24 6 22Z" fill="white"/>
+            <path d="M13 11V10Q13 9 14 9H18Q19 9 19 10V11" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="16" cy="17" r="4" fill="#5BB98C"/>
+            <circle cx="16" cy="17" r="2.2" fill="white"/>
+            <circle cx="16" cy="17" r="0.9" fill="#5BB98C"/>
+          </svg>
+          <span class="tab-title">JobFinder — Tableau de bord</span>
+          <span class="tab-close">×</span>
+        </div>
+        <!-- Tab inactive -->
+        <div class="tab inactive">
+          <svg viewBox="0 0 16 16" width="14" height="14" style="flex-shrink:0;opacity:.5"><rect width="16" height="16" rx="3" fill="#666"/></svg>
+          <span class="tab-title">LinkedIn — Emplois</span>
+          <span class="tab-close">×</span>
+        </div>
+        <div class="tab inactive">
+          <svg viewBox="0 0 16 16" width="14" height="14" style="flex-shrink:0;opacity:.5"><rect width="16" height="16" rx="3" fill="#E84135"/></svg>
+          <span class="tab-title">Gmail</span>
+          <span class="tab-close">×</span>
+        </div>
+      </div>
+      <div class="address-bar-row">
+        <div class="nav-btn">←</div>
+        <div class="nav-btn">→</div>
+        <div class="nav-btn">⟳</div>
+        <div class="address-bar">
+          <span class="lock-icon">🔒</span>
+          <span style="flex:1">jobfinder.app</span>
+          <span style="color:#9AA0A6;font-size:13px">⭐</span>
+        </div>
+        <div class="nav-btn" style="font-size:17px">⋮</div>
+      </div>
+    </div>
+    <div class="browser-body">
+      <div style="font-size:12px;color:#9CA3AF;font-style:italic">Aperçu de l'application...</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ GOOGLE SEARCH ══ -->
+<div class="section">
+  <div class="section-label">Résultat de recherche Google</div>
+  <div class="google-mockup">
+    <div class="google-header">
+      <div class="google-logo">
+        <span class="g-blue">G</span><span class="g-red">o</span><span class="g-yellow">o</span><span class="g-blue">g</span><span class="g-green">l</span><span class="g-red">e</span>
+      </div>
+      <div class="google-search-bar">
+        <span class="google-search-icon">🔍</span>
+        <span>jobfinder candidature CV IA</span>
+      </div>
+    </div>
+    <div class="google-tabs">
+      <div class="gtab active">Tous</div>
+      <div class="gtab">Images</div>
+      <div class="gtab">Actualités</div>
+      <div class="gtab">Vidéos</div>
+    </div>
+    <div class="google-results">
+
+      <!-- Résultat 1 — Annonce -->
+      <div class="gresult">
+        <div class="gresult-source">
+          <svg viewBox="0 0 32 32" width="18" height="18" class="gresult-favicon" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="7" fill="#2F5DA8"/>
+            <path d="M6 13Q6 11 8 11H24Q26 11 26 13V22Q26 24 24 24H18L16 27L14 24H8Q6 24 6 22Z" fill="white"/>
+            <path d="M13 11V10Q13 9 14 9H18Q19 9 19 10V11" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="16" cy="17" r="4" fill="#5BB98C"/>
+            <circle cx="16" cy="17" r="2.2" fill="white"/>
+            <circle cx="16" cy="17" r="0.9" fill="#5BB98C"/>
+          </svg>
+          <span class="gresult-domain">jobfinder.app</span>
+          <span class="sponsored-label">Sponsorisé</span>
+        </div>
+        <div class="gresult-title">JobFinder — Le copilote de ta recherche d'emploi 🎯</div>
+        <div class="gresult-desc">Trouve des offres, adapte ton CV avec l'IA et suis tes candidatures en un seul endroit. <strong>GPT-4o</strong> analyse chaque offre et optimise ton profil pour maximiser tes chances.</div>
+        <div class="gresult-sitelinks">
+          <span class="gresult-sitelink">Adapter mon CV</span>
+          <span class="gresult-sitelink">Mes candidatures</span>
+          <span class="gresult-sitelink">Templates CV</span>
+          <span class="gresult-sitelink">Se connecter</span>
+        </div>
+      </div>
+
+      <!-- Résultat 2 — Organique -->
+      <div class="gresult">
+        <div class="gresult-source">
+          <svg viewBox="0 0 32 32" width="18" height="18" class="gresult-favicon" xmlns="http://www.w3.org/2000/svg">
+            <rect width="32" height="32" rx="7" fill="#2F5DA8"/>
+            <path d="M6 13Q6 11 8 11H24Q26 11 26 13V22Q26 24 24 24H18L16 27L14 24H8Q6 24 6 22Z" fill="white"/>
+            <path d="M13 11V10Q13 9 14 9H18Q19 9 19 10V11" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="16" cy="17" r="4" fill="#5BB98C"/>
+            <circle cx="16" cy="17" r="2.2" fill="white"/>
+            <circle cx="16" cy="17" r="0.9" fill="#5BB98C"/>
+          </svg>
+          <span class="gresult-domain">jobfinder.app › templates</span>
+        </div>
+        <div class="gresult-title">Templates CV modernes générés par IA — JobFinder</div>
+        <div class="gresult-desc">Créez des CV <strong>professionnels et stylisés</strong> en quelques clics. Notre IA adapte chaque template à votre profil et à l'offre ciblée. Plus de 10 styles disponibles.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- ══ OG IMAGE / PARTAGE ══ -->
+<div class="section">
+  <div class="section-label">Image de partage — Open Graph (Google / Réseaux sociaux)</div>
+  <div class="og-mockup">
+    <div class="og-circles">
+      <div class="og-c1"></div>
+      <div class="og-c2"></div>
+    </div>
+    <div class="og-content">
+      <div class="og-logo-mark">
+        <svg viewBox="0 0 180 180" width="70" height="70" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 60Q20 44 36 44H144Q160 44 160 60V118Q160 134 144 134H103L90 154L77 134H36Q20 134 20 118Z" fill="rgba(255,255,255,.9)"/>
+          <path d="M68 44V37Q68 30 76 30H104Q112 30 112 37V44" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="8" stroke-linecap="round"/>
+          <circle cx="90" cy="88" r="26" fill="#5BB98C"/>
+          <circle cx="90" cy="88" r="14" fill="white"/>
+          <circle cx="90" cy="88" r="6" fill="#5BB98C"/>
+          <line x1="56" y1="88" x2="70" y2="88" stroke="white" stroke-width="6"/>
+          <line x1="110" y1="88" x2="124" y2="88" stroke="white" stroke-width="6"/>
+          <line x1="90" y1="54" x2="90" y2="68" stroke="white" stroke-width="6"/>
+          <line x1="90" y1="108" x2="90" y2="122" stroke="white" stroke-width="6"/>
+        </svg>
+      </div>
+      <div class="og-text">
+        <div class="og-title">JobFinder</div>
+        <div class="og-tagline">Le copilote de ta recherche<br>d'emploi, propulsé par l'IA.</div>
+        <div class="og-pill">✦ Adapte ton CV en 30 secondes</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MOBILE APP ICON ══ -->
+<div class="section">
+  <div class="section-label">Icône app mobile — Écran d'accueil iOS</div>
+  <div class="mobile-mockup">
+    <div class="phone-notch"></div>
+    <div class="phone-screen">
+      <div class="phone-time">9:41</div>
+      <div class="phone-date">Mercredi 8 avril</div>
+      <div class="app-grid">
+
+        <!-- JobFinder (mis en évidence) -->
+        <div class="app-icon-wrap">
+          <div class="app-icon jf" style="width:54px;height:54px;border-radius:14px;box-shadow:0 4px 16px rgba(47,93,168,.6),0 0 0 3px rgba(255,255,255,.4)">
+            <svg viewBox="0 0 180 180" width="36" height="36" xmlns="http://www.w3.org/2000/svg">
+              <path d="M20 60Q20 44 36 44H144Q160 44 160 60V118Q160 134 144 134H103L90 154L77 134H36Q20 134 20 118Z" fill="rgba(255,255,255,.9)"/>
+              <path d="M68 44V37Q68 30 76 30H104Q112 30 112 37V44" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="8" stroke-linecap="round"/>
+              <circle cx="90" cy="88" r="26" fill="#5BB98C"/>
+              <circle cx="90" cy="88" r="14" fill="white"/>
+              <circle cx="90" cy="88" r="6" fill="#5BB98C"/>
+              <line x1="56" y1="88" x2="70" y2="88" stroke="white" stroke-width="6"/>
+              <line x1="110" y1="88" x2="124" y2="88" stroke="white" stroke-width="6"/>
+              <line x1="90" y1="54" x2="90" y2="68" stroke="white" stroke-width="6"/>
+              <line x1="90" y1="108" x2="90" y2="122" stroke="white" stroke-width="6"/>
+            </svg>
+          </div>
+          <div class="app-label" style="font-weight:700;color:#fff">JobFinder</div>
+        </div>
+
+        <div class="app-icon-wrap"><div class="app-icon green" style="width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px">💬</div><div class="app-label">Messages</div></div>
+        <div class="app-icon-wrap"><div class="app-icon teal" style="width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px">📅</div><div class="app-label">Calendrier</div></div>
+        <div class="app-icon-wrap"><div class="app-icon orange" style="width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px">📷</div><div class="app-label">Appareil</div></div>
+        <div class="app-icon-wrap"><div class="app-icon purple" style="width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px">🎵</div><div class="app-label">Musique</div></div>
+        <div class="app-icon-wrap"><div class="app-icon red" style="width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px">❤️</div><div class="app-label">Santé</div></div>
+        <div class="app-icon-wrap"><div class="app-icon grey" style="width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px">⚙️</div><div class="app-label">Réglages</div></div>
+        <div class="app-icon-wrap"><div class="app-icon pink" style="width:52px;height:52px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:26px">📸</div><div class="app-label">Photos</div></div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

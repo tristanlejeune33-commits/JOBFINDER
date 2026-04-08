@@ -314,10 +314,14 @@ def route_me():
 def route_config():
     u = get_current_user()
     if request.method == "GET":
+        ud = get_user_data(u["id"])
         return jsonify({
             "provider":       u.get("ai_provider","Claude (Anthropic)"),
             "has_claude_key": bool(u.get("api_key_claude","")),
-            "has_openai_key": True,  # toujours active (clé intégrée)
+            "has_openai_key": True,
+            "has_summary":    bool(ud.get("summary","").strip()),
+            "has_docs":       bool(ud.get("doc_text","").strip()),
+            "has_photo":      bool(ud.get("photo_b64","").strip()),
         })
     data = request.json or {}
     sets = {}
@@ -860,63 +864,187 @@ def route_template(tpl_id):
 @require_auth
 def route_generate_template():
     data = request.json or {}
+    u    = get_current_user()
+    ud   = get_user_data(u["id"])
 
-    # Récupère toutes les réponses du wizard
-    objectif       = data.get("objectif", "")
-    secteur        = data.get("secteur", "")
-    type_entreprise= data.get("typeEntreprise", "")
-    experience     = data.get("experience", "")
-    style          = data.get("style", "Moderne")
-    ton_cv         = data.get("tonCV", "")
-    couleur        = data.get("couleur", data.get("color", "#1d4ed8"))
-    impressions    = data.get("impressions", [])
-    name           = data.get("name", "Mon CV")
+    # ── Wizard answers ──────────────────────────────────────────────
+    objectif        = data.get("objectif", "")
+    secteur         = data.get("secteur", "")
+    type_entreprise = data.get("typeEntreprise", "")
+    experience      = data.get("experience", "")
+    style           = data.get("style", "Moderne")
+    ton_cv          = data.get("tonCV", "")
+    couleur         = data.get("couleur", data.get("color", "#6d28d9"))
+    couleurs_raw    = data.get("couleurs", [couleur])
+    couleurs        = [c for c in couleurs_raw if c and len(c) == 7]
+    if not couleurs: couleurs = [couleur]
+    impressions     = data.get("impressions", [])
+    name            = data.get("name", "Mon CV")
+    imp_str         = ", ".join(impressions) if impressions else "Sérieux, Professionnel"
 
-    imp_str = ", ".join(impressions) if impressions else "Sérieux, Professionnel"
+    # Palette couleurs lisible pour le prompt
+    if len(couleurs) == 1:
+        palette_str = f"{couleurs[0]} (principale)"
+    elif len(couleurs) == 2:
+        palette_str = f"{couleurs[0]} (principale), {couleurs[1]} (secondaire/accents)"
+    else:
+        palette_str = f"{couleurs[0]} (principale), {couleurs[1]} (secondaire), {couleurs[2]} (accent détails)"
 
-    # Construit le prompt GPT complet à partir de toutes les réponses
-    prompt = f"""Tu es un expert en design de CV. Crée un template de CV HTML complet et professionnel basé sur ces informations précises :
+    # ── Données réelles de l'utilisateur ────────────────────────────
+    user_name    = u.get("name", "")
+    user_email   = u.get("email", "")
+    user_summary = ud.get("summary", "").strip()
+    user_docs    = ud.get("doc_text", "").strip()
+    has_photo    = bool(ud.get("photo_b64", ""))
+    photo_mime   = ud.get("photo_mime", "image/jpeg")
 
-=== PROFIL DU CANDIDAT ===
-Objectif : {objectif}
-Secteur recherché : {secteur}
-Type d'entreprise visée : {type_entreprise}
+    # Construit le bloc données utilisateur
+    user_context = ""
+    if user_summary:
+        user_context += f"\n\n=== RÉSUMÉ PERSONNEL DE L'UTILISATEUR (utilise ces infos réelles) ===\n{user_summary[:3000]}"
+    if user_docs:
+        user_context += f"\n\n=== DOCUMENTS / ANCIENS CV IMPORTÉS (extrait infos pertinentes) ===\n{user_docs[:4000]}"
+
+    # Placeholder photo : soit marqueur de remplacement, soit cercle initiales
+    photo_placeholder = "PHOTO_PLACEHOLDER" if has_photo else None
+    initiales = "".join([p[0].upper() for p in user_name.split()[:2]]) if user_name else "JD"
+    nom_affiche = user_name if user_name else "Jean Dupont"
+    email_affiche = user_email if user_email else "jean.dupont@email.com"
+
+    # ── Guides de design par style ──────────────────────────────────
+    design_guides = {
+        "Sobre": """
+STYLE SOBRE — Minimaliste haut de gamme :
+- Palette : blanc pur + 1 couleur accent + gris anthracite texte
+- Typographie : serif élégant (Cormorant Garamond, Playfair Display) pour nom, sans-serif (Lato, Source Sans Pro) pour corps
+- Structure : 1 colonne, marges généreuses (40px), sections séparées par une fine ligne
+- Accents design subtils : filet horizontal coloré sous le nom, point coloré avant chaque titre de section
+- Aucune forme géométrique agressive, aucun fond coloré de section
+- Impression : sobriété, confiance, expertise""",
+
+        "Moderne": """
+STYLE MODERNE — Design actuel et percutant :
+- Structure : 2 colonnes (sidebar 34% colorée à gauche, contenu 66% blanc à droite)
+- Sidebar : fond couleur principale, texte blanc, photo ronde en haut centrée, contact + compétences
+- Header du contenu : nom en gros (28px bold), poste en couleur principale
+- Formes géométriques : rectangle coloré en haut à droite (clip-path ou border), petits carrés colorés devant les titres de section
+- Barres de compétences visuelles (div avec width% et fond couleur principale)
+- Timeline expérience : ligne verticale colorée à gauche avec points/ronds
+- Typographie : Inter, Nunito ou DM Sans
+- Impression : moderne, dynamique, structuré""",
+
+        "Créatif": """
+STYLE CRÉATIF — Mémorable, audacieux :
+- Header spectaculaire : fond couleur principale avec diagonale (clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%)), photo ronde border blanc 4px
+- Formes géométriques : grands cercles transparents en arrière-plan, formes angulaires CSS
+- Section compétences : tags/badges colorés avec border-radius:4px, fond semi-transparent
+- Icônes : utilise Unicode ● ▸ ◆ ▪ pour ponctuer les sections
+- Timeline avec alternance gauche/droite pour l'expérience
+- Couleurs : couleur principale + version claire (opacity .15) pour fonds de section
+- Typographie : Poppins ou Raleway, poids variés (300, 600, 800)
+- Accents : band colorée verticale épaisse (6px) sur le bord gauche du contenu
+- Impression : créativité, personnalité forte, originalité""",
+
+        "Premium": """
+STYLE PREMIUM — Luxe, raffinement :
+- Fond page : blanc cassé (#fafaf8) ou crème très léger
+- Header : 2 colonnes — gauche texte (nom huge 36px, trait fin doré/coloré, poste), droite photo dans cadre carré avec border colorée 3px
+- Typographie : Cormorant Garamond ou Libre Baskerville pour titres, Montserrat light pour corps
+- Séparateurs : ligne fine pleine largeur avec petit losange/carré centré dessus (CSS ::before/::after)
+- Sections compétences : cercles/anneaux SVG inline ou progress rings CSS
+- Palette : couleur principale + or (#c9a84c) ou argent pour accents secondaires, fond section alterné très léger
+- Espacements généreux, jamais de surcharge visuelle
+- Impression : excellence, haut de gamme, maturité""",
+
+        "Impactant": """
+STYLE IMPACTANT — Fort, ambitieux :
+- Header pleine largeur : fond couleur principale, texte blanc, nom en majuscules 32px letter-spacing .1em
+- Bande diagonale de transition header→corps (clip-path ou SVG en position absolute)
+- Fond corps : blanc pur, contraste maximal
+- Titres de section : fond couleur principale, texte blanc, padding 8px 16px, largeur auto, border-radius 4px
+- Chiffres clés mis en valeur : grands chiffres colorés (nombre d'années, projets, etc.)
+- Compétences : jauge horizontale épaisse (12px) avec animation CSS @keyframes fill
+- Typographie : Oswald ou Barlow Condensed pour titres, Open Sans pour corps
+- Impression : ambition, leadership, résultats"""
+    }
+
+    design_guide = design_guides.get(style, design_guides["Moderne"])
+
+    # ── Règles selon type entreprise ────────────────────────────────
+    entreprise_rules = {
+        "Startup": "Layout innovant, badges de compétences tech, section 'Projets' mise en avant, pas trop corporate",
+        "Grand groupe": "Structure classique optimisée, sections standards bien hiérarchisées, sérieux et lisibilité",
+        "PME": "Équilibre polyvalence/spécialisation, ton accessible, mise en avant adaptabilité",
+        "Cabinet conseil": "Précision, chiffres d'impact, bullet points STAR, dense mais aéré",
+        "Luxe": "Raffinement maximal, typographie premium, aucun élément criard, élégance over everything",
+        "Tech": "Compétences techniques en avant, stack tech visible, GitHub/portfolio, format épuré efficace",
+        "Créatif/Com": "Portfolio/réalisations visuellement mis en avant, créativité démontrée par le design lui-même"
+    }.get(type_entreprise, "Design professionnel, équilibre entre lisibilité et personnalité")
+
+    # ── Prompt principal ─────────────────────────────────────────────
+    prompt = f"""Tu es un designer UI/UX expert spécialisé en création de CV HTML visuellement exceptionnels. Ta mission : créer un CV HTML complet, moderne, et visuellement IMPRESSIONNANT.
+
+=== PROFIL ET OBJECTIF ===
+Nom affiché : {nom_affiche}
+Email : {email_affiche}
+Objectif candidature : {objectif}
+Secteur : {secteur}
+Type d'entreprise visée : {type_entreprise} → {entreprise_rules}
 Niveau d'expérience : {experience}
+Ton souhaité : {ton_cv}
+Impression à laisser : {imp_str}
+{user_context}
 
-=== DESIGN SOUHAITÉ ===
-Style visuel : {style}
-Ton du CV : {ton_cv}
-Couleur principale : {couleur}
-Impression à donner : {imp_str}
+=== GUIDE DE DESIGN — Style "{style}" ===
+{design_guide}
 
-=== RÈGLES DE DESIGN selon le profil ===
-- Objectif "{objectif}" → {"structure ATS claire, pas de colonnes, noms de sections standards" if "ATS" in objectif else "design impactant, typographie forte" if "démarquer" in objectif or "premium" in objectif.lower() else "équilibre lisibilité et personnalité"}
-- Entreprise "{type_entreprise}" → {"moderne, dynamique, osé" if type_entreprise in ["Startup","Tech"] else "sobre, structuré, corporate" if type_entreprise in ["Grand groupe","Luxe"] else "professionnel et lisible"}
-- Style "{style}" → {"minimaliste, peu de décorations" if style=="Sobre" else "lignes nettes, espace blanc, accent couleur" if style=="Moderne" else "typographie bold, mise en page créative" if style=="Créatif" else "élégance, luxe, détails raffinés" if style=="Premium" else "fort contraste, énergie visuelle"}
-- L'impression "{imp_str}" doit transparaître dans CHAQUE choix de design
+=== DONNÉES À UTILISER ===
+{"→ PRIORITÉ ABSOLUE : utilise les informations du résumé personnel et des documents ci-dessus pour remplir les sections (expériences, compétences, formation). Si l'info est présente, utilise-la. Complète avec des données cohérentes si manquant." if user_summary or user_docs else "→ Génère des données placeholder réalistes et cohérentes avec le secteur '{secteur}' (postes, entreprises, formations typiques du domaine)."}
+- Nom : {nom_affiche}
+- Contact : {email_affiche}, +33 6 12 34 56 78, LinkedIn: linkedin.com/in/{nom_affiche.lower().replace(' ','-')}, {"GitHub / Portfolio si secteur tech/créatif" if secteur.lower() in ["tech","informatique","digital","développement","design","web"] else "Localisation Paris ou ville cohérente"}
+- {"Photo : utilise exactement cette balise img : <img src='PHOTO_PLACEHOLDER' ...>" if has_photo else f"Photo : cercle CSS (width:90px;height:90px;border-radius:50%;background:{couleurs[0]};display:flex;align-items:center;justify-content:center;color:white;font-size:24px;font-weight:700) avec initiales '{initiales}'"}
+- Palette de couleurs choisie : {palette_str}
+- IMPORTANT : respecte EXACTEMENT ces couleurs dans tout le design (backgrounds, textes colorés, barres, bordures, etc.)
+- Sections : Expérience (3 postes avec dates, entreprise, missions bullet points), Formation (2 diplômes), Compétences (adaptées secteur + level/barres), {"+ Projets si tech/créatif, + Langues, + Certifications si pertinent" if secteur else "+ Langues, + Centre d'intérêts si pertinent"}
 
-=== EXIGENCES TECHNIQUES ===
-- Fichier HTML unique et complet, tout le CSS dans une balise <style>
-- Importer UNE Google Font adaptée au style (via @import dans le CSS)
-- Format A4, max-width ~800px, centré sur la page
-- Photo placeholder : cercle coloré 80px avec initiales "JD" en blanc (couleur fond = couleur principale)
-- Données placeholder : "Jean Dupont", poste adapté au secteur "{secteur}", Paris, jean.dupont@email.com, +33 6 12 34 56 78
-- Sections obligatoires : Expérience professionnelle (3 postes), Formation (2 diplômes), Compétences (liste)
-- Sections supplémentaires adaptées au secteur "{secteur}" si pertinent
-- Aucun JavaScript. Compatible impression.
+=== EXIGENCES TECHNIQUES OBLIGATOIRES ===
+1. Fichier HTML UNIQUE et COMPLET — tout le CSS dans <style>, aucun JS
+2. @import Google Font dans le CSS (choisir selon style : Poppins/Inter pour moderne, Cormorant pour premium, Raleway pour créatif, etc.)
+3. Format A4 : body max-width 794px, centré (margin: 0 auto), background blanc pour zone CV
+4. print-friendly : @media print {{ body {{ margin:0 }} .no-print {{ display:none }} }}
+5. CSS avancé autorisé : clip-path, CSS Grid, Flexbox, ::before/::after, CSS variables, gradients, box-shadow
+6. Aucune image externe sauf Google Fonts. SVG inline autorisé pour formes décoratives.
+7. Chaque section doit être VISUELLEMENT distincte du reste
+8. Le design doit être UNIQUE, mémorable, et refléter parfaitement le style "{style}"
 
-Retourne UNIQUEMENT le document HTML complet commençant par <!DOCTYPE html>. Aucune explication, aucun markdown."""
+=== CE QUI EST INTERDIT ===
+- Template générique et ennuyeux (fond blanc, texte noir, aucune forme = REFUSÉ)
+- Manque de hiérarchie visuelle
+- Texte illisible (contraste insuffisant)
+- Trop chargé au point d'être illisible
+
+Retourne UNIQUEMENT le code HTML complet commençant par <!DOCTYPE html>. Aucun texte avant, aucune explication, aucun markdown, aucun bloc ```."""
 
     try:
         from openai import OpenAI
         client = OpenAI(api_key=OPENAI_API_KEY)
         resp = client.chat.completions.create(
             model="gpt-4o",
-            messages=[{"role":"user","content":prompt}],
-            max_tokens=8000
+            messages=[
+                {"role": "system", "content": "Tu es un expert en design UI/UX et création de CV HTML premium. Tu génères UNIQUEMENT du code HTML pur, sans aucune explication ni markdown. Ton code est propre, moderne et visuellement impressionnant."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=12000,
+            temperature=0.85
         )
         html = resp.choices[0].message.content.strip()
-        html = re.sub(r"^```[\w]*\s*","",html); html = re.sub(r"\s*```$","",html)
+        # Nettoie markdown si présent
+        html = re.sub(r"^```[\w]*\s*", "", html)
+        html = re.sub(r"\s*```$", "", html)
+        # Remplace PHOTO_PLACEHOLDER par la vraie photo si dispo
+        if has_photo and ud.get("photo_b64"):
+            photo_src = f"data:{photo_mime};base64,{ud['photo_b64']}"
+            html = html.replace("PHOTO_PLACEHOLDER", photo_src)
         return jsonify({"html": html})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
