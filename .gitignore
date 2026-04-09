@@ -1,0 +1,9 @@
+data/
+cv_adaptes/
+__pycache__/
+*.pyc
+.env
+*.db
+*.sqlite
+lancer_jobfinder.bat
+diagnostic.bat

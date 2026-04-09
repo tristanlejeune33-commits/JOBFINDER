@@ -532,6 +532,13 @@ Instructions:
 - Highlight the skills and experiences most relevant to the target role
 - Return only the complete modified HTML, no markdown, no explanations
 
+Writing style — critical:
+- Write like a real person, not a corporate template. Short, direct sentences.
+- No filler adjectives or adverbs: avoid "highly motivated", "passionate", "dynamic", "results-driven", "strong ability to", "excellent communication skills", "proven track record", "leverage", "synergy" and similar hollow phrases.
+- Describe what was actually done and the concrete result. Prefer action verbs with numbers when available.
+- Do not start every bullet with the same structure. Vary sentence rhythm.
+- Descriptions should sound like they were written by the candidate, not by a recruiter.
+
 Modified HTML:"""
     try:
         result = call_ai(provider, api_key, prompt, max_tokens=8192)
@@ -550,13 +557,23 @@ def route_adapt_cv_template():
     provider, api_key = get_ai_keys(u)
     if not api_key:
         return jsonify({"error": "Clé API manquante."}), 400
-    if not os.path.exists(TEMPLATE_CV):
-        return jsonify({"error": "Template cv_vibe_modern introuvable."}), 400
     docs_text = get_docs_context(u["id"])
     if not docs_text:
         return jsonify({"error": "Aucune documentation trouvée. Importez vos documents dans Paramètres."}), 400
-    with open(TEMPLATE_CV, encoding="utf-8") as f:
-        template_html = f.read()
+    # Support custom template from DB (template_id) or fallback to cv_vibe_modern file
+    tpl_id = data.get("template_id")
+    if tpl_id:
+        with get_db() as db:
+            row = db.execute("SELECT html_content FROM cv_templates WHERE id=? AND user_id=?",
+                             (tpl_id, u["id"])).fetchone()
+        if not row:
+            return jsonify({"error": "Template introuvable."}), 404
+        template_html = row["html_content"]
+    else:
+        if not os.path.exists(TEMPLATE_CV):
+            return jsonify({"error": "Template cv_vibe_modern introuvable."}), 400
+        with open(TEMPLATE_CV, encoding="utf-8") as f:
+            template_html = f.read()
     ud = get_user_data(u["id"])
     PHOTO_MARKER = "PORTRAIT_SRC_PLACEHOLDER"
     head_match = re.search(r'^([\s\S]*?<body[^>]*>)', template_html, re.IGNORECASE)
@@ -589,6 +606,14 @@ Instructions:
 - Do not invent experiences, skills, dates or qualifications not in the documentation
 - Keep src="{PHOTO_MARKER}" exactly as-is
 - Return only the rewritten HTML body, no markdown, no code fences
+
+Writing style — critical:
+- Write like a real person, not a corporate template. Short, direct sentences.
+- No hollow adjectives or adverbs: ban "highly motivated", "passionate", "dynamic", "results-driven", "strong ability to", "excellent communication skills", "proven track record", "leverage", "synergy", "team player" and similar empty phrases.
+- Every sentence must say something concrete: what was done, for whom, with what result.
+- Vary sentence length and structure. Avoid starting every item the same way.
+- The tone should feel like the candidate wrote it themselves — confident but grounded, not inflated.
+- If a section has bullet points in the HTML, keep them short (one idea each, max 12 words).
 
 Rewritten HTML body:"""
     try:
@@ -724,6 +749,14 @@ Offre d'emploi :
 {("Documentation :" + chr(10) + docs_text[:2000]) if docs_text else ""}
 
 Génère uniquement ce qui est fondé sur les informations disponibles.
+
+Ton d'écriture — essentiel :
+- Écris comme un humain qui parle à quelqu'un, pas comme un document RH.
+- Pas de tirets à répétition ni de listes interminables. Quand c'est possible, formule en phrases courtes.
+- Pas d'adjectifs creux : interdit d'écrire "dynamique", "motivé(e)", "passionné(e)", "excellent communicant", "force de proposition", "sens du résultat", "orienté business" et expressions similaires.
+- Les réponses suggérées doivent sonner naturel, comme si le candidat les disait vraiment à voix haute. Pas de formules toutes faites.
+- Les questions à poser au recruteur doivent être précises et montrer une vraie curiosité, pas des questions génériques.
+- Sois direct. Une phrase courte qui dit quelque chose vaut mieux qu'un paragraphe qui tourne en rond.
 
 🎯 MON PITCH EN 2 MINUTES
 ❓ QUESTIONS PROBABLES + RÉPONSES SUGGÉRÉES (8 questions)
@@ -1006,6 +1039,14 @@ Impression à laisser : {imp_str}
 - Palette de couleurs choisie : {palette_str}
 - IMPORTANT : respecte EXACTEMENT ces couleurs dans tout le design (backgrounds, textes colorés, barres, bordures, etc.)
 - Sections : Expérience (3 postes avec dates, entreprise, missions bullet points), Formation (2 diplômes), Compétences (adaptées secteur + level/barres), {"+ Projets si tech/créatif, + Langues, + Certifications si pertinent" if secteur else "+ Langues, + Centre d'intérêts si pertinent"}
+
+=== TON ET STYLE D'ÉCRITURE DU TEXTE ===
+- Chaque phrase de texte doit sonner humaine et directe. Pas de style RH robotique.
+- Interdit : "dynamique", "passionné(e)", "motivé(e)", "orienté résultats", "force de proposition", "excellent communicant", "sens du travail en équipe", "maîtrise parfaite", "solides compétences en", et tout adjectif ou adverbe de remplissage similaire.
+- Les descriptions de poste et missions : une action concrète par ligne, verbe fort, résultat si possible. Max 10 mots par bullet.
+- Le résumé ou accroche : 2 phrases maximum, ton confiant mais sobre. Dire ce qu'on fait, pas ce qu'on "est".
+- Les compétences : noms courts, pas de qualificatifs ("Python" pas "Excellente maîtrise de Python").
+- Le texte doit donner l'impression que c'est le candidat qui a écrit, pas un générateur.
 
 === EXIGENCES TECHNIQUES OBLIGATOIRES ===
 1. Fichier HTML UNIQUE et COMPLET — tout le CSS dans <style>, aucun JS

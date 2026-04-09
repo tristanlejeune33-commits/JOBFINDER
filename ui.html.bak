@@ -171,18 +171,28 @@ html,body{
 .auth-stat{
   background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
   border-radius:12px;padding:14px 10px;text-align:center;
+  transition:transform .2s,background .2s;
   opacity:0;transform:translateY(20px);
-  transition:opacity .45s ease, transform .45s cubic-bezier(.22,.61,.36,1), background .2s;
 }
 .auth-stat.visible{opacity:1;transform:translateY(0)}
 .auth-stat:hover{background:rgba(255,255,255,.1);transform:translateY(-2px)}
 .auth-stat-icon{font-size:18px;margin-bottom:6px;display:block}
 .auth-stat-num{
-  font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1;
+  font-size:18px;font-weight:800;color:#fff;letter-spacing:-.5px;line-height:1;
   display:flex;justify-content:center;align-items:baseline;gap:1px;
 }
-.auth-stat-val{font-size:22px;font-weight:800;color:#fff}
-.auth-stat-label{font-size:10px;color:rgba(255,255,255,.45);margin-top:6px;font-weight:500;line-height:1.3}
+.auth-stat-num .prefix{font-size:14px;font-weight:700;color:rgba(255,255,255,.7)}
+.auth-stat-num .suffix{font-size:12px;font-weight:700;color:rgba(255,255,255,.7);margin-left:1px}
+.auth-stat-label{font-size:10px;color:rgba(255,255,255,.45);margin-top:4px;font-weight:500;line-height:1.3}
+
+/* Odometer / slot roll animation */
+.odo-wrap{display:inline-flex;overflow:hidden;height:22px;align-items:flex-end}
+.odo-digit{
+  display:flex;flex-direction:column;
+  transition:transform .6s cubic-bezier(.22,.61,.36,1);
+  will-change:transform;
+}
+.odo-digit span{height:22px;display:flex;align-items:center;justify-content:center;line-height:1}
 
 /* Social proof */
 .auth-social{
@@ -790,14 +800,6 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 .tpl-btn.danger:hover{border-color:var(--red);color:var(--red);background:var(--red-d)}
 .tpl-btn.primary{background:linear-gradient(135deg,#3a6cc0,#2F5DA8);border-color:var(--accent);color:#fff}
 .tpl-btn.primary:hover{background:linear-gradient(135deg,#4a7ed4,#3a6cc0)}
-.tpl-card-active{border-color:var(--accent)!important;box-shadow:0 0 0 2px rgba(91,184,162,.25),var(--shadow-md)!important}
-.tpl-active-badge{
-  position:absolute;top:8px;right:8px;
-  background:var(--accent);color:#fff;
-  font-size:10px;font-weight:800;
-  padding:3px 8px;border-radius:99px;
-  letter-spacing:.04em;
-}
 .tpl-empty-state{
   grid-column:1/-1;display:flex;flex-direction:column;align-items:center;
   justify-content:center;padding:60px 20px;color:var(--text3);gap:14px;
@@ -1278,107 +1280,6 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   border-right-color:var(--blue);
   border-radius:50%;animation:spin .7s linear infinite;
 }
-
-/* ══════════════════════════════════════════════════════
-   TUTORIAL / DIDACTICIEL
-══════════════════════════════════════════════════════ */
-#tuto-overlay{
-  position:fixed;inset:0;z-index:99990;
-  pointer-events:none;
-  display:none;
-}
-#tuto-overlay.active{display:block;}
-
-/* Dark backdrop with a transparent cutout */
-#tuto-backdrop{
-  position:absolute;inset:0;
-  pointer-events:all;
-  transition:opacity .35s;
-}
-
-/* Spotlight ring around target element */
-#tuto-spotlight{
-  position:absolute;
-  border-radius:12px;
-  box-shadow:
-    0 0 0 4px var(--accent),
-    0 0 0 9999px rgba(0,0,0,.62);
-  transition:all .35s cubic-bezier(.4,0,.2,1);
-  pointer-events:none;
-  z-index:1;
-}
-
-/* Floating tooltip card */
-#tuto-card{
-  position:fixed;
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:24px 24px 20px;
-  width:320px;
-  max-height:calc(100vh - 32px);
-  overflow-y:auto;
-  box-shadow:0 20px 60px rgba(0,0,0,.28),0 4px 16px rgba(0,0,0,.14);
-  z-index:99992;
-  pointer-events:all;
-  transition:top .3s cubic-bezier(.4,0,.2,1),left .3s cubic-bezier(.4,0,.2,1),opacity .2s;
-  box-sizing:border-box;
-}
-#tuto-card.placing{opacity:0;}
-/* Spotlight also fixed */
-#tuto-spotlight{position:fixed;}
-
-.tuto-progress{
-  display:flex;gap:5px;margin-bottom:16px;
-}
-.tuto-pip{
-  height:3px;flex:1;border-radius:99px;
-  background:var(--border);
-  transition:background .3s;
-}
-.tuto-pip.done{background:var(--accent);}
-.tuto-pip.cur{background:var(--accent);opacity:.6;}
-
-.tuto-emoji{
-  font-size:32px;line-height:1;margin-bottom:10px;
-  display:block;
-}
-.tuto-step-label{
-  font-size:10px;font-weight:700;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--accent);
-  margin-bottom:4px;
-}
-.tuto-title{
-  font-size:17px;font-weight:700;color:var(--text);
-  margin-bottom:8px;line-height:1.3;
-}
-.tuto-desc{
-  font-size:13.5px;color:var(--text2);line-height:1.6;
-  margin-bottom:20px;
-}
-.tuto-actions{
-  display:flex;align-items:center;gap:8px;
-}
-.tuto-btn-skip{
-  font-size:12px;color:var(--text3);background:none;border:none;
-  cursor:pointer;padding:4px 0;margin-right:auto;
-  text-decoration:underline;text-underline-offset:2px;
-}
-.tuto-btn-skip:hover{color:var(--text2);}
-.tuto-btn-prev{
-  background:var(--bg2);border:1px solid var(--border);
-  color:var(--text2);border-radius:8px;padding:8px 14px;
-  font-size:13px;font-weight:600;cursor:pointer;transition:.18s;
-}
-.tuto-btn-prev:hover{background:var(--border);}
-.tuto-btn-next{
-  background:var(--accent);color:#fff;border:none;
-  border-radius:8px;padding:8px 18px;
-  font-size:13px;font-weight:700;cursor:pointer;
-  transition:.18s;display:flex;align-items:center;gap:6px;
-}
-.tuto-btn-next:hover{filter:brightness(1.1);}
-.tuto-btn-next .tuto-arrow{font-size:15px;}
 </style>
 </head>
 <body>
@@ -1554,13 +1455,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <!-- Template mode toggle -->
       <div class="fg" style="margin-bottom:10px">
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
-          <input type="checkbox" id="use-template" style="accent-color:var(--accent);width:16px;height:16px" checked onchange="toggleTemplateMode()">
-          <span>Utiliser le template <strong id="active-tpl-label">cv_vibe_modern</strong> (recommandé)</span>
+          <input type="checkbox" id="use-template" style="accent-color:var(--accent);width:16px;height:16px" checked>
+          <span>Utiliser le template <strong>cv_vibe_modern</strong> (recommandé)</span>
         </label>
-        <div class="tx-sm tx-m mt1" id="template-note" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
-          <span id="template-note-text">Le template cv_vibe_modern sera rempli automatiquement avec vos infos adaptées au poste.</span>
-          <a href="#" id="change-tpl-link" onclick="nav('templates');return false" style="font-size:11px;color:var(--accent);white-space:nowrap">🎨 Changer de template →</a>
-        </div>
+        <div class="tx-sm tx-m mt1" id="template-note">Le template cv_vibe_modern sera rempli automatiquement avec vos infos adaptées au poste.</div>
       </div>
       <div class="fg" id="cv-base-row" style="display:none">
         <label>CV de base (HTML) — si template désactivé</label>
@@ -1630,10 +1528,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <div id="page-settings" class="page">
   <div class="ph">
     <div class="ph-text"><h2>⚙️ Paramètres</h2><p>Complétez votre profil pour des CV plus personnalisés</p></div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="btn btn-secondary btn-sm" onclick="localStorage.removeItem('jf_tuto_done');startTutorial();" title="Relancer le guide de démarrage">🎓 Didacticiel</button>
-      <button class="btn btn-green" onclick="saveSettings()">💾 Sauvegarder</button>
-    </div>
+    <button class="btn btn-green" onclick="saveSettings()">💾 Sauvegarder</button>
   </div>
   <div class="settings-grid">
     <div class="card">
@@ -1772,10 +1667,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <div id="page-admin" class="page">
   <div class="ph">
     <div class="ph-text"><h2>🛡️ Administration</h2><p>Gestion des utilisateurs</p></div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="btn btn-secondary btn-sm" style="background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;border:none;" onclick="startTutorial()">▶ Aperçu didacticiel</button>
-      <button class="btn btn-secondary btn-sm" onclick="loadAdminUsers()">🔄 Actualiser</button>
-    </div>
+    <button class="btn btn-secondary btn-sm" onclick="loadAdminUsers()">🔄 Actualiser</button>
   </div>
   <div class="card">
     <div class="card-title">👥 Utilisateurs</div>
@@ -1793,27 +1685,6 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 </div>
 
 </main>
-</div>
-
-<!-- ══ TUTORIAL OVERLAY ══ -->
-<div id="tuto-overlay">
-  <div id="tuto-backdrop" onclick="tutoHandleBackdrop()"></div>
-  <div id="tuto-spotlight"></div>
-  <div id="tuto-card">
-    <div class="tuto-progress" id="tuto-progress"></div>
-    <span class="tuto-emoji" id="tuto-emoji">👋</span>
-    <div class="tuto-step-label" id="tuto-step-label">Étape 1</div>
-    <div class="tuto-title"  id="tuto-title">Bienvenue !</div>
-    <div class="tuto-desc"   id="tuto-desc">Description de l'étape.</div>
-    <div class="tuto-actions">
-      <button class="tuto-btn-skip" onclick="tutoSkip()">Passer le didacticiel</button>
-      <button class="tuto-btn-prev" id="tuto-prev" onclick="tutoPrev()">← Précédent</button>
-      <button class="tuto-btn-next" id="tuto-next" onclick="tutoNext()">
-        <span id="tuto-next-label">Suivant</span>
-        <span class="tuto-arrow">→</span>
-      </button>
-    </div>
-  </div>
 </div>
 
 <!-- Auth Overlay -->
@@ -1871,31 +1742,31 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 
     <!-- Stats with animated counters -->
     <div class="auth-stats" id="auth-stats">
-      <div class="auth-stat" data-val="20" data-prefix="" data-suffix="s" data-delay="0">
+      <div class="auth-stat" data-delay="0">
         <span class="auth-stat-icon">⚡</span>
         <div class="auth-stat-num">
-          <span class="auth-stat-val">0s</span>
+          <span class="odo-wrap" data-target="20" data-suffix="s"></span>
         </div>
         <div class="auth-stat-label">CV optimisé</div>
       </div>
-      <div class="auth-stat" data-val="72" data-prefix="+" data-suffix="%" data-delay="120">
+      <div class="auth-stat" data-delay="120">
         <span class="auth-stat-icon">📈</span>
         <div class="auth-stat-num">
-          <span class="auth-stat-val">+0%</span>
+          <span class="prefix">+</span><span class="odo-wrap" data-target="72" data-suffix="%"></span>
         </div>
         <div class="auth-stat-label">Plus d'entretiens</div>
       </div>
-      <div class="auth-stat" data-val="2" data-prefix="" data-suffix="h" data-delay="240">
+      <div class="auth-stat" data-delay="240">
         <span class="auth-stat-icon">🕐</span>
         <div class="auth-stat-num">
-          <span class="auth-stat-val">0h</span>
+          <span class="odo-wrap" data-target="2" data-suffix="h"></span>
         </div>
         <div class="auth-stat-label">Gagnées par candidature</div>
       </div>
-      <div class="auth-stat" data-val="100" data-prefix="" data-suffix="%" data-delay="360">
+      <div class="auth-stat" data-delay="360">
         <span class="auth-stat-icon">🎯</span>
         <div class="auth-stat-num">
-          <span class="auth-stat-val">0%</span>
+          <span class="odo-wrap" data-target="100" data-suffix="%"></span>
         </div>
         <div class="auth-stat-label">Adapté à l'offre et aux ATS</div>
       </div>
@@ -1992,60 +1863,68 @@ let currentUser = null;
 let allStages = [];
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// AUTH — Animations (rAF counter — ease-out cubic)
+// AUTH — Animations
 // ═══════════════════════════════════════════════════════════════════════════════
 
-function animateCount(el, target, prefix, suffix, duration){
-  const start = performance.now();
-  function tick(now){
-    const t      = Math.min((now - start) / duration, 1);
-    const eased  = 1 - Math.pow(1 - t, 3); // ease-out cubic
-    const val    = Math.round(eased * target);
-    el.textContent = prefix + val + suffix;
-    if(t < 1) requestAnimationFrame(tick);
-    else       el.textContent = prefix + target + suffix;
-  }
-  requestAnimationFrame(tick);
+/* ── Odometer / slot-roll counter ── */
+function buildOdo(el, target, suffix){
+  const digits = String(target).split('');
+  el.innerHTML = digits.map(d=>{
+    // Build a column of 0→d digits + suffix in last col
+    const nums = [];
+    for(let i=0;i<=parseInt(d);i++) nums.push(`<span>${i}</span>`);
+    return `<span class="odo-digit" data-final="${d}"><span>0</span>${nums.slice(1).map(s=>s).join('')}</span>`;
+  }).join('') + (suffix?`<span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7);margin-left:1px;line-height:22px">${suffix}</span>`:'');
+}
+
+function animateOdo(el){
+  el.querySelectorAll('.odo-digit').forEach((col,i)=>{
+    const final = parseInt(col.dataset.final);
+    const total = col.children.length; // spans
+    // total spans = final+1, index 0=first digit(0), index final=final digit
+    const targetIdx = final; // we want to show the span at index=final
+    const delay = i * 80;
+    setTimeout(()=>{
+      // translate so the final digit is visible (each span = 22px)
+      col.style.transform = `translateY(-${targetIdx * 22}px)`;
+    }, delay);
+  });
 }
 
 function initAuthAnimations(){
-  // Reset first (needed on re-login)
-  document.querySelectorAll('.auth-stat').forEach(s=>{
-    s.classList.remove('visible');
-    const valEl = s.querySelector('.auth-stat-val');
-    if(valEl){
-      const prefix = s.dataset.prefix || '';
-      const suffix = s.dataset.suffix || '';
-      valEl.textContent = prefix + '0' + suffix;
-    }
-  });
-  document.getElementById('auth-social')?.classList.remove('visible');
-  document.getElementById('auth-feature')?.classList.remove('visible');
-
-  // Stagger cards + count up
-  document.querySelectorAll('.auth-stat').forEach((card, i)=>{
-    const delay  = parseInt(card.dataset.delay)  || (i * 130);
-    const target = parseInt(card.dataset.val)    || 0;
-    const prefix = card.dataset.prefix           || '';
-    const suffix = card.dataset.suffix           || '';
-    const valEl  = card.querySelector('.auth-stat-val');
+  // Stagger stat cards
+  const stats = document.querySelectorAll('.auth-stat');
+  stats.forEach((s,i)=>{
+    const delay = parseInt(s.dataset.delay)||0;
     setTimeout(()=>{
-      card.classList.add('visible');
-      if(valEl){
-        // Short extra delay so card fades in first, then counter starts
-        setTimeout(()=>{
-          animateCount(valEl, target, prefix, suffix, target > 10 ? 900 : 600);
-        }, 160);
+      s.classList.add('visible');
+      s.style.transition=`opacity .45s ease, transform .45s cubic-bezier(.22,.61,.36,1)`;
+      // Build + animate odometers inside this stat
+      const odo = s.querySelector('.odo-wrap');
+      if(odo){
+        const target = parseInt(odo.dataset.target);
+        const suffix = odo.dataset.suffix||'';
+        buildOdo(odo, target, suffix);
+        // Small extra delay so the card appears first, then digits roll
+        setTimeout(()=>animateOdo(odo), 200);
       }
-    }, 350 + delay);
+    }, 400 + delay);
   });
-
-  setTimeout(()=>document.getElementById('auth-social')?.classList.add('visible'),  950);
-  setTimeout(()=>document.getElementById('auth-feature')?.classList.add('visible'), 1150);
+  // Social proof + feature
+  setTimeout(()=>document.getElementById('auth-social')?.classList.add('visible'), 900);
+  setTimeout(()=>document.getElementById('auth-feature')?.classList.add('visible'), 1100);
 }
 
-window._initAuthAnim = initAuthAnimations;
-document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(initAuthAnimations, 80); });
+/* Auto-run when overlay is visible */
+(function(){
+  // Run on DOMContentLoaded if overlay is showing
+  window.addEventListener('DOMContentLoaded', ()=>{
+    const ov = document.getElementById('auth-overlay');
+    if(ov && ov.style.display !== 'none') initAuthAnimations();
+  });
+  // Also expose so we can call after login check
+  window._initAuthAnim = initAuthAnimations;
+})();
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // AUTH
@@ -2089,7 +1968,7 @@ function onLogin(user){
   // Couleur badge
   const rb=document.getElementById('user-role-badge');
   rb.style.color=user.role==='admin'?'var(--red)':user.role==='pro'?'var(--purple)':'var(--text3)';
-  initApp().then(()=>maybeStartTutorial());
+  initApp();
 }
 
 async function logout(){
@@ -2393,7 +2272,6 @@ function nav(id){
   if(id==='planning'){loadStages().then(renderPlanning);}
   if(id==='templates')    loadTemplates();
   if(id==='admin')        loadAdminUsers();
-  if(id==='adapter')      updateAdapterTemplateLabel();
   // Close sidebar on mobile when navigating
   if(window.innerWidth<=768) closeSidebar();
 }
@@ -2741,9 +2619,8 @@ async function generateCV(){
 
   let data;
   if(useTemplate){
-    const payload={company:co,role:ro,job_desc:desc};
-    if(activeTemplateId) payload.template_id=activeTemplateId;
-    data=await post('/api/adapt-cv-template',payload);
+    // Les docs sont lus côté serveur depuis data/docs.json
+    data=await post('/api/adapt-cv-template',{company:co,role:ro,job_desc:desc});
   } else {
     data=await post('/api/adapt-cv',{company:co,role:ro,job_desc:desc,cv_html:cvContent});
   }
@@ -3152,8 +3029,6 @@ async function delApp(id){
 
 // ── Templates CV — Wizard ──────────────────────────────────────────────────────
 let templates=[], tplGeneratedHTML='';
-let activeTemplateId = parseInt(localStorage.getItem('jf_active_tpl_id')) || null;
-let activeTemplateName = localStorage.getItem('jf_active_tpl_name') || null;
 
 // ── Définition des étapes ──
 const WIZ_TOTAL = 5;
@@ -3706,74 +3581,14 @@ async function downloadTplPdf(id, name){
   toast('Génération PDF...','info');
   try{
     const resp=await fetch(`/api/template-pdf/${id}`);
-    if(!resp.ok) throw new Error('server_unavailable');
+    if(!resp.ok){const d=await resp.json();toast(d.error||'Erreur PDF','error');return;}
     const blob=await resp.blob();
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a'); a.href=url; a.download=(name||'template')+'.pdf';
     document.body.appendChild(a); a.click();
     setTimeout(()=>{URL.revokeObjectURL(url);document.body.removeChild(a);},1000);
     toast('PDF téléchargé !','success');
-  }catch(e){
-    // Fallback client-side via html2pdf.js
-    toast('Conversion locale en cours...','info');
-    const d=await api(`/api/cv-templates/${id}`);
-    if(!d.html_content){toast('Impossible de générer le PDF','error');return;}
-    clientSidePdf(d.html_content, name);
-  }
-}
-
-function clientSidePdf(html, name){
-  if(typeof html2pdf==='undefined'){toast('html2pdf non chargé','error');return;}
-  const container=document.createElement('div');
-  container.style.cssText='position:fixed;left:-9999px;top:0;width:210mm;background:#fff';
-  container.innerHTML=html;
-  document.body.appendChild(container);
-  const opt={
-    margin:0,
-    filename:(name||'cv')+'.pdf',
-    image:{type:'jpeg',quality:.95},
-    html2canvas:{scale:2,useCORS:true,logging:false},
-    jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-  };
-  html2pdf().set(opt).from(container).save()
-    .then(()=>{document.body.removeChild(container);toast('PDF téléchargé !','success');})
-    .catch(()=>{document.body.removeChild(container);toast('Erreur PDF','error');});
-}
-
-function setActiveTpl(id, name){
-  activeTemplateId=id;
-  activeTemplateName=name;
-  localStorage.setItem('jf_active_tpl_id', id);
-  localStorage.setItem('jf_active_tpl_name', name);
-  updateAdapterTemplateLabel();
-  renderTemplates();
-  toast(`Template "${name}" sélectionné comme actif ✅`,'success');
-}
-
-function updateAdapterTemplateLabel(){
-  const lbl=document.getElementById('active-tpl-label');
-  const note=document.getElementById('template-note-text');
-  if(!lbl) return;
-  const displayName=activeTemplateName||'cv_vibe_modern';
-  lbl.textContent=displayName;
-  if(note) note.textContent=`Le template "${displayName}" sera rempli automatiquement avec vos infos adaptées au poste.`;
-}
-
-function generateFromTpl(id, name){
-  // Navigate to adapter and pre-select this template
-  setActiveTpl(id, name);
-  nav('adapter');
-  document.getElementById('use-template').checked=true;
-  toggleTemplateMode();
-  toast(`Prêt à générer avec "${name}"`, 'info');
-}
-
-function toggleTemplateMode(){
-  const checked=document.getElementById('use-template').checked;
-  const cvRow=document.getElementById('cv-base-row');
-  const noteArea=document.getElementById('template-note');
-  if(cvRow) cvRow.style.display=checked?'none':'';
-  if(noteArea) noteArea.style.display=checked?'':'none';
+  }catch(e){toast('Erreur : '+e.message,'error');}
 }
 
 async function previewTpl(id){
@@ -3788,14 +3603,9 @@ async function previewTpl(id){
     <div style="height:420px;background:var(--surface);border-radius:12px;overflow:hidden;border:1px solid var(--border)">
       <iframe style="width:100%;height:100%;border:none" srcdoc="${data.html_content.replace(/"/g,'&quot;')}"></iframe>
     </div>`;
-  const isAct=activeTemplateId===id;
   document.getElementById('wiz-foot').innerHTML=`
     <button class="wiz-back" onclick="closeGenModal()">✕ Fermer</button>
-    <button class="btn btn-secondary" onclick="downloadTplPdf(${id},'${(data.name||'').replace(/'/g,"\\'")}')">📥 PDF</button>
-    ${isAct
-      ? `<button class="btn btn-green" onclick="closeGenModal();nav('adapter')" style="gap:6px">🚀 Générer CV</button>`
-      : `<button class="btn btn-primary" onclick="setActiveTpl(${id},'${(data.name||'').replace(/'/g,"\\'")}');closeGenModal()">☑️ Choisir ce template</button>`
-    }`;
+    <button class="btn btn-secondary" onclick="downloadTplPdf(${id},'${(data.name||'').replace(/'/g,"\\'")}')">📥 PDF</button>`;
 }
 
 async function deleteTpl(id){
@@ -3820,15 +3630,11 @@ function renderTemplates(){
       <button class="btn btn-primary" onclick="openGenModal()">✨ Créer mon CV</button>
     </div>`; return;
   }
-  grid.innerHTML=templates.map(t=>{
-    const isActive = activeTemplateId === t.id;
-    const safeName = (t.name||'').replace(/'/g,"\\'");
-    return `
-    <div class="tpl-card${isActive?' tpl-card-active':''}">
+  grid.innerHTML=templates.map(t=>`
+    <div class="tpl-card">
       <div class="tpl-thumb" onclick="previewTpl(${t.id})">
         <iframe srcdoc="" data-tpl-id="${t.id}" loading="lazy"></iframe>
         <div class="tpl-thumb-overlay"><span style="color:#fff;font-size:13px;font-weight:600">👁️ Aperçu</span></div>
-        ${isActive?`<div class="tpl-active-badge">✅ Actif</div>`:''}
       </div>
       <div class="tpl-info">
         <div class="tpl-name">${t.name}</div>
@@ -3837,18 +3643,13 @@ function renderTemplates(){
           <span>${t.style||'Moderne'}</span>
           <span style="margin-left:auto">${(t.created_at||'').slice(0,10)}</span>
         </div>
-        <div class="tpl-actions" style="flex-wrap:wrap;gap:5px">
-          ${isActive
-            ? `<button class="tpl-btn" style="flex:1;background:var(--green);color:#fff;border-color:var(--green)" onclick="generateFromTpl(${t.id},'${safeName}')">🚀 Générer CV</button>`
-            : `<button class="tpl-btn" style="flex:1" onclick="setActiveTpl(${t.id},'${safeName}')">☑️ Choisir</button>`
-          }
-          <button class="tpl-btn primary" onclick="downloadTplPdf(${t.id},'${safeName}')">📥 PDF</button>
+        <div class="tpl-actions">
+          <button class="tpl-btn primary" onclick="downloadTplPdf(${t.id},'${(t.name||'').replace(/'/g,"\\'")}')">📥 PDF</button>
           <button class="tpl-btn" onclick="previewTpl(${t.id})">👁️</button>
           <button class="tpl-btn danger" onclick="deleteTpl(${t.id})">🗑</button>
         </div>
       </div>
-    </div>`;
-  }).join('');
+    </div>`).join('');
   grid.querySelectorAll('iframe[data-tpl-id]').forEach(async iframe=>{
     const id=iframe.dataset.tplId;
     const d=await api(`/api/cv-templates/${id}`);
@@ -3875,257 +3676,6 @@ function closeSidebar(){
 function syncBottomNav(id){
   const btn=document.querySelector(`#bottom-nav .bn-btn[data-page="${id}"]`);
   if(btn) btn.scrollIntoView({inline:'center',behavior:'smooth'});
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// DIDACTICIEL / TUTORIAL
-// ═══════════════════════════════════════════════════════════════════════════════
-const TUTO_STEPS = [
-  {
-    target: null,         // null = centré, pas de spotlight
-    emoji:  '👋',
-    title:  'Bienvenue sur JobFinder !',
-    desc:   'Ce rapide didacticiel te guide à travers les fonctionnalités clés de l\'application. Tu peux le passer à tout moment et le relancer depuis les Paramètres.',
-    page:   'dashboard',
-    wide:   true,
-  },
-  {
-    target: '#page-dashboard .ph',
-    emoji:  '🏠',
-    title:  'Tableau de bord',
-    desc:   'Ici tu vois en un coup d\'œil l\'état de tes candidatures, tes prochains entretiens et ta progression générale.',
-    page:   'dashboard',
-  },
-  {
-    target: '[data-page="applications"]',
-    emoji:  '📋',
-    title:  'Mes candidatures',
-    desc:   'Suis chaque candidature : En attente → Entretien → Offre → Refus. Glisse les cartes pour les déplacer d\'une colonne à l\'autre.',
-    page:   'applications',
-  },
-  {
-    target: '[data-page="adapter"]',
-    emoji:  '✨',
-    title:  'Adapter mon CV',
-    desc:   'Colle l\'URL ou le texte d\'une offre d\'emploi : l\'application analyse l\'offre et génère un CV sur-mesure en quelques secondes.',
-    page:   'adapter',
-  },
-  {
-    target: '[data-page="planning"]',
-    emoji:  '📅',
-    title:  'Planning des entretiens',
-    desc:   'Retrouve tous tes entretiens dans une vue calendrier. Clique sur un jour pour ajouter un entretien ou voir les détails.',
-    page:   'planning',
-  },
-  {
-    target: '[data-page="templates"]',
-    emoji:  '🎨',
-    title:  'Mes modèles de CV',
-    desc:   'Crée et sauvegarde plusieurs modèles de CV avec différentes mises en page et couleurs. Choisis le meilleur selon l\'entreprise.',
-    page:   'templates',
-  },
-  {
-    target: '[data-page="settings"]',
-    emoji:  '⚙️',
-    title:  'Paramètres & Profil',
-    desc:   'Renseigne ton résumé professionnel, tes documents (CV de base, lettre type) et personnalise l\'application. Plus tu complètes ton profil, meilleures seront les générations !',
-    page:   'settings',
-    isLast: true,
-  },
-];
-
-let tutoStep = 0;
-let tutoActive = false;
-
-function startTutorial(){
-  tutoStep = 0;
-  tutoActive = true;
-  document.getElementById('tuto-overlay').classList.add('active');
-  tutoRender();
-}
-
-function tutoSkip(){
-  tutoEnd();
-}
-
-function tutoEnd(){
-  tutoActive = false;
-  document.getElementById('tuto-overlay').classList.remove('active');
-  // Toujours marquer comme vu (skip ou terminé)
-  localStorage.setItem('jf_tuto_done','1');
-}
-
-function tutoPrev(){
-  if(tutoStep > 0){ tutoStep--; tutoRender(); }
-}
-
-function tutoNext(){
-  const step = TUTO_STEPS[tutoStep];
-  if(step.isLast || tutoStep >= TUTO_STEPS.length - 1){
-    tutoEnd();
-    return;
-  }
-  tutoStep++;
-  tutoRender();
-}
-
-function tutoHandleBackdrop(){
-  // Click on dark area → skip/close
-  tutoEnd();
-}
-
-function tutoRender(){
-  const step = TUTO_STEPS[tutoStep];
-  const total = TUTO_STEPS.length;
-  const overlay = document.getElementById('tuto-overlay');
-  const card    = document.getElementById('tuto-card');
-
-  // Navigate to the correct page if needed
-  if(step.page){
-    nav(step.page);
-  }
-
-  // Content
-  document.getElementById('tuto-emoji').textContent      = step.emoji;
-  document.getElementById('tuto-step-label').textContent = `Étape ${tutoStep + 1} sur ${total}`;
-  document.getElementById('tuto-title').textContent      = step.title;
-  document.getElementById('tuto-desc').textContent       = step.desc;
-
-  // Next button label
-  const nextLbl = document.getElementById('tuto-next-label');
-  const nextBtn = document.getElementById('tuto-next');
-  const arrow   = nextBtn.querySelector('.tuto-arrow');
-  if(step.isLast){
-    nextLbl.textContent = 'Commencer';
-    arrow.textContent   = '🚀';
-    nextBtn.style.background = 'linear-gradient(135deg,var(--accent),var(--purple))';
-  } else {
-    nextLbl.textContent = 'Suivant';
-    arrow.textContent   = '→';
-    nextBtn.style.background = '';
-  }
-
-  // Prev button
-  document.getElementById('tuto-prev').style.display = tutoStep === 0 ? 'none' : '';
-
-  // Progress pips
-  const prog = document.getElementById('tuto-progress');
-  prog.innerHTML = '';
-  for(let i = 0; i < total; i++){
-    const pip = document.createElement('div');
-    pip.className = 'tuto-pip' + (i < tutoStep ? ' done' : i === tutoStep ? ' cur' : '');
-    prog.appendChild(pip);
-  }
-
-  // Spotlight + card positioning
-  card.classList.add('placing');
-  setTimeout(() => {
-    tutoPosition(step);
-    card.classList.remove('placing');
-  }, 40);
-}
-
-function tutoPosition(step){
-  const spotlight = document.getElementById('tuto-spotlight');
-  const card      = document.getElementById('tuto-card');
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const PAD = 10;
-  const MARGIN = 16;
-  const cardW = 320;
-
-  // Helper: clamp a position so the card never leaves the viewport
-  function clamp(cx, cy, h){
-    return {
-      cx: Math.max(MARGIN, Math.min(cx, vw - cardW - MARGIN)),
-      cy: Math.max(MARGIN, Math.min(cy, vh - h - MARGIN))
-    };
-  }
-
-  // No target → centered
-  if(!step.target){
-    spotlight.style.display = 'none';
-    card.style.width = (step.wide ? 380 : cardW) + 'px';
-    card.style.left  = Math.round((vw - (step.wide ? 380 : cardW)) / 2) + 'px';
-    card.style.top   = Math.round((vh - card.offsetHeight) / 2) + 'px';
-    return;
-  }
-
-  spotlight.style.display = 'block';
-
-  const target = document.querySelector(step.target);
-  if(!target){
-    spotlight.style.display = 'none';
-    card.style.left = Math.round((vw - cardW) / 2) + 'px';
-    card.style.top  = Math.round((vh - card.offsetHeight) / 2) + 'px';
-    return;
-  }
-
-  // Two-frame approach:
-  // Frame 1 — move card off-screen so it can be measured, then
-  // Frame 2 — place it correctly with real height
-  card.style.transition = 'none';
-  card.style.left = '-9999px';
-  card.style.top  = '0';
-  card.style.width = cardW + 'px';
-
-  requestAnimationFrame(() => {
-    const r = target.getBoundingClientRect();
-
-    // Spotlight around target
-    spotlight.style.left   = (r.left - PAD) + 'px';
-    spotlight.style.top    = (r.top  - PAD) + 'px';
-    spotlight.style.width  = (r.width  + PAD * 2) + 'px';
-    spotlight.style.height = (r.height + PAD * 2) + 'px';
-
-    // Real card height now that it has been rendered off-screen
-    const cardH = Math.min(card.offsetHeight || 300, vh - MARGIN * 2);
-
-    // Is the target in the sidebar? (left edge < 240px or right edge < 28% vw)
-    const inSidebar = r.right < Math.max(240, vw * 0.25);
-
-    let cx, cy;
-
-    if(inSidebar){
-      // Always place to the right of sidebar
-      cx = r.right + PAD + MARGIN;
-      cy = r.top + r.height / 2 - cardH / 2;
-    } else if(r.bottom + PAD + MARGIN + cardH <= vh){
-      // Below
-      cy = r.bottom + PAD + MARGIN;
-      cx = r.left;
-    } else if(r.top - PAD - MARGIN - cardH >= 0){
-      // Above
-      cy = r.top - PAD - MARGIN - cardH;
-      cx = r.left;
-    } else if(r.right + PAD + MARGIN + cardW <= vw){
-      // Right
-      cx = r.right + PAD + MARGIN;
-      cy = r.top + r.height / 2 - cardH / 2;
-    } else {
-      // Center
-      cx = (vw - cardW) / 2;
-      cy = (vh - cardH) / 2;
-    }
-
-    // Strict clamp — card MUST be fully visible
-    const pos = clamp(cx, cy, cardH);
-
-    // Restore transition then apply final position
-    requestAnimationFrame(() => {
-      card.style.transition = '';
-      card.style.left = Math.round(pos.cx) + 'px';
-      card.style.top  = Math.round(pos.cy) + 'px';
-    });
-  });
-}
-
-// Auto-trigger on first login
-function maybeStartTutorial(){
-  if(!localStorage.getItem('jf_tuto_done')){
-    // Small delay to let the app finish rendering
-    setTimeout(startTutorial, 800);
-  }
 }
 </script>
 </body>
