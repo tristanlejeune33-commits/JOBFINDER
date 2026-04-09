@@ -3777,6 +3777,25 @@ function toggleTemplateMode(){
 }
 
 async function previewTpl(id){
+<<<<<<< HEAD
+=======
+  // Demo template — show a placeholder preview instead of hitting the API
+  if(String(id).startsWith('_')){
+    const demo=DEMO_TEMPLATES.find(t=>t.id===id)||{name:'Template démo',color:'#2F5DA8',style:'Moderne'};
+    document.getElementById('tpl-gen-overlay').classList.add('open');
+    document.getElementById('wiz-prog').style.width='100%';
+    document.getElementById('wiz-step-lbl').textContent='Aperçu démo';
+    document.getElementById('wiz-body').innerHTML=`
+      <div style="height:420px;background:var(--surface);border-radius:12px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;border:1px solid var(--border)">
+        <div style="font-size:48px">🎨</div>
+        <div style="font-size:15px;font-weight:700;color:var(--text)">${demo.name}</div>
+        <div style="font-size:13px;color:var(--text3)">Style ${demo.style} · <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${demo.color};vertical-align:middle"></span></div>
+        <div style="font-size:12px;color:var(--text3);text-align:center;max-width:260px">Ceci est un aperçu de démo. Crée ton propre template via le wizard pour le voir ici.</div>
+      </div>`;
+    document.getElementById('wiz-foot').innerHTML=`<button class="wiz-back" onclick="closeGenModal()">✕ Fermer</button>`;
+    return;
+  }
+>>>>>>> abd6bd9 (initial commit)
   const data=await api(`/api/cv-templates/${id}`);
   if(data.error){toast(data.error,'error');return;}
   tplGeneratedHTML=data.html_content;
@@ -3851,6 +3870,10 @@ function renderTemplates(){
   }).join('');
   grid.querySelectorAll('iframe[data-tpl-id]').forEach(async iframe=>{
     const id=iframe.dataset.tplId;
+<<<<<<< HEAD
+=======
+    if(String(id).startsWith('_')) return; // demo placeholder — skip API call
+>>>>>>> abd6bd9 (initial commit)
     const d=await api(`/api/cv-templates/${id}`);
     if(d.html_content) iframe.srcdoc=d.html_content;
   });
@@ -3882,14 +3905,22 @@ function syncBottomNav(id){
 // ═══════════════════════════════════════════════════════════════════════════════
 const TUTO_STEPS = [
   {
+<<<<<<< HEAD
     target: null,         // null = centré, pas de spotlight
     emoji:  '👋',
     title:  'Bienvenue sur JobFinder !',
     desc:   'Ce rapide didacticiel te guide à travers les fonctionnalités clés de l\'application. Tu peux le passer à tout moment et le relancer depuis les Paramètres.',
+=======
+    target: null,
+    emoji:  '👋',
+    title:  'Bienvenue sur JobFinder !',
+    desc:   'On va te montrer tout ce que l\'app peut faire — avec un exemple concret. Les données que tu vois sont fictives, juste pour la démo. Tes vraies données t\'attendent après.',
+>>>>>>> abd6bd9 (initial commit)
     page:   'dashboard',
     wide:   true,
   },
   {
+<<<<<<< HEAD
     target: '#page-dashboard .ph',
     emoji:  '🏠',
     title:  'Tableau de bord',
@@ -3922,13 +3953,51 @@ const TUTO_STEPS = [
     emoji:  '🎨',
     title:  'Mes modèles de CV',
     desc:   'Crée et sauvegarde plusieurs modèles de CV avec différentes mises en page et couleurs. Choisis le meilleur selon l\'entreprise.',
+=======
+    target: '#page-dashboard',
+    emoji:  '🏠',
+    title:  'Tableau de bord',
+    desc:   'D\'un coup d\'œil : 6 candidatures en cours, 3 entretiens à venir, une offre acceptée chez BlaBlaCar. Tout est résumé ici, mis à jour en temps réel.',
+    page:   'dashboard',
+  },
+  {
+    target: '#kanban',
+    emoji:  '📋',
+    title:  'Tes candidatures',
+    desc:   'Chaque carte représente une candidature. Glisse-la d\'une colonne à l\'autre quand le statut change. Spotify est en entretien, Alan attend une réponse, BlaBlaCar a dit oui.',
+    page:   'applications',
+  },
+  {
+    target: '#page-adapter .adapter-in',
+    emoji:  '✨',
+    title:  'Adapter mon CV en 20s',
+    desc:   'Colle l\'URL ou le texte d\'une offre, clique Générer. L\'app reécrit ton CV pour coller exactement à ce que le recruteur cherche — mots-clés, compétences, ton.',
+    page:   'adapter',
+  },
+  {
+    target: '#page-planning',
+    emoji:  '📅',
+    title:  'Planning des entretiens',
+    desc:   'Spotify RH dans 2 jours, Dataiku technique dans 5 jours — tout est affiché sur le calendrier. Clique sur un créneau pour ajouter des notes ou voir le détail.',
+    page:   'planning',
+  },
+  {
+    target: '#tpl-grid',
+    emoji:  '🎨',
+    title:  'Tes modèles de CV',
+    desc:   'Crée autant de modèles que tu veux : un moderne pour la tech, un créatif pour le design. L\'app choisit lequel utiliser selon le poste visé.',
+>>>>>>> abd6bd9 (initial commit)
     page:   'templates',
   },
   {
     target: '[data-page="settings"]',
     emoji:  '⚙️',
     title:  'Paramètres & Profil',
+<<<<<<< HEAD
     desc:   'Renseigne ton résumé professionnel, tes documents (CV de base, lettre type) et personnalise l\'application. Plus tu complètes ton profil, meilleures seront les générations !',
+=======
+    desc:   'Charge ton résumé professionnel et tes anciens CV — c\'est la matière première. Plus ton profil est complet, plus les CV générés seront précis et personnalisés.',
+>>>>>>> abd6bd9 (initial commit)
     page:   'settings',
     isLast: true,
   },
@@ -3937,9 +4006,73 @@ const TUTO_STEPS = [
 let tutoStep = 0;
 let tutoActive = false;
 
+<<<<<<< HEAD
 function startTutorial(){
   tutoStep = 0;
   tutoActive = true;
+=======
+// ── Demo data for tutorial ──────────────────────────────────────────────────
+const DEMO_APPS = [
+  {id:'_d1',company:'Spotify',role:'Product Manager',status:'Entretien',job_url:'https://spotify.com/jobs',job_desc:'',created_at:'2026-04-01',cv_filename:'',interview_prep:''},
+  {id:'_d2',company:'Doctolib',role:'Growth Marketing Manager',status:'En attente',job_url:'',job_desc:'',created_at:'2026-04-03',cv_filename:'',interview_prep:''},
+  {id:'_d3',company:'Alan',role:'Data Analyst',status:'Envoyée',job_url:'',job_desc:'',created_at:'2026-04-05',cv_filename:'',interview_prep:''},
+  {id:'_d4',company:'BlaBlaCar',role:'UX Designer Senior',status:'Acceptée',job_url:'',job_desc:'',created_at:'2026-03-28',cv_filename:'',interview_prep:''},
+  {id:'_d5',company:'Contentsquare',role:'Développeur Frontend',status:'Refusée',job_url:'',job_desc:'',created_at:'2026-03-20',cv_filename:'',interview_prep:''},
+  {id:'_d6',company:'Dataiku',role:'Sales Engineer',status:'Entretien',job_url:'',job_desc:'',created_at:'2026-04-07',cv_filename:'',interview_prep:''},
+];
+function getDemoStages(){
+  const d=(days,h=10)=>{
+    const dt=new Date(); dt.setDate(dt.getDate()+days);
+    return `${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}-${String(dt.getDate()).padStart(2,'0')} ${String(h).padStart(2,'0')}:00`;
+  };
+  return [
+    {id:'_s1',app_id:'_d1',company:'Spotify',role:'Product Manager',type:'Entretien RH',date:d(2,10),result:'En attente',notes:'Préparer le pitch produit et les métriques de croissance.'},
+    {id:'_s2',app_id:'_d6',company:'Dataiku',role:'Sales Engineer',type:'Entretien technique',date:d(5,14),result:'En attente',notes:'Démo de la plateforme + questions cycles de vente B2B.'},
+    {id:'_s3',app_id:'_d1',company:'Spotify',role:'Product Manager',type:'Entretien technique',date:d(9,11),result:'En attente',notes:'Case study : comment améliorer la rétention des utilisateurs freemium.'},
+    {id:'_s4',app_id:'_d4',company:'BlaBlaCar',role:'UX Designer Senior',type:'Offre reçue',date:d(-4,9),result:'Positif',notes:'Offre acceptée ! Début le 2 mai.'},
+  ];
+}
+const DEMO_TEMPLATES = [
+  {id:'_t1',name:'CV Moderne Tech',style:'Moderne',color:'#2F5DA8',created_at:'2026-04-01'},
+  {id:'_t2',name:'CV Créatif Design',style:'Créatif',color:'#5BB98C',created_at:'2026-03-28'},
+];
+let _demoSaved = null;
+
+function loadDemoData(){
+  _demoSaved = {apps:[...apps], stages:[...allStages], tpl:[...templates]};
+  apps      = [...DEMO_APPS];
+  allStages = getDemoStages();
+  templates = [...DEMO_TEMPLATES];
+  render(); renderAL(); renderTemplates();
+  // Show demo badge
+  let badge = document.getElementById('demo-badge');
+  if(!badge){
+    badge = document.createElement('div');
+    badge.id = 'demo-badge';
+    badge.innerHTML = '🎬 Mode démo';
+    badge.style.cssText = 'position:fixed;top:12px;right:16px;z-index:99991;background:rgba(245,158,11,.92);color:#fff;font-size:11px;font-weight:800;padding:5px 12px;border-radius:99px;letter-spacing:.05em;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.2)';
+    document.body.appendChild(badge);
+  }
+  badge.style.display = '';
+}
+
+function clearDemoData(){
+  if(!_demoSaved) return;
+  apps      = _demoSaved.apps;
+  allStages = _demoSaved.stages;
+  templates = _demoSaved.tpl;
+  _demoSaved = null;
+  render(); renderAL();
+  const badge = document.getElementById('demo-badge');
+  if(badge) badge.style.display = 'none';
+}
+// ────────────────────────────────────────────────────────────────────────────
+
+function startTutorial(){
+  tutoStep = 0;
+  tutoActive = true;
+  loadDemoData();
+>>>>>>> abd6bd9 (initial commit)
   document.getElementById('tuto-overlay').classList.add('active');
   tutoRender();
 }
@@ -3951,6 +4084,10 @@ function tutoSkip(){
 function tutoEnd(){
   tutoActive = false;
   document.getElementById('tuto-overlay').classList.remove('active');
+<<<<<<< HEAD
+=======
+  clearDemoData();
+>>>>>>> abd6bd9 (initial commit)
   // Toujours marquer comme vu (skip ou terminé)
   localStorage.setItem('jf_tuto_done','1');
 }
