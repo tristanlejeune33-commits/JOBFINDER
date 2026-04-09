@@ -3777,8 +3777,6 @@ function toggleTemplateMode(){
 }
 
 async function previewTpl(id){
-<<<<<<< HEAD
-=======
   // Demo template — show a placeholder preview instead of hitting the API
   if(String(id).startsWith('_')){
     const demo=DEMO_TEMPLATES.find(t=>t.id===id)||{name:'Template démo',color:'#2F5DA8',style:'Moderne'};
@@ -3795,7 +3793,6 @@ async function previewTpl(id){
     document.getElementById('wiz-foot').innerHTML=`<button class="wiz-back" onclick="closeGenModal()">✕ Fermer</button>`;
     return;
   }
->>>>>>> abd6bd9 (initial commit)
   const data=await api(`/api/cv-templates/${id}`);
   if(data.error){toast(data.error,'error');return;}
   tplGeneratedHTML=data.html_content;
@@ -3870,10 +3867,7 @@ function renderTemplates(){
   }).join('');
   grid.querySelectorAll('iframe[data-tpl-id]').forEach(async iframe=>{
     const id=iframe.dataset.tplId;
-<<<<<<< HEAD
-=======
     if(String(id).startsWith('_')) return; // demo placeholder — skip API call
->>>>>>> abd6bd9 (initial commit)
     const d=await api(`/api/cv-templates/${id}`);
     if(d.html_content) iframe.srcdoc=d.html_content;
   });
@@ -3905,55 +3899,14 @@ function syncBottomNav(id){
 // ═══════════════════════════════════════════════════════════════════════════════
 const TUTO_STEPS = [
   {
-<<<<<<< HEAD
-    target: null,         // null = centré, pas de spotlight
-    emoji:  '👋',
-    title:  'Bienvenue sur JobFinder !',
-    desc:   'Ce rapide didacticiel te guide à travers les fonctionnalités clés de l\'application. Tu peux le passer à tout moment et le relancer depuis les Paramètres.',
-=======
     target: null,
     emoji:  '👋',
     title:  'Bienvenue sur JobFinder !',
     desc:   'On va te montrer tout ce que l\'app peut faire — avec un exemple concret. Les données que tu vois sont fictives, juste pour la démo. Tes vraies données t\'attendent après.',
->>>>>>> abd6bd9 (initial commit)
     page:   'dashboard',
     wide:   true,
   },
   {
-<<<<<<< HEAD
-    target: '#page-dashboard .ph',
-    emoji:  '🏠',
-    title:  'Tableau de bord',
-    desc:   'Ici tu vois en un coup d\'œil l\'état de tes candidatures, tes prochains entretiens et ta progression générale.',
-    page:   'dashboard',
-  },
-  {
-    target: '[data-page="applications"]',
-    emoji:  '📋',
-    title:  'Mes candidatures',
-    desc:   'Suis chaque candidature : En attente → Entretien → Offre → Refus. Glisse les cartes pour les déplacer d\'une colonne à l\'autre.',
-    page:   'applications',
-  },
-  {
-    target: '[data-page="adapter"]',
-    emoji:  '✨',
-    title:  'Adapter mon CV',
-    desc:   'Colle l\'URL ou le texte d\'une offre d\'emploi : l\'application analyse l\'offre et génère un CV sur-mesure en quelques secondes.',
-    page:   'adapter',
-  },
-  {
-    target: '[data-page="planning"]',
-    emoji:  '📅',
-    title:  'Planning des entretiens',
-    desc:   'Retrouve tous tes entretiens dans une vue calendrier. Clique sur un jour pour ajouter un entretien ou voir les détails.',
-    page:   'planning',
-  },
-  {
-    target: '[data-page="templates"]',
-    emoji:  '🎨',
-    title:  'Mes modèles de CV',
-    desc:   'Crée et sauvegarde plusieurs modèles de CV avec différentes mises en page et couleurs. Choisis le meilleur selon l\'entreprise.',
-=======
     target: '#page-dashboard',
     emoji:  '🏠',
     title:  'Tableau de bord',
@@ -3986,18 +3939,13 @@ const TUTO_STEPS = [
     emoji:  '🎨',
     title:  'Tes modèles de CV',
     desc:   'Crée autant de modèles que tu veux : un moderne pour la tech, un créatif pour le design. L\'app choisit lequel utiliser selon le poste visé.',
->>>>>>> abd6bd9 (initial commit)
     page:   'templates',
   },
   {
     target: '[data-page="settings"]',
     emoji:  '⚙️',
     title:  'Paramètres & Profil',
-<<<<<<< HEAD
-    desc:   'Renseigne ton résumé professionnel, tes documents (CV de base, lettre type) et personnalise l\'application. Plus tu complètes ton profil, meilleures seront les générations !',
-=======
     desc:   'Charge ton résumé professionnel et tes anciens CV — c\'est la matière première. Plus ton profil est complet, plus les CV générés seront précis et personnalisés.',
->>>>>>> abd6bd9 (initial commit)
     page:   'settings',
     isLast: true,
   },
@@ -4006,11 +3954,6 @@ const TUTO_STEPS = [
 let tutoStep = 0;
 let tutoActive = false;
 
-<<<<<<< HEAD
-function startTutorial(){
-  tutoStep = 0;
-  tutoActive = true;
-=======
 // ── Demo data for tutorial ──────────────────────────────────────────────────
 const DEMO_APPS = [
   {id:'_d1',company:'Spotify',role:'Product Manager',status:'Entretien',job_url:'https://spotify.com/jobs',job_desc:'',created_at:'2026-04-01',cv_filename:'',interview_prep:''},
@@ -4072,7 +4015,6 @@ function startTutorial(){
   tutoStep = 0;
   tutoActive = true;
   loadDemoData();
->>>>>>> abd6bd9 (initial commit)
   document.getElementById('tuto-overlay').classList.add('active');
   tutoRender();
 }
@@ -4084,10 +4026,7 @@ function tutoSkip(){
 function tutoEnd(){
   tutoActive = false;
   document.getElementById('tuto-overlay').classList.remove('active');
-<<<<<<< HEAD
-=======
   clearDemoData();
->>>>>>> abd6bd9 (initial commit)
   // Toujours marquer comme vu (skip ou terminé)
   localStorage.setItem('jf_tuto_done','1');
 }
