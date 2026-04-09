@@ -1,0 +1,42 @@
+# ── Données utilisateur ───────────────────────────────────────────────────
+data/
+cv_adaptes/
+
+# ── Base de données ───────────────────────────────────────────────────────
+*.db
+*.sqlite
+
+# ── Secrets ───────────────────────────────────────────────────────────────
+.env
+*.key
+secrets.json
+
+# ── Build PyInstaller ─────────────────────────────────────────────────────
+build/
+dist/
+__pycache__/
+*.py[cod]
+*.pyo
+
+# ── Fichiers temporaires et sauvegardes ───────────────────────────────────
+*.bak
+ui_v*.html
+ui_work.html
+mockups.html
+
+# ── Scripts de dev (pas utiles pour l'utilisateur final) ──────────────────
+lancer_jobfinder.bat
+diagnostic.bat
+
+# ── Environnements virtuels ───────────────────────────────────────────────
+.venv/
+venv/
+env/
+
+# ── OS ────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Logs ─────────────────────────────────────────────────────────────────
+*.log
