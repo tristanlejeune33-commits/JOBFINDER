@@ -1,35 +1,23 @@
 @echo off
-title JobFinder — Deploy
-chcp 65001 >nul
-
+title JobFinder Deploy
 cd /d "%~dp0"
-
-:: ── Identite Git (necessaire au premier commit) ───────────────────────────
 git config user.email "tristanlejeune33@gmail.com"
 git config user.name "Tristan"
-
 echo.
-echo  Fichiers modifies :
 git status --short
 echo.
-
-:: ── Message de commit ────────────────────────────────────────────────────
-set /p MSG="  Message de commit (Entree = 'update') : "
+set /p MSG="Message (Entree = update) : "
 if "%MSG%"=="" set MSG=update
-
-:: ── Push ─────────────────────────────────────────────────────────────────
 git add .
 git commit -m "%MSG%"
+git pull origin main --rebase --allow-unrelated-histories
 git push origin main
-
-if errorlevel 1 (
-    echo.
-    echo  [ERREUR] Push echoue. Verifier les droits GitHub.
-    pause
-    exit /b 1
-)
-
+if errorlevel 1 goto error
 echo.
-echo  Deploye ! Le site se met a jour automatiquement.
-echo.
+echo Deploye !
 timeout /t 3 >nul
+goto end
+:error
+echo ERREUR : voir message ci-dessus
+pause
+:end
