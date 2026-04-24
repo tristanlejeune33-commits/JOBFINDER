@@ -28,23 +28,144 @@ OPENAI_API_KEY = os.environ.get(
 
 # ── Chemins ─────────────────────────────────────────────────────────────────────
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR    = os.path.join(BASE_DIR, "data")
-CV_DIR      = os.path.join(BASE_DIR, "cv_adaptes")
+DATA_DIR    = os.environ.get("DATA_DIR", os.path.join(BASE_DIR, "data"))
+CV_DIR      = os.environ.get("CV_DIR",   os.path.join(BASE_DIR, "cv_adaptes"))
 DB_PATH     = os.path.join(DATA_DIR, "jobfinder.db")
 TEMPLATE_CV = os.path.join(BASE_DIR, "cv_vibe_modern_html (3).html")
 for d in [DATA_DIR, CV_DIR]:
     os.makedirs(d, exist_ok=True)
 
 app = Flask(__name__, static_folder=BASE_DIR, static_url_path="")
-app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(32))
+# SECRET_KEY MUST be set as env var in production — never use random here
+_raw_secret = os.environ.get("SECRET_KEY", "")
+if not _raw_secret:
+    import warnings
+    warnings.warn("SECRET_KEY non définie — sessions non persistantes entre redémarrages !", RuntimeWarning)
+    _raw_secret = "dev-only-" + secrets.token_hex(16)   # stable pour la session courante
+app.secret_key = _raw_secret
 app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
 
-# ── Base de données ─────────────────────────────────────────────────────────────
+# ── Adaptateur Base de Données (SQLite local / PostgreSQL Railway) ────────────
+# Détecte automatiquement PostgreSQL via DATABASE_URL (fourni par Railway)
+_DATABASE_URL = os.environ.get("DATABASE_URL", "")
+# Railway génère parfois "postgres://" (déprécié), psycopg2 veut "postgresql://"
+if _DATABASE_URL.startswith("postgres://"):
+    _DATABASE_URL = _DATABASE_URL.replace("postgres://", "postgresql://", 1)
+_DB_TYPE = "postgres" if _DATABASE_URL else "sqlite"
+
+class _PgCursor:
+    """Curseur psycopg2 avec interface compatible SQLite (dict rows + lastrowid)"""
+    def __init__(self, cur, lastrowid=None):
+        self._cur = cur
+        self.lastrowid = lastrowid
+    def fetchone(self):
+        row = self._cur.fetchone()
+        return dict(row) if row else None
+    def fetchall(self):
+        return [dict(r) for r in (self._cur.fetchall() or [])]
+    def __iter__(self):
+        return (dict(r) for r in self._cur)
+
+class _PgConn:
+    """Connexion PostgreSQL compatible avec les patterns SQLite du code existant"""
+    import re as _re
+    _OR_IGNORE = _re.compile(r'\bINSERT\s+OR\s+IGNORE\s+INTO\b', _re.IGNORECASE)
+    _IS_INSERT = _re.compile(r'^\s*INSERT\s+INTO\b', _re.IGNORECASE | _re.MULTILINE)
+
+    def __init__(self, url):
+        import psycopg2, psycopg2.extras
+        self._conn = psycopg2.connect(url, cursor_factory=psycopg2.extras.RealDictCursor)
+
+    @classmethod
+    def _translate(cls, q):
+        """Convertit SQL SQLite → PostgreSQL"""
+        is_ignore = bool(cls._OR_IGNORE.search(q))
+        q = q.replace('?', '%s')
+        q = cls._OR_IGNORE.sub('INSERT INTO', q)
+        if is_ignore and 'ON CONFLICT' not in q.upper():
+            q = q.rstrip().rstrip(';') + ' ON CONFLICT DO NOTHING'
+        return q, is_ignore
+
+    @staticmethod
+    def _pg_schema(stmt):
+        import re
+        stmt = re.sub(r'INTEGER\s+PRIMARY\s+KEY\s+AUTOINCREMENT', 'SERIAL PRIMARY KEY', stmt, flags=re.IGNORECASE)
+        stmt = re.sub(r"INTEGER\s+PRIMARY\s+KEY\b", 'INTEGER PRIMARY KEY', stmt, flags=re.IGNORECASE)
+        stmt = re.sub(r"datetime\('now'\)", "to_char(NOW(),'YYYY-MM-DD HH24:MI:SS')", stmt)
+        stmt = re.sub(r"date\('now'\)", "to_char(CURRENT_DATE,'YYYY-MM-DD')", stmt)
+        return stmt
+
+    def execute(self, query, params=()):
+        q, is_ignore = self._translate(query)
+        is_real_insert = bool(self._IS_INSERT.search(q)) and not is_ignore
+        if is_real_insert and 'RETURNING' not in q.upper():
+            q = q.rstrip().rstrip(';') + ' RETURNING id'
+        cur = self._conn.cursor()
+        cur.execute(q, params if params else ())
+        lastrowid = None
+        if is_real_insert:
+            row = cur.fetchone()
+            lastrowid = dict(row).get('id') if row else None
+        return _PgCursor(cur, lastrowid)
+
+    def executescript(self, script):
+        cur = self._conn.cursor()
+        for stmt in script.split(';'):
+            stmt = stmt.strip()
+            if not stmt:
+                continue
+            stmt = self._pg_schema(stmt)
+            try:
+                cur.execute(stmt)
+            except Exception as e:
+                self._conn.rollback()
+                raise RuntimeError(f"Schema init error: {e}\nQuery: {stmt}") from e
+
+    def commit(self):   self._conn.commit()
+    def rollback(self): self._conn.rollback()
+    def close(self):    self._conn.close()
+    def __enter__(self): return self
+    def __exit__(self, exc_type, *_):
+        if exc_type: self._conn.rollback()
+        else:        self._conn.commit()
+        self._conn.close()
+
+class _SqliteCursor:
+    """Curseur SQLite avec fetchone() retournant des dicts (cohérent avec Postgres)"""
+    def __init__(self, cur):
+        self._cur = cur
+        self.lastrowid = cur.lastrowid
+    def fetchone(self):
+        row = self._cur.fetchone()
+        return dict(row) if row else None
+    def fetchall(self):
+        return [dict(r) for r in (self._cur.fetchall() or [])]
+    def __iter__(self):
+        return (dict(r) for r in self._cur)
+
+class _SqliteConn:
+    """Connexion SQLite avec interface cohérente (dict rows)"""
+    def __init__(self, path):
+        self._conn = sqlite3.connect(path)
+        self._conn.row_factory = sqlite3.Row
+        self._conn.execute("PRAGMA foreign_keys = ON")
+    def execute(self, query, params=()):
+        return _SqliteCursor(self._conn.execute(query, params))
+    def executescript(self, script):
+        return self._conn.executescript(script)
+    def commit(self):   self._conn.commit()
+    def rollback(self): self._conn.rollback()
+    def close(self):    self._conn.close()
+    def __enter__(self): return self
+    def __exit__(self, exc_type, *_):
+        if exc_type: self._conn.rollback()
+        else:        self._conn.commit()
+        self._conn.close()
+
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+    if _DB_TYPE == "postgres":
+        return _PgConn(_DATABASE_URL)
+    return _SqliteConn(DB_PATH)
 
 def init_db():
     with get_db() as db:
@@ -112,7 +233,40 @@ def init_db():
             created_at   TEXT DEFAULT (datetime('now')),
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS cv_adaptes (
+            id             INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id        INTEGER NOT NULL,
+            application_id INTEGER,
+            filename       TEXT NOT NULL,
+            company        TEXT DEFAULT '',
+            role_name      TEXT DEFAULT '',
+            html_content   TEXT NOT NULL,
+            source         TEXT DEFAULT 'adapt',
+            created_at     TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE SET NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id     INTEGER NOT NULL,
+            token_hash  TEXT UNIQUE NOT NULL,
+            expires_at  TEXT NOT NULL,
+            used_at     TEXT,
+            created_at  TEXT DEFAULT (datetime('now')),
+            request_ip  TEXT DEFAULT '',
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
         """)
+    # Migration : ajout colonnes PDF CV (safe si déjà présentes)
+    with get_db() as db:
+        for col, dflt in [("pdf_cv_json","''"), ("pdf_cv_raw","''"), ("pdf_cv_preview","'{}' ")]:
+            try:
+                db.execute(f"ALTER TABLE user_data ADD COLUMN {col} TEXT DEFAULT {dflt}")
+                db.commit()
+            except Exception:
+                pass  # colonne déjà présente
 
 init_db()
 
@@ -135,6 +289,44 @@ def get_user_data(user_id):
             db.commit()
             row = db.execute("SELECT * FROM user_data WHERE user_id=?", (user_id,)).fetchone()
         return dict(row)
+
+def save_cv_adapte(user_id, filename, html_content, company="", role="", source="adapt", application_id=None):
+    """Sauvegarde un CV adapté en base + sur disque (fallback local).
+    Retourne le filename (peut être modifié pour éviter les collisions)."""
+    # Écrit aussi sur disque si CV_DIR est dispo (pour route_download_pdf/Playwright)
+    try:
+        os.makedirs(CV_DIR, exist_ok=True)
+        with open(os.path.join(CV_DIR, filename), "w", encoding="utf-8") as f:
+            f.write(html_content)
+    except Exception as e:
+        print(f"[CV-DISK-WARN] {e}")
+    with get_db() as db:
+        # Si même filename existe pour ce user → on écrase (on garde une seule version)
+        existing = db.execute(
+            "SELECT id FROM cv_adaptes WHERE user_id=? AND filename=?",
+            (user_id, filename)
+        ).fetchone()
+        if existing:
+            db.execute(
+                "UPDATE cv_adaptes SET html_content=?, company=?, role_name=?, source=?, application_id=? WHERE id=?",
+                (html_content, company, role, source, application_id, existing["id"])
+            )
+        else:
+            db.execute(
+                "INSERT INTO cv_adaptes(user_id,application_id,filename,company,role_name,html_content,source) VALUES(?,?,?,?,?,?,?)",
+                (user_id, application_id, filename, company, role, html_content, source)
+            )
+        db.commit()
+    return filename
+
+def load_cv_adapte(user_id, filename):
+    """Relit un CV adapté depuis la DB. Retourne le HTML ou None."""
+    with get_db() as db:
+        row = db.execute(
+            "SELECT html_content FROM cv_adaptes WHERE user_id=? AND filename=?",
+            (user_id, filename)
+        ).fetchone()
+    return row["html_content"] if row else None
 
 # ── Auth helpers ────────────────────────────────────────────────────────────────
 def get_current_user():
@@ -304,6 +496,116 @@ def route_me():
     if not u:
         return jsonify({"user": None})
     return jsonify({"user": {"id": u["id"], "email": u["email"], "name": u["name"], "role": u["role"]}})
+
+# ── Helpers email / reset password ──────────────────────────────────────────
+import hashlib, smtplib
+from email.mime.text import MIMEText
+
+SMTP_HOST     = os.environ.get("SMTP_HOST", "")
+SMTP_PORT     = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER     = os.environ.get("SMTP_USER", "")
+SMTP_PASS     = os.environ.get("SMTP_PASS", "")
+SMTP_FROM     = os.environ.get("SMTP_FROM", SMTP_USER)
+APP_BASE_URL  = os.environ.get("APP_BASE_URL", "http://localhost:5151")
+RESET_TTL_MIN = 30  # minutes
+
+def _hash_token(tok):
+    return hashlib.sha256(tok.encode("utf-8")).hexdigest()
+
+def _send_email(to, subject, body_text, body_html=None):
+    """Envoie un mail via SMTP. Silencieux si SMTP non configuré (dev)."""
+    if not SMTP_HOST or not SMTP_USER:
+        print(f"[EMAIL-DEV] to={to} subject={subject}\n{body_text}\n")
+        return False
+    msg = MIMEText(body_html or body_text, "html" if body_html else "plain", "utf-8")
+    msg["Subject"] = subject
+    msg["From"]    = SMTP_FROM
+    msg["To"]      = to
+    with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=20) as s:
+        s.starttls()
+        s.login(SMTP_USER, SMTP_PASS)
+        s.sendmail(SMTP_FROM, [to], msg.as_string())
+    return True
+
+@app.route("/api/auth/forgot-password", methods=["POST"])
+def route_forgot_password():
+    data  = request.json or {}
+    email = (data.get("email") or "").strip().lower()
+    if not email:
+        return jsonify({"error": "Email requis"}), 400
+    # Réponse neutre : on ne révèle pas si l'email existe (anti-enum)
+    generic_ok = {"ok": True, "message": "Si un compte existe, un email a été envoyé."}
+    with get_db() as db:
+        row = db.execute("SELECT id,email FROM users WHERE email=?", (email,)).fetchone()
+        if not row:
+            return jsonify(generic_ok)
+        token       = secrets.token_urlsafe(32)
+        token_hash  = _hash_token(token)
+        expires_at  = (datetime.datetime.utcnow() + datetime.timedelta(minutes=RESET_TTL_MIN)).strftime("%Y-%m-%d %H:%M:%S")
+        ip          = request.headers.get("X-Forwarded-For", request.remote_addr or "")
+        db.execute(
+            "INSERT INTO password_reset_tokens(user_id,token_hash,expires_at,request_ip) VALUES(?,?,?,?)",
+            (row["id"], token_hash, expires_at, ip)
+        )
+        db.commit()
+    reset_link = f"{APP_BASE_URL.rstrip('/')}/?reset_token={token}"
+    subject    = "Réinitialisation de votre mot de passe — JobFinder"
+    body_html  = f"""
+    <div style="font-family:Inter,sans-serif;max-width:540px;margin:auto;padding:24px;">
+      <h2 style="color:#7c3aed;">Réinitialisation de mot de passe</h2>
+      <p>Vous avez demandé à réinitialiser votre mot de passe JobFinder.</p>
+      <p>Cliquez sur ce lien (valable {RESET_TTL_MIN} minutes) :</p>
+      <p><a href="{reset_link}" style="display:inline-block;background:#7c3aed;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Choisir un nouveau mot de passe</a></p>
+      <p style="color:#666;font-size:13px;">Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
+      <p style="color:#999;font-size:12px;">Lien brut : {reset_link}</p>
+    </div>
+    """
+    try:
+        _send_email(email, subject, f"Lien de reset : {reset_link}", body_html)
+    except Exception as e:
+        # On ne remonte pas l'erreur SMTP au client pour éviter fuite d'info
+        print(f"[EMAIL-ERROR] {e}")
+    return jsonify(generic_ok)
+
+@app.route("/api/auth/reset-password", methods=["POST"])
+def route_reset_password():
+    data  = request.json or {}
+    token = (data.get("token") or "").strip()
+    pwd   = (data.get("password") or "").strip()
+    if not token or not pwd:
+        return jsonify({"error": "Token et mot de passe requis"}), 400
+    if len(pwd) < 6:
+        return jsonify({"error": "Mot de passe trop court (min 6 caractères)"}), 400
+    token_hash = _hash_token(token)
+    with get_db() as db:
+        row = db.execute(
+            "SELECT id,user_id,expires_at,used_at FROM password_reset_tokens WHERE token_hash=?",
+            (token_hash,)
+        ).fetchone()
+        if not row:
+            return jsonify({"error": "Lien invalide"}), 400
+        if row.get("used_at"):
+            return jsonify({"error": "Lien déjà utilisé"}), 400
+        # Convertit expires_at en datetime naïf UTC pour comparer proprement
+        exp = row["expires_at"]
+        if isinstance(exp, str):
+            try:
+                exp_dt = datetime.datetime.strptime(exp[:19], "%Y-%m-%d %H:%M:%S")
+            except Exception:
+                exp_dt = datetime.datetime.utcnow() - datetime.timedelta(seconds=1)
+        else:
+            # Postgres renvoie un datetime (timezone-aware) → on normalise en UTC naïf
+            exp_dt = exp.replace(tzinfo=None) if exp.tzinfo else exp
+        now = datetime.datetime.utcnow()
+        if exp_dt < now:
+            return jsonify({"error": "Lien expiré"}), 400
+        now_str = now.strftime("%Y-%m-%d %H:%M:%S")
+        db.execute("UPDATE users SET password_hash=? WHERE id=?",
+                   (generate_password_hash(pwd), row["user_id"]))
+        db.execute("UPDATE password_reset_tokens SET used_at=? WHERE id=?",
+                   (now_str, row["id"]))
+        db.commit()
+    return jsonify({"ok": True, "message": "Mot de passe mis à jour"})
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ROUTES CONFIG (par utilisateur)
@@ -490,12 +792,50 @@ def route_upload_cv():
     return jsonify({"ok": True})
 
 @app.route("/api/cv-file/<filename>")
+@require_auth
 def route_serve_cv(filename):
+    u    = get_current_user()
     safe = os.path.basename(filename)
+    # 1. Disque si présent
     path = os.path.join(CV_DIR, safe)
-    if not os.path.exists(path):
+    if os.path.exists(path):
+        return send_file(path, mimetype="text/html")
+    # 2. Fallback base de données (prod Railway, volume non configuré)
+    html = load_cv_adapte(u["id"], safe)
+    if html is None:
         return "CV introuvable", 404
-    return send_file(path, mimetype="text/html")
+    return Response(html, mimetype="text/html")
+
+@app.route("/api/cv-adaptes", methods=["GET"])
+@require_auth
+def route_list_cv_adaptes():
+    u = get_current_user()
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT id, filename, company, role_name, source, application_id, created_at "
+            "FROM cv_adaptes WHERE user_id=? ORDER BY created_at DESC",
+            (u["id"],)
+        ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+@app.route("/api/cv-adaptes/<int:cv_id>", methods=["DELETE"])
+@require_auth
+def route_delete_cv_adapte(cv_id):
+    u = get_current_user()
+    with get_db() as db:
+        row = db.execute("SELECT filename FROM cv_adaptes WHERE id=? AND user_id=?",
+                         (cv_id, u["id"])).fetchone()
+        if not row:
+            return jsonify({"error": "Non trouvé"}), 404
+        db.execute("DELETE FROM cv_adaptes WHERE id=?", (cv_id,))
+        db.commit()
+    # Supprime aussi le fichier si présent (best-effort)
+    try:
+        p = os.path.join(CV_DIR, os.path.basename(row["filename"]))
+        if os.path.exists(p): os.remove(p)
+    except Exception:
+        pass
+    return jsonify({"ok": True})
 
 @app.route("/api/adapt-cv", methods=["POST"])
 @require_auth
@@ -543,8 +883,7 @@ Modified HTML:"""
     try:
         result = call_ai(provider, api_key, prompt, max_tokens=8192)
         fname  = f"CV_{safe_name(company)}_{safe_name(role)}_{today()}.html"
-        with open(os.path.join(CV_DIR, fname), "w", encoding="utf-8") as f:
-            f.write(result)
+        save_cv_adapte(u["id"], fname, result, company=company, role=role, source="adapt")
         return jsonify({"html": result, "filename": fname})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -634,8 +973,7 @@ Rewritten HTML body:"""
         else:
             result = result.replace(PHOTO_MARKER, "")
         fname = f"CV_{safe_name(company)}_{safe_name(role)}_{today()}.html"
-        with open(os.path.join(CV_DIR, fname), "w", encoding="utf-8") as f:
-            f.write(result)
+        save_cv_adapte(u["id"], fname, result, company=company, role=role, source="template")
         return jsonify({"html": result, "filename": fname})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -801,12 +1139,24 @@ def route_extract_doc():
 @app.route("/api/download-pdf", methods=["POST"])
 @require_auth
 def route_download_pdf():
+    u        = get_current_user()
     data     = request.json or {}
     filename = data.get("filename","").strip()
     if not filename: return jsonify({"error": "Nom de fichier manquant"}), 400
     safe = os.path.basename(filename)
     path = os.path.join(CV_DIR, safe)
-    if not os.path.exists(path): return jsonify({"error": "CV introuvable"}), 404
+    # Si le fichier n'est plus sur disque (ex: redeploy Railway sans volume),
+    # on le recrée depuis la DB.
+    if not os.path.exists(path):
+        html = load_cv_adapte(u["id"], safe)
+        if html is None:
+            return jsonify({"error": "CV introuvable"}), 404
+        try:
+            os.makedirs(CV_DIR, exist_ok=True)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(html)
+        except Exception as e:
+            return jsonify({"error": f"Impossible d'écrire le CV : {e}"}), 500
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
@@ -1377,6 +1727,7 @@ def route_pdf_adapt():
         lambda m: m.group(1) + PHOTO_MARKER + m.group(2), body_part, flags=re.DOTALL)
 
     # ── LLM adaptation prompt ───────────────────────────────────────────────
+    extra_block = ("Additional candidate notes:\n" + extra[:2000]) if extra else ""
     prompt = f"""You are a professional CV writer. Rewrite this CV template using the candidate's real information, targeted for a specific job.
 
 Target position: {role}
@@ -1386,7 +1737,7 @@ Job description:
 
 {cv_context[:5000]}
 
-{("Additional candidate notes:\n" + extra[:2000]) if extra else ""}
+{extra_block}
 
 HTML body to rewrite (preserve all tags/classes/IDs/attributes exactly):
 {body_for_ai}
@@ -1420,11 +1771,47 @@ Rewritten HTML body:"""
         else:
             result = result.replace(PHOTO_MARKER, "")
         fname = f"CV_{safe_name(company)}_{safe_name(role)}_{today()}.html"
-        with open(os.path.join(CV_DIR, fname), "w", encoding="utf-8") as f:
-            f.write(result)
+        save_cv_adapte(u["id"], fname, result, company=company, role=role, source="pdf")
         return jsonify({"html": result, "filename": fname})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ROUTE CV PDF (stockage par compte)
+# ═══════════════════════════════════════════════════════════════════════════════
+
+@app.route("/api/pdf-cv", methods=["GET", "POST"])
+@require_auth
+def route_pdf_cv():
+    u = get_current_user()
+    if request.method == "GET":
+        ud = get_user_data(u["id"])
+        cv_json_raw = ud.get("pdf_cv_json", "") or ""
+        raw_text    = ud.get("pdf_cv_raw", "")  or ""
+        preview_raw = ud.get("pdf_cv_preview", "{}") or "{}"
+        try:
+            cv_json = json.loads(cv_json_raw) if cv_json_raw else None
+        except Exception:
+            cv_json = None
+        try:
+            preview = json.loads(preview_raw)
+        except Exception:
+            preview = {}
+        return jsonify({"cv_json": cv_json, "raw_text": raw_text, "preview": preview})
+    # POST : sauvegarde ou effacement
+    data = request.json or {}
+    cv_json  = data.get("cv_json")
+    raw_text = data.get("raw_text", "")
+    preview  = data.get("preview", {})
+    with get_db() as db:
+        db.execute("INSERT OR IGNORE INTO user_data(user_id) VALUES(?)", (u["id"],))
+        db.execute(
+            "UPDATE user_data SET pdf_cv_json=?, pdf_cv_raw=?, pdf_cv_preview=? WHERE user_id=?",
+            (json.dumps(cv_json) if cv_json else "", raw_text or "", json.dumps(preview), u["id"])
+        )
+        db.commit()
+    return jsonify({"ok": True})
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
