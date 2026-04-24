@@ -84,9 +84,12 @@ html,body{
 .auth-left{
   flex:1;min-width:0;
   background:linear-gradient(145deg,#0f1f3d 0%,#1a3461 45%,#0f2b50 100%);
-  display:flex;flex-direction:column;justify-content:center;
+  display:flex;flex-direction:column;justify-content:flex-start;
   padding:52px 56px;position:relative;overflow:hidden;
+  /* Centrage vertical souple : espace avant le contenu */
 }
+.auth-left-spacer-top{flex:1;min-height:0;max-height:80px}
+.auth-left-spacer-bot{flex:1;min-height:0;max-height:60px}
 /* Mesh gradient orbs */
 .auth-left::before{
   content:'';position:absolute;width:600px;height:600px;border-radius:50%;
@@ -226,12 +229,14 @@ html,body{
 .auth-right{
   width:420px;flex-shrink:0;
   background:#fff;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;padding:48px 44px;
+  align-items:center;justify-content:flex-start;padding:0 44px;
   box-shadow:-20px 0 60px rgba(0,0,0,.2);
   overflow-y:auto;
 }
+.auth-right::before,.auth-right::after{content:'';flex:1;min-height:40px}
 .auth-box{
   width:100%;max-width:340px;
+  padding:8px 0;
   animation:mIn .3s cubic-bezier(.34,1.56,.64,1);
 }
 .auth-logo{display:flex;align-items:center;gap:12px;margin-bottom:6px;justify-content:center}
@@ -260,12 +265,15 @@ html,body{
 .auth-trust-item span{font-size:13px}
 
 /* ── Planning calendrier ── */
-.planning-filters{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap;align-items:center}
+.planning-filters{
+  display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;align-items:center;
+  background:var(--card);border:1px solid var(--border);border-radius:12px;
+  padding:8px 10px;
+}
 .plan-pill{
-  padding:6px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;
-  border:1.5px solid var(--border);background:var(--card);color:var(--text2);
+  padding:5px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;
+  border:1.5px solid transparent;background:var(--card2);color:var(--text2);
   transition:var(--t);font-family:'Inter',sans-serif;
-  box-shadow:0 1px 2px rgba(30,58,95,.04);
 }
 .plan-pill:hover{color:var(--text);border-color:var(--border2);background:var(--card2)}
 .plan-pill.active{background:linear-gradient(135deg,#3a6cc0,#2F5DA8);border-color:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(47,93,168,.25)}
@@ -273,12 +281,12 @@ html,body{
 .plan-pill.pill-interview.active{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 2px 8px rgba(79,124,172,.25)}
 .plan-pill.pill-sent.active{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 2px 8px rgba(91,185,140,.25)}
 .plan-search{
-  background:var(--card);border:1.5px solid var(--border);color:var(--text);
-  border-radius:20px;padding:6px 14px;font-size:12px;outline:none;
-  margin-left:auto;width:180px;font-family:'Inter',sans-serif;
+  background:var(--card2);border:1.5px solid transparent;color:var(--text);
+  border-radius:20px;padding:5px 14px;font-size:12px;outline:none;
+  margin-left:auto;width:160px;font-family:'Inter',sans-serif;
   transition:border-color .18s,box-shadow .18s;
 }
-.plan-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(47,93,168,.1)}
+.plan-search:focus{border-color:var(--accent);background:var(--card);box-shadow:0 0 0 3px rgba(47,93,168,.1)}
 .plan-search::placeholder{color:var(--text3)}
 /* nav */
 .cal-nav{
@@ -300,6 +308,10 @@ html,body{
 .cal-view-toggle{display:flex;background:var(--card2);border-radius:8px;padding:3px;gap:2px}
 .cal-view-btn{padding:5px 12px;border-radius:6px;border:none;background:none;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer;transition:var(--t);font-family:'Inter',sans-serif}
 .cal-view-btn.active{background:var(--accent);color:#fff}
+/* Planning legend */
+.cal-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;padding:10px 14px;border-radius:10px;background:var(--card2);border:1px solid var(--border)}
+.cal-leg-item{font-size:11px;color:var(--text3);font-weight:600;display:flex;align-items:center;gap:5px}
+.cal-leg-dot{width:8px;height:8px;border-radius:2px;display:inline-block;flex-shrink:0}
 /* 7 jours */
 .cal-7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
 .cal-day-col{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;min-height:140px;display:flex;flex-direction:column}
@@ -524,8 +536,58 @@ label{font-size:11.5px;font-weight:700;color:var(--text2);display:block;margin-b
   display:flex;align-items:center;gap:8px;letter-spacing:-.2px;
 }
 
+/* ── PDF Import ── */
+.pdf-steps{
+  display:flex;align-items:center;gap:0;margin-bottom:24px;
+}
+.pdf-step{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;font-weight:600;color:var(--text3);
+}
+.pdf-step.active{color:var(--accent)}
+.pdf-step.done{color:var(--green)}
+.pdf-step-num{
+  width:28px;height:28px;border-radius:50%;
+  background:var(--card2);border:2px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:800;flex-shrink:0;transition:var(--t);
+}
+.pdf-step.active .pdf-step-num{background:var(--accent);border-color:var(--accent);color:#fff}
+.pdf-step.done .pdf-step-num{background:var(--green);border-color:var(--green);color:#fff}
+.pdf-step-line{flex:1;height:2px;background:var(--border);margin:0 8px;max-width:60px}
+.pdf-drop-zone{
+  border:2px dashed var(--border2);border-radius:16px;
+  padding:52px 32px;text-align:center;cursor:pointer;
+  transition:var(--t);background:var(--card);
+}
+.pdf-drop-zone:hover,.pdf-drop-zone.drag{
+  border-color:var(--accent);background:var(--accent-light);
+}
+.pdf-drop-icon{font-size:48px;margin-bottom:14px;line-height:1}
+.pdf-drop-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px}
+.pdf-drop-sub{font-size:13px;color:var(--text2)}
+/* CV preview card (step 2) */
+.pdf-cv-preview-card{
+  background:linear-gradient(135deg,var(--accent-light),rgba(91,185,140,.06));
+  border:1px solid rgba(47,93,168,.18);border-radius:16px;padding:18px 20px;
+  display:flex;gap:16px;align-items:flex-start;
+}
+.pdf-cv-avatar{
+  width:48px;height:48px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,#3a6cc0,#2F5DA8);
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.pdf-cv-name{font-size:17px;font-weight:800;color:var(--text);letter-spacing:-.3px}
+.pdf-cv-title{font-size:13px;color:var(--accent);font-weight:600;margin-top:3px}
+.pdf-cv-meta{display:flex;gap:14px;margin-top:8px;flex-wrap:wrap}
+.pdf-cv-meta-item{font-size:12px;color:var(--text2);font-weight:500;display:flex;align-items:center;gap:4px}
+
 /* ── Adapter ── */
-#page-adapter .layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;height:calc(100vh - 172px)}
+#page-adapter .layout{display:grid;grid-template-columns:1fr 1fr;gap:16px;height:clamp(420px,calc(100vh - 172px),1200px)}
+/* Mobile tab switcher */
+.adapter-tabs{display:none;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:4px;gap:4px;margin-bottom:12px}
+.adp-tab{flex:1;padding:9px 12px;border-radius:9px;border:none;background:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:var(--t)}
+.adp-tab.active{background:var(--accent);color:#fff;box-shadow:0 2px 8px rgba(47,93,168,.3)}
 .adapter-in{
   background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
   padding:22px;overflow-y:auto;display:flex;flex-direction:column;gap:12px;
@@ -641,7 +703,7 @@ label{font-size:11.5px;font-weight:700;color:var(--text2);display:block;margin-b
 .drop-zone.over{border-color:var(--accent);background:var(--accent-light)}
 
 /* ── Interviews ── */
-#page-interviews .layout{display:grid;grid-template-columns:290px 1fr;gap:16px;height:calc(100vh - 172px)}
+#page-interviews .layout{display:grid;grid-template-columns:290px 1fr;gap:16px;height:clamp(420px,calc(100vh - 172px),1200px)}
 .al{overflow-y:auto;display:flex;flex-direction:column;gap:6px}
 .al-item{
   background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);
@@ -668,9 +730,28 @@ label{font-size:11.5px;font-weight:700;color:var(--text2);display:block;margin-b
   box-shadow:var(--shadow);
 }
 .prep-raw{font-size:13.5px;color:var(--text);line-height:1.9;white-space:pre-wrap;font-family:'Inter',sans-serif}
+/* Prep panel header */
+.prep-card-header{
+  background:linear-gradient(135deg,var(--accent-light),rgba(47,93,168,.04));
+  border:1px solid rgba(47,93,168,.15);
+  border-radius:14px;padding:18px 20px;flex-shrink:0;
+}
+.prep-card-company{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--accent);margin-bottom:4px}
+.prep-card-role{font-size:18px;font-weight:800;color:var(--text);letter-spacing:-.3px;line-height:1.2;margin-bottom:6px}
+.prep-card-meta{font-size:12px;color:var(--text2);margin-bottom:14px;font-weight:500}
+.prep-card-actions{display:flex;gap:8px;flex-wrap:wrap}
 
 /* ── Settings ── */
-.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+/* Settings section label */
+.settings-section-label{
+  grid-column:1/-1;
+  font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--text3);padding:4px 0 2px;margin-top:4px;
+  border-bottom:1px solid var(--border);padding-bottom:8px;
+}
+.settings-grid .card{border-radius:16px}
+.settings-grid .card-title{font-size:13px;font-weight:700;letter-spacing:-.1px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
 .prov-toggle{display:flex;gap:9px;margin-bottom:4px}
 .prov-btn{
   flex:1;padding:11px 14px;border-radius:var(--radius-sm);
@@ -914,53 +995,36 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 #bottom-nav{
   display:none;
   position:fixed;bottom:0;left:0;right:0;
-  height:62px;
-  background:rgba(255,255,255,.88);
-  backdrop-filter:blur(20px) saturate(180%);
-  -webkit-backdrop-filter:blur(20px) saturate(180%);
-  border-top:1px solid rgba(226,234,244,.8);
-  box-shadow:0 -4px 20px rgba(30,58,95,.06);
+  background:var(--card);
+  border-top:1px solid var(--border);
+  box-shadow:0 -2px 24px rgba(14,28,56,.08);
   z-index:500;
   align-items:stretch;
-  padding:0 4px;
+  padding:0 6px;
   padding-bottom:env(safe-area-inset-bottom);
+  height:calc(58px + env(safe-area-inset-bottom));
 }
 .bn-btn{
   flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;background:none;border:none;color:var(--text3);cursor:pointer;
-  font-size:10px;font-weight:600;font-family:'Inter',sans-serif;
-  padding:8px 4px;border-radius:10px;transition:var(--t);position:relative;
-  -webkit-tap-highlight-color:transparent;
+  gap:4px;background:none;border:none;color:var(--text3);cursor:pointer;
+  font-family:'Inter',sans-serif;
+  padding:8px 2px 6px;border-radius:12px;transition:var(--t);position:relative;
+  -webkit-tap-highlight-color:transparent;min-width:0;
 }
-.bn-btn:active{background:var(--card2);transform:scale(.95)}
+.bn-btn:active{transform:scale(.93)}
 .bn-btn.active{color:var(--accent)}
-/* Active dot indicator above icon */
-.bn-btn.active::before{
-  content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);
-  width:18px;height:3px;border-radius:99px;
-  background:var(--accent);opacity:.7;
+/* Pill indicator under active icon */
+.bn-btn.active::after{
+  content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  width:20px;height:3px;border-radius:99px;
+  background:var(--accent);
 }
-.bn-btn .bn-icon{font-size:20px;line-height:1}
-.bn-btn .bn-label{font-size:10px;font-weight:600;white-space:nowrap}
-/* FAB center button */
-.bn-fab{
-  flex:1;display:flex;align-items:center;justify-content:center;
-  background:none;border:none;cursor:pointer;padding:6px 4px;
-  -webkit-tap-highlight-color:transparent;
-}
-.bn-fab-inner{
-  width:48px;height:48px;background:var(--accent);border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:24px;color:#fff;font-weight:300;
-  box-shadow:0 4px 18px rgba(47,93,168,.45);
-  transition:var(--t);line-height:1;
-  margin-top:-18px;/* rises above nav bar */
-}
-.bn-fab:active .bn-fab-inner{transform:scale(.92)}
-
+.bn-btn .bn-icon{font-size:22px;line-height:1;transition:transform .18s}
+.bn-btn.active .bn-icon{transform:scale(1.12)}
+.bn-btn .bn-label{font-size:9.5px;font-weight:700;white-space:nowrap;letter-spacing:.01em}
 /* Badge on bottom nav */
 .bn-badge{
-  position:absolute;top:6px;right:calc(50% - 18px);
+  position:absolute;top:5px;right:calc(50% - 20px);
   background:var(--accent);color:#fff;font-size:9px;font-weight:800;
   padding:1px 4px;border-radius:20px;min-width:14px;text-align:center;
   display:none;
@@ -1005,6 +1069,25 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   #sidebar{width:186px;min-width:186px}
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .kanban{grid-template-columns:repeat(3,1fr)}
+  /* Auth-left : réduire le padding, stats 2 colonnes */
+  .auth-left{padding:36px 32px}
+  .auth-stats{grid-template-columns:repeat(2,1fr);gap:6px}
+  .auth-headline h2{font-size:26px}
+  .auth-left-spacer-top{max-height:40px}
+  .auth-left-spacer-bot{max-height:30px}
+}
+
+/* ── Narrow laptop / tablet portrait (≤ 900px) ── */
+@media(max-width:900px){
+  .auth-left{padding:28px 24px}
+  .auth-stats{gap:5px}
+  .auth-stat{padding:10px 8px}
+  .auth-stat-val{font-size:18px}
+  .auth-stat-icon{font-size:15px}
+  .auth-flow{gap:8px}
+  .auth-feature{display:none}
+  .auth-left-spacer-top{max-height:20px}
+  .auth-left-spacer-bot{display:none}
 }
 
 /* ── Mobile (≤ 768px) ── */
@@ -1056,12 +1139,15 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   .tbl-wrap{display:none}
   #dash-cards{display:flex!important}
 
-  /* Adapter */
-  #page-adapter .layout{grid-template-columns:1fr;height:auto;gap:12px}
-  .adapter-in,.adapter-out{min-height:280px}
-  #cv-preview{min-height:360px}
+  /* Adapter — tab switching on mobile */
+  #page-adapter .layout{grid-template-columns:1fr;height:auto;gap:0}
+  .adapter-tabs{display:flex}
+  .adapter-in,.adapter-out{min-height:calc(100vh - 220px);border-radius:12px}
+  #cv-preview{min-height:calc(100vh - 280px)}
   .adapter-header-btns{display:none!important}
   #adapter-mobile-actions{display:flex!important}
+  /* Hide inactive panel on mobile */
+  #adp-panel-form.adp-hidden,#adp-panel-preview.adp-hidden{display:none!important}
 
   /* Kanban → version mobile */
   .kanban{display:none!important}
@@ -1151,8 +1237,14 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   /* Auth */
   #auth-overlay{flex-direction:column}
   .auth-left{display:none}
-  .auth-right{width:100%;flex:1;padding:32px 20px;box-shadow:none}
-  .auth-box{max-width:100%}
+  .auth-right{width:100%;flex:1;padding:0 20px;box-shadow:none;background:var(--bg)}
+  .auth-right::before,.auth-right::after{min-height:24px}
+  .auth-box{max-width:100%;padding:8px 0}
+  .auth-logo h2{color:var(--text)}
+  .auth-tagline{color:var(--text2)}
+
+  /* Tutorial card : ne dépasse pas l'écran */
+  #tuto-card{width:calc(100vw - 24px);max-width:340px}
 
   /* Template grid */
   .tpl-grid{grid-template-columns:1fr 1fr;gap:10px}
@@ -1459,17 +1551,22 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
     <span class="bn-icon">🏠</span>
     <span class="bn-label">Accueil</span>
   </button>
-  <button class="bn-fab" onclick="openModal(null)" title="Nouvelle candidature">
-    <div class="bn-fab-inner">+</div>
-  </button>
   <button class="bn-btn" data-page="applications" onclick="nav('applications')">
     <span class="bn-icon">📋</span>
     <span class="bn-badge" id="bn-badge-apps">0</span>
     <span class="bn-label">Candidatures</span>
   </button>
-  <button class="bn-btn" onclick="toggleSidebar()">
-    <span class="bn-icon">☰</span>
-    <span class="bn-label">Plus</span>
+  <button class="bn-btn" data-page="adapter" onclick="nav('adapter')">
+    <span class="bn-icon">✨</span>
+    <span class="bn-label">Mon CV</span>
+  </button>
+  <button class="bn-btn" data-page="planning" onclick="nav('planning')">
+    <span class="bn-icon">📅</span>
+    <span class="bn-label">Planning</span>
+  </button>
+  <button class="bn-btn" data-page="settings" onclick="nav('settings')">
+    <span class="bn-icon">⚙️</span>
+    <span class="bn-label">Paramètres</span>
   </button>
 </nav>
 
@@ -1512,18 +1609,128 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   <div id="dash-cards" class="m-card-list" style="display:none"></div>
 </div>
 
+<!-- Import CV PDF -->
+<div id="page-pdf-import" class="page" style="display:none!important">
+  <div class="ph">
+    <div class="ph-text"><h2>📄 Importer un CV PDF</h2><p>Importe ton CV, colle une offre — l'IA génère un CV ciblé en 30 secondes</p></div>
+  </div>
+
+  <!-- Steps indicator -->
+  <div class="pdf-steps" id="pdf-steps">
+    <div class="pdf-step active" id="pstep-1"><span class="pdf-step-num">1</span><span class="pdf-step-label">Importer</span></div>
+    <div class="pdf-step-line"></div>
+    <div class="pdf-step" id="pstep-2"><span class="pdf-step-num">2</span><span class="pdf-step-label">Offre</span></div>
+    <div class="pdf-step-line"></div>
+    <div class="pdf-step" id="pstep-3"><span class="pdf-step-num">3</span><span class="pdf-step-label">Résultat</span></div>
+  </div>
+
+  <!-- STEP 1 : Upload PDF -->
+  <div id="pdf-step-1">
+    <div class="pdf-drop-zone" id="pdf-drop-zone" onclick="document.getElementById('pdf-file-inp').click()"
+         ondragover="event.preventDefault();this.classList.add('drag')"
+         ondragleave="this.classList.remove('drag')"
+         ondrop="event.preventDefault();this.classList.remove('drag');handlePdfDrop(event)">
+      <div class="pdf-drop-icon">📄</div>
+      <div class="pdf-drop-title">Glisse ton CV ici</div>
+      <div class="pdf-drop-sub">ou clique pour choisir un fichier PDF · max 10 Mo</div>
+      <input type="file" id="pdf-file-inp" accept=".pdf" style="display:none" onchange="handlePdfFile(event)">
+    </div>
+    <div id="pdf-extract-status" class="tx-sm tx-m" style="margin-top:10px;text-align:center"></div>
+  </div>
+
+  <!-- STEP 2 : Job offer (hidden by default) -->
+  <div id="pdf-step-2" style="display:none">
+    <!-- CV preview card -->
+    <div class="pdf-cv-preview-card" id="pdf-cv-card"></div>
+    <!-- Job offer form -->
+    <div class="card" style="margin-top:16px">
+      <div class="card-title">🎯 Offre d'emploi cible</div>
+      <div class="row2" style="margin-bottom:14px">
+        <div class="fg"><label>Entreprise</label><input id="pdf-company" placeholder="Ex : Spotify, L'Oréal..."></div>
+        <div class="fg"><label>Poste</label><input id="pdf-role" placeholder="Ex : Product Manager"></div>
+      </div>
+      <div class="fg">
+        <label>Description de l'offre
+          <span style="font-size:11px;color:var(--text3);font-weight:400;margin-left:6px">ou <a href="#" onclick="nav('adapter');return false" style="color:var(--accent)">récupérer via URL dans Adapter →</a></span>
+        </label>
+        <textarea id="pdf-job-desc" rows="8" placeholder="Collez ici le texte complet de l'offre d'emploi (Indeed, LinkedIn, Welcome to the Jungle...)"></textarea>
+      </div>
+      <!-- Template selector -->
+      <div class="fg" style="margin-bottom:6px">
+        <label>Template CV</label>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <select id="pdf-template-sel" style="flex:1;background:var(--card2);border:1px solid var(--border2);color:var(--text);border-radius:10px;padding:9px 12px;font-size:13px;outline:none;font-family:'Inter',sans-serif">
+            <option value="">cv_vibe_modern (défaut)</option>
+          </select>
+          <a href="#" onclick="nav('templates');return false" style="font-size:12px;color:var(--accent);white-space:nowrap">🎨 Gérer les templates →</a>
+        </div>
+      </div>
+      <div id="pdf-adapt-status" class="tx-sm tx-m" style="margin-top:8px"></div>
+      <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
+        <button class="btn btn-secondary" onclick="pdfGoStep(1)">← Retour</button>
+        <button class="btn btn-primary" id="pdf-genbtn" onclick="pdfAdapt()" style="flex:1">✨ Générer mon CV adapté</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 : Result (hidden by default) -->
+  <div id="pdf-step-3" style="display:none">
+    <div class="layout" style="height:clamp(420px,calc(100vh - 210px),1200px)">
+      <!-- Preview -->
+      <div class="adapter-out">
+        <div class="flex items-c justify-b" style="flex-shrink:0">
+          <span class="card-title" style="margin-bottom:0">👁️ CV adapté</span>
+          <div class="flex gap-2">
+            <button class="btn btn-secondary btn-sm" onclick="previewPdfCV()">🔍 Plein écran</button>
+            <button class="btn btn-secondary btn-sm" id="pdf-pdfbtn" onclick="downloadPdfCV()">⬇️ PDF</button>
+            <button class="btn btn-secondary btn-sm" onclick="pdfGoStep(2)">← Modifier</button>
+          </div>
+        </div>
+        <iframe id="pdf-cv-preview" style="width:100%;flex:1;border:none;border-radius:var(--radius-sm);background:#fff;min-height:0"></iframe>
+      </div>
+      <!-- Info panel -->
+      <div class="adapter-in" style="max-width:340px;flex-shrink:0">
+        <div class="card-title">✅ CV généré</div>
+        <div id="pdf-result-info" class="tx-sm tx-m" style="line-height:1.7"></div>
+        <div style="margin-top:auto;display:flex;flex-direction:column;gap:8px">
+          <button class="btn btn-green" id="pdf-savebtn" onclick="pdfSaveApp()" style="display:none">💾 Enregistrer comme candidature</button>
+          <button class="btn btn-primary" onclick="pdfGoStep(1)" style="margin-top:8px">+ Nouveau CV depuis PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- Adapter CV -->
 <div id="page-adapter" class="page">
   <div class="ph">
-    <div class="ph-text"><h2>✨ Adapter mon CV</h2><p>Votre CV adapté à chaque offre pour maximiser vos chances</p></div>
-    <div class="flex gap-2">
-      <button class="btn btn-secondary" onclick="previewCV()">👁️ Plein écran</button>
-      <button class="btn btn-secondary" id="pdfbtn" onclick="downloadPDF()">⬇️ Télécharger PDF</button>
-      <button class="btn btn-primary" id="genbtn" onclick="generateCV()">✨ Générer mon CV</button>
+    <div class="ph-text"><h2>✨ Adapter mon CV</h2><p>CV adapté à chaque offre pour maximiser vos chances</p></div>
+    <div class="flex gap-2 adapter-header-btns">
+      <button class="btn btn-secondary btn-sm" onclick="previewCV()">👁️ Plein écran</button>
+      <button class="btn btn-secondary btn-sm" id="pdfbtn" onclick="downloadPDF()">⬇️ PDF</button>
+      <button class="btn btn-primary btn-sm" id="genbtn" onclick="generateCV()">✨ Générer</button>
     </div>
   </div>
+  <!-- Tabs mobile uniquement -->
+  <div class="adapter-tabs" id="adapter-tabs">
+    <button class="adp-tab active" onclick="switchAdpTab('form',this)">📝 Formulaire</button>
+    <button class="adp-tab" onclick="switchAdpTab('preview',this)">👁️ Aperçu CV</button>
+  </div>
   <div class="layout">
-    <div class="adapter-in">
+    <div class="adapter-in" id="adp-panel-form">
+
+      <!-- Bandeau CV PDF (visible si CV PDF importé dans Paramètres) -->
+      <div id="adp-pdf-banner" style="display:none;background:rgba(47,93,168,.08);border:1px solid rgba(47,93,168,.22);border-radius:10px;padding:10px 14px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span style="font-size:13px;font-weight:700;color:var(--accent)">📄 CV PDF chargé</span>
+          <span class="tx-sm tx-m" id="adp-pdf-name" style="flex:1"></span>
+          <button class="btn btn-red btn-sm" onclick="clearPdfCv()" style="padding:3px 8px;font-size:11px">✕ Retirer</button>
+        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer;margin-top:6px;font-size:12px;color:var(--text2)">
+          <input type="checkbox" id="use-pdf-cv" style="accent-color:var(--accent)" checked>
+          Utiliser ce CV PDF pour la génération
+        </label>
+      </div>
 
       <!-- Import depuis une candidature -->
       <div class="card-title">📂 Importer depuis une candidature</div>
@@ -1575,7 +1782,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <div id="gen-status" class="tx-sm tx-m"></div>
       <button class="btn btn-green" onclick="saveAndApply()" id="savebtn" style="display:none">💾 Sauvegarder &amp; Enregistrer candidature</button>
     </div>
-    <div class="adapter-out">
+    <div class="adapter-out" id="adp-panel-preview">
       <div class="flex items-c justify-b">
         <span class="card-title" style="margin-bottom:0">👁️ Aperçu du CV adapté</span>
       </div>
@@ -1629,70 +1836,116 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <!-- Settings -->
 <div id="page-settings" class="page">
   <div class="ph">
-    <div class="ph-text"><h2>⚙️ Paramètres</h2><p>Complétez votre profil pour des CV plus personnalisés</p></div>
+    <div class="ph-text"><h2>⚙️ Paramètres</h2><p>Profil, documents et préférences</p></div>
     <div style="display:flex;gap:8px;align-items:center">
-      <button class="btn btn-secondary btn-sm" onclick="localStorage.removeItem('jf_tuto_done');startTutorial();" title="Relancer le guide de démarrage">🎓 Didacticiel</button>
-      <button class="btn btn-green" onclick="saveSettings()">💾 Sauvegarder</button>
+      <button class="btn btn-secondary btn-sm" onclick="localStorage.removeItem('jf_tuto_done');startTutorial();">🎓 Didacticiel</button>
+      <button class="btn btn-green btn-sm" onclick="saveSettings()">💾 Sauvegarder</button>
     </div>
   </div>
   <div class="settings-grid">
-    <div class="card">
-      <div class="card-title">📄 CV de base</div>
-      <div class="fg">
-        <label>Importer votre CV (.html)</label>
-        <div class="flex gap-2 items-c">
-          <input id="s-cv-name" placeholder="Aucun CV importé" readonly style="flex:1">
-          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('s-cv-inp').click()">📂 Choisir</button>
-          <input type="file" id="s-cv-inp" accept=".html,.htm" style="display:none" onchange="importCV(event)">
-        </div>
-      </div>
-      <div id="s-cv-status" class="tx-sm mt2" style="color:var(--green)"></div>
-    </div>
+
+    <!-- Section : Profil -->
+    <div class="settings-section-label">👤 Profil</div>
+
+    <!-- Résumé -->
     <div class="card" style="grid-column:1/-1">
-      <div class="card-title">✍️ Mon résumé personnel</div>
-      <div class="tx-sm tx-m" style="margin-bottom:12px;line-height:1.6">
-        Décrivez vos expériences, réalisations, points forts, soft skills — tout ce que vous souhaitez mettre en avant. Plus vous êtes précis, plus le CV sera personnalisé. <strong style="color:var(--accent)">Ce texte sera utilisé en priorité.</strong>
-      </div>
-      <textarea id="s-summary" rows="8" placeholder="Ex: J'ai 4 ans d'expérience en développement commercial B2B. Chez TOPA j'ai augmenté le CA de 30% en 2 ans en restructurant la force de vente. Je suis à l'aise en négociation complexe, j'ai managé une équipe de 5 personnes, et j'ai mis en place un CRM Salesforce from scratch. Mon point fort c'est l'approche terrain combinée à une vraie compréhension des enjeux business..." style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--text);border-radius:10px;padding:12px;font-size:13px;line-height:1.7;resize:vertical;font-family:inherit"></textarea>
+      <div class="card-title">✍️ Mon résumé</div>
+      <p class="tx-sm tx-m" style="margin-bottom:12px;line-height:1.6">Décrivez vos expériences, réalisations, points forts. Plus c'est précis, plus le CV sera personnalisé. <strong style="color:var(--accent)">Ce texte est utilisé en priorité par l'IA.</strong></p>
+      <textarea id="s-summary" rows="7" placeholder="Ex: 4 ans en développement commercial B2B. Chez TOPA j'ai augmenté le CA de 30% en 2 ans en restructurant la force de vente. À l'aise en négociation complexe, management d'une équipe de 5, CRM Salesforce from scratch..." style="width:100%;background:var(--card2);border:1px solid var(--border2);color:var(--text);border-radius:10px;padding:12px;font-size:13px;line-height:1.7;resize:vertical;font-family:inherit"></textarea>
       <div style="display:flex;justify-content:flex-end;margin-top:10px">
-        <button class="btn btn-green btn-sm" onclick="saveSummary()">💾 Sauvegarder le résumé</button>
+        <button class="btn btn-green btn-sm" onclick="saveSummary()">💾 Sauvegarder</button>
       </div>
       <div id="s-summary-status" class="tx-sm mt1" style="color:var(--green);text-align:right"></div>
     </div>
-    <div class="card">
-      <div class="card-title">📎 Ma documentation</div>
-      <div class="tx-sm tx-m" style="margin-bottom:12px;line-height:1.6">Importez vos anciens CV, lettres de motivation, profils LinkedIn (PDF ou HTML) — ils serviront de base pour rédiger votre CV et préparer vos entretiens <strong style="color:var(--text)">sans rien inventer</strong>.</div>
-      <div class="flex gap-2 items-c" style="margin-bottom:10px">
-        <input id="s-doc-names" placeholder="Aucun document importé" readonly style="flex:1;font-size:12px">
-        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('s-doc-inp').click()">📂 Ajouter</button>
-        <input type="file" id="s-doc-inp" accept=".html,.htm,.txt,.pdf" multiple style="display:none" onchange="loadSettingsDocs(event)">
-        <button class="btn btn-red btn-sm" onclick="clearSettingsDocs()">✕</button>
-      </div>
-      <div id="s-doc-status" class="tx-sm" style="color:var(--green)"></div>
-    </div>
+
+    <!-- Photo -->
     <div class="card">
       <div class="card-title">📸 Photo de profil</div>
-      <div class="tx-sm tx-m" style="margin-bottom:12px">Insérée automatiquement dans le cadre portrait du template cv_vibe_modern.</div>
-      <div class="flex gap-2 items-c" style="margin-bottom:12px">
+      <p class="tx-sm tx-m" style="margin-bottom:12px">Insérée automatiquement dans le template CV moderne.</p>
+      <div class="flex gap-2 items-c" style="margin-bottom:10px">
         <input id="ph-name" placeholder="Aucune photo" readonly style="flex:1;font-size:12px">
         <button class="btn btn-secondary btn-sm" onclick="document.getElementById('ph-inp').click()">📂 Choisir</button>
         <input type="file" id="ph-inp" accept="image/*" style="display:none" onchange="loadPhoto(event)">
         <button class="btn btn-red btn-sm" id="ph-del-btn" onclick="removePhoto()" style="display:none">🗑</button>
       </div>
-      <div id="ph-status" class="tx-sm" style="color:var(--green);margin-bottom:10px"></div>
+      <div id="ph-status" class="tx-sm" style="color:var(--green);margin-bottom:8px"></div>
       <div id="ph-preview-wrap" style="display:none;text-align:center">
-        <img id="ph-preview" style="width:130px;height:130px;object-fit:cover;border-radius:50%;border:3px solid var(--accent);filter:grayscale(70%)">
+        <img id="ph-preview" style="width:100px;height:100px;object-fit:cover;border-radius:50%;border:3px solid var(--accent);filter:grayscale(70%)">
         <div class="tx-sm tx-m mt1">Aperçu (niveaux de gris dans le CV)</div>
       </div>
     </div>
+
+    <!-- CV de base -->
     <div class="card">
-      <div class="card-title">ℹ️ À propos</div>
-      <div class="tx-sm tx-m" style="line-height:1.7">
-        JobFinder — Le copilote de ta recherche d'emploi<br>
-        Compatible Claude &amp; ChatGPT · Interface web locale<br>
-        Données stockées dans le dossier <code style="color:var(--accent)">data/</code>
+      <div class="card-title">📄 CV de base</div>
+      <p class="tx-sm tx-m" style="margin-bottom:12px">Importez votre CV en HTML pour l'utiliser sans template.</p>
+      <div class="flex gap-2 items-c">
+        <input id="s-cv-name" placeholder="Aucun CV importé" readonly style="flex:1">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('s-cv-inp').click()">📂 Choisir</button>
+        <input type="file" id="s-cv-inp" accept=".html,.htm" style="display:none" onchange="importCV(event)">
+      </div>
+      <div id="s-cv-status" class="tx-sm mt2" style="color:var(--green)"></div>
+    </div>
+
+    <!-- CV PDF -->
+    <div class="card">
+      <div class="card-title">📄 CV importé (PDF)</div>
+      <p class="tx-sm tx-m" style="margin-bottom:12px;line-height:1.6">L'IA extrait la structure de ton CV pour l'adapter automatiquement dans <strong style="color:var(--accent)">Adapter mon CV</strong>.</p>
+      <!-- État vide : drop zone -->
+      <div id="s-pdf-empty">
+        <div class="pdf-drop-zone" id="s-pdf-drop" onclick="document.getElementById('s-pdf-inp').click()"
+             ondragover="event.preventDefault();this.classList.add('drag')"
+             ondragleave="this.classList.remove('drag')"
+             ondrop="event.preventDefault();this.classList.remove('drag');sHandlePdfDrop(event)"
+             style="padding:20px 16px">
+          <div class="pdf-drop-icon" style="font-size:32px;margin-bottom:10px">📄</div>
+          <div class="pdf-drop-title" style="font-size:14px">Glisse ton CV PDF ici</div>
+          <div class="pdf-drop-sub">ou clique pour choisir · max 10 Mo</div>
+          <input type="file" id="s-pdf-inp" accept=".pdf" style="display:none" onchange="sHandlePdfFile(event)">
+        </div>
+        <div id="s-pdf-status" class="tx-sm tx-m" style="margin-top:8px;text-align:center"></div>
+      </div>
+      <!-- État chargé : mini card -->
+      <div id="s-pdf-loaded" style="display:none">
+        <div class="pdf-cv-preview-card" id="s-pdf-card-inner"></div>
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="nav('adapter')">✨ Adapter ce CV →</button>
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('s-pdf-inp').click()">🔄 Remplacer</button>
+          <button class="btn btn-red btn-sm" onclick="clearPdfCv()">🗑 Supprimer</button>
+        </div>
       </div>
     </div>
+
+    <!-- Section : Documents -->
+    <div class="settings-section-label">📎 Documentation</div>
+
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-title">📎 Mes documents</div>
+      <p class="tx-sm tx-m" style="margin-bottom:12px;line-height:1.6">Anciens CV, lettres de motivation, profil LinkedIn (PDF ou HTML) — l'IA s'en sert pour rédiger <strong style="color:var(--text)">sans rien inventer</strong>.</p>
+      <div class="flex gap-2 items-c" style="margin-bottom:10px">
+        <input id="s-doc-names" placeholder="Aucun document importé" readonly style="flex:1;font-size:12px">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('s-doc-inp').click()">📂 Ajouter</button>
+        <input type="file" id="s-doc-inp" accept=".html,.htm,.txt,.pdf" multiple style="display:none" onchange="loadSettingsDocs(event)">
+        <button class="btn btn-red btn-sm" onclick="clearSettingsDocs()">✕ Vider</button>
+      </div>
+      <div id="s-doc-status" class="tx-sm" style="color:var(--green)"></div>
+    </div>
+
+    <!-- Section : À propos -->
+    <div class="settings-section-label">ℹ️ À propos</div>
+
+    <div class="card" style="grid-column:1/-1;background:var(--card2)">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,#3a6cc0,#2F5DA8);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+          <svg viewBox="0 0 34 34" xmlns="http://www.w3.org/2000/svg" width="22" height="22"><path d="M5 12Q5 9 8 9H26Q29 9 29 12V22Q29 25 26 25H19.5L17 29L14.5 25H8Q5 25 5 22Z" fill="rgba(255,255,255,.95)"/><circle cx="17" cy="17" r="5.5" fill="#5BB98C"/><circle cx="17" cy="17" r="2.8" fill="rgba(255,255,255,.95)"/></svg>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--text)">JobFinder</div>
+          <div class="tx-sm tx-m" style="margin-top:2px">Compatible Claude &amp; ChatGPT · Données dans <code style="color:var(--accent)">data/</code></div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -1726,14 +1979,14 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   <!-- Grille -->
   <div id="cal-grid"></div>
   <!-- Légende couleurs -->
-  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-    <span style="font-size:11px;color:var(--text3);font-weight:600;display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:#2F5DA8;display:inline-block"></span>Candidature</span>
-    <span style="font-size:11px;color:var(--text3);font-weight:600;display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:#3b82f6;display:inline-block"></span>RH</span>
-    <span style="font-size:11px;color:var(--text3);font-weight:600;display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:#10b981;display:inline-block"></span>Téléphonique</span>
-    <span style="font-size:11px;color:var(--text3);font-weight:600;display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:#4F7CAC;display:inline-block"></span>Technique</span>
-    <span style="font-size:11px;color:var(--text3);font-weight:600;display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:#f59e0b;display:inline-block"></span>Test / Assessment</span>
-    <span style="font-size:11px;color:var(--text3);font-weight:600;display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:#34d399;display:inline-block"></span>Offre reçue</span>
-    <span style="font-size:11px;color:var(--text3);font-weight:600;display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:#94a3b8;display:inline-block"></span>Autre</span>
+  <div class="cal-legend">
+    <span class="cal-leg-item"><span class="cal-leg-dot" style="background:#2F5DA8"></span>Candidature</span>
+    <span class="cal-leg-item"><span class="cal-leg-dot" style="background:#3b82f6"></span>RH</span>
+    <span class="cal-leg-item"><span class="cal-leg-dot" style="background:#10b981"></span>Tél.</span>
+    <span class="cal-leg-item"><span class="cal-leg-dot" style="background:#4F7CAC"></span>Technique</span>
+    <span class="cal-leg-item"><span class="cal-leg-dot" style="background:#f59e0b"></span>Test</span>
+    <span class="cal-leg-item"><span class="cal-leg-dot" style="background:#34d399"></span>Offre</span>
+    <span class="cal-leg-item"><span class="cal-leg-dot" style="background:#94a3b8"></span>Autre</span>
   </div>
 </div>
 
@@ -1771,24 +2024,28 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <!-- Admin -->
 <div id="page-admin" class="page">
   <div class="ph">
-    <div class="ph-text"><h2>🛡️ Administration</h2><p>Gestion des utilisateurs</p></div>
+    <div class="ph-text"><h2>🛡️ Administration</h2><p>Gestion de la plateforme</p></div>
     <div style="display:flex;gap:8px;align-items:center">
-      <button class="btn btn-secondary btn-sm" style="background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;border:none;" onclick="startTutorial()">▶ Aperçu didacticiel</button>
+      <button class="btn btn-secondary btn-sm" onclick="startTutorial()">▶ Didacticiel</button>
       <button class="btn btn-secondary btn-sm" onclick="loadAdminUsers()">🔄 Actualiser</button>
     </div>
   </div>
-  <div class="card">
-    <div class="card-title">👥 Utilisateurs</div>
-    <table class="admin-table" style="width:100%;border-collapse:collapse">
-      <thead><tr style="border-bottom:1px solid var(--border)">
-        <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Utilisateur</th>
-        <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Email</th>
-        <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Inscription</th>
-        <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Rôle</th>
-        <th style="padding:10px 14px"></th>
-      </tr></thead>
-      <tbody id="admin-users-tbody"></tbody>
-    </table>
+  <div class="card" style="border-radius:16px;overflow:hidden">
+    <div class="card-title" style="margin-bottom:0;padding-bottom:14px;border-bottom:1px solid var(--border)">👥 Utilisateurs</div>
+    <div style="overflow-x:auto;margin-top:2px">
+      <table class="admin-table" style="width:100%;border-collapse:collapse">
+        <thead>
+          <tr>
+            <th style="text-align:left;padding:10px 16px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">Utilisateur</th>
+            <th style="text-align:left;padding:10px 16px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">Email</th>
+            <th style="text-align:left;padding:10px 16px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">Inscription</th>
+            <th style="text-align:left;padding:10px 16px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap">Rôle</th>
+            <th style="padding:10px 16px"></th>
+          </tr>
+        </thead>
+        <tbody id="admin-users-tbody"></tbody>
+      </table>
+    </div>
   </div>
 </div>
 
@@ -1822,6 +2079,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   <!-- ══ LEFT — Marketing panel ══ -->
   <div class="auth-left">
     <div class="auth-dots"></div>
+    <div class="auth-left-spacer-top"></div>
 
     <!-- Brand -->
     <div class="auth-brand">
@@ -1921,6 +2179,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <div class="auth-feature-text"><strong>Passe les filtres,</strong> décroche plus d'entretiens.<br>Pensé pour battre les algorithmes de recrutement.</div>
       <div class="auth-feature-badge">📈</div>
     </div>
+    <div class="auth-left-spacer-bot"></div>
   </div>
 
   <!-- ══ RIGHT — Form panel ══ -->
@@ -2095,6 +2354,16 @@ function onLogin(user){
 async function logout(){
   await post('/api/auth/logout',{});
   currentUser=null;
+  // Reset all in-memory user state
+  photoB64=''; photoMime='image/jpeg';
+  cvContent=''; apps=[]; allStages=[]; templates=[];
+  docsLoaded=false; config={};
+  generatedCV=''; generatedCVFilename='';
+  pdfCvJson=null; pdfRawText=''; pdfGenHtml=''; pdfGenFilename='';
+  // Clear user-specific localStorage
+  ['jf_active_tpl_id','jf_active_tpl_name','jf_tuto_done',
+   'jf_pdf_cv_json','jf_pdf_raw_text','jf_pdf_preview'].forEach(k=>localStorage.removeItem(k));
+  activeTemplateId=null; activeTemplateName=null;
   // Reset stat animations so they replay
   document.querySelectorAll('.auth-stat').forEach(s=>s.classList.remove('visible'));
   document.getElementById('auth-social')?.classList.remove('visible');
@@ -2393,7 +2662,8 @@ function nav(id){
   if(id==='planning'){loadStages().then(renderPlanning);}
   if(id==='templates')    loadTemplates();
   if(id==='admin')        loadAdminUsers();
-  if(id==='adapter')      updateAdapterTemplateLabel();
+  if(id==='adapter')      { updateAdapterTemplateLabel(); updateAdpPdfBanner(); }
+  if(id==='settings')     renderSettingsPdfCard();
   // Close sidebar on mobile when navigating
   if(window.innerWidth<=768) closeSidebar();
 }
@@ -2430,7 +2700,9 @@ async function loadConfig(){
 
   // Preload CV if available
   const cv = await api('/api/cv-base');
-  if(cv.html){ cvContent=cv.html; document.getElementById('a-cv-name').value=cv.name||'cv_base.html'; }
+  cvContent = cv.html || '';
+  const cvNameEl = document.getElementById('a-cv-name');
+  if(cvNameEl) cvNameEl.value = cv.html ? (cv.name||'cv_base.html') : '';
 }
 
 // ── Apps ───────────────────────────────────────────────────────────────────────
@@ -2450,6 +2722,297 @@ function populateAppSelect(){
     sel.appendChild(opt);
   });
   if(cur) sel.value=cur;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PDF IMPORT PAGE
+// ═══════════════════════════════════════════════════════════════
+let pdfCvJson  = (()=>{ try{ const v=localStorage.getItem('jf_pdf_cv_json'); return v?JSON.parse(v):null; }catch(e){return null;} })();
+let pdfRawText = localStorage.getItem('jf_pdf_raw_text')||'';
+let pdfGenHtml = '';
+let pdfGenFilename = '';
+
+// ── PDF CV Import (Settings) ───────────────────────────────────────────────────
+
+function sHandlePdfDrop(e){
+  const file = e.dataTransfer.files[0];
+  if(file && file.type==='application/pdf') sPdfProcess(file);
+  else toast('Fichier non reconnu — utilisez un PDF','error');
+}
+function sHandlePdfFile(e){
+  const file = e.target.files[0];
+  if(file) sPdfProcess(file);
+}
+
+async function sPdfProcess(file){
+  if(file.size > 10*1024*1024){toast('Fichier trop lourd (max 10 Mo)','error');return;}
+  const status = document.getElementById('s-pdf-status');
+  const drop   = document.getElementById('s-pdf-drop');
+  if(status) status.textContent = '⏳ Lecture du PDF...';
+  if(drop)   drop.style.opacity = '0.6';
+
+  const b64 = await new Promise((res,rej)=>{
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result.split(',')[1]);
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+
+  if(status) status.textContent = '🤖 Analyse par l\'IA...';
+  const data = await post('/api/pdf-import', {b64, name: file.name});
+  if(drop) drop.style.opacity = '1';
+
+  if(data.error){
+    if(status) status.textContent = '❌ ' + data.error;
+    toast(data.error,'error');
+    return;
+  }
+
+  pdfCvJson  = data.cv_json;
+  pdfRawText = data.raw_text || '';
+  // Persist to localStorage
+  try {
+    localStorage.setItem('jf_pdf_cv_json', JSON.stringify(pdfCvJson));
+    localStorage.setItem('jf_pdf_raw_text', pdfRawText);
+    localStorage.setItem('jf_pdf_preview', JSON.stringify(data.preview||{}));
+  } catch(e){}
+
+  renderSettingsPdfCard(data.preview);
+  updateAdpPdfBanner();
+  toast('CV extrait avec succès !','success');
+}
+
+function renderSettingsPdfCard(preview){
+  const empty  = document.getElementById('s-pdf-empty');
+  const loaded = document.getElementById('s-pdf-loaded');
+  const card   = document.getElementById('s-pdf-card-inner');
+  if(!empty || !loaded) return;
+
+  if(!pdfCvJson){
+    empty.style.display  = '';
+    loaded.style.display = 'none';
+    return;
+  }
+
+  // Use preview from arg or from localStorage
+  let p = preview;
+  if(!p){ try{ p = JSON.parse(localStorage.getItem('jf_pdf_preview')||'{}'); }catch(e){ p={}; } }
+
+  card.innerHTML = `
+    <div class="pdf-cv-avatar">📄</div>
+    <div style="flex:1;min-width:0">
+      <div class="pdf-cv-name">${S(p.name||'CV importé')}</div>
+      ${p.title ? `<div class="pdf-cv-title">${S(p.title)}</div>` : ''}
+      <div class="pdf-cv-meta">
+        ${p.n_exp    ? `<span class="pdf-cv-meta-item">💼 ${p.n_exp} expérience${p.n_exp>1?'s':''}</span>` : ''}
+        ${p.n_edu    ? `<span class="pdf-cv-meta-item">🎓 ${p.n_edu} formation${p.n_edu>1?'s':''}</span>` : ''}
+        ${p.n_skills ? `<span class="pdf-cv-meta-item">🛠️ ${p.n_skills} compétences</span>` : ''}
+        <span class="pdf-cv-meta-item" style="color:var(--green)">✅ Prêt</span>
+      </div>
+    </div>`;
+
+  empty.style.display  = 'none';
+  loaded.style.display = '';
+}
+
+function clearPdfCv(){
+  pdfCvJson = null; pdfRawText = ''; pdfGenHtml = ''; pdfGenFilename = '';
+  try{ localStorage.removeItem('jf_pdf_cv_json'); localStorage.removeItem('jf_pdf_raw_text'); localStorage.removeItem('jf_pdf_preview'); }catch(e){}
+  renderSettingsPdfCard();
+  updateAdpPdfBanner();
+  toast('CV PDF supprimé','info');
+}
+
+function updateAdpPdfBanner(){
+  const banner = document.getElementById('adp-pdf-banner');
+  if(!banner) return;
+  if(!pdfCvJson){ banner.style.display = 'none'; return; }
+  banner.style.display = '';
+  let p = {}; try{ p = JSON.parse(localStorage.getItem('jf_pdf_preview')||'{}'); }catch(e){}
+  const nameEl = document.getElementById('adp-pdf-name');
+  if(nameEl) nameEl.textContent = p.name ? `· ${p.name}` : '';
+}
+
+function pdfGoStep(n){
+  [1,2,3].forEach(i=>{
+    document.getElementById(`pdf-step-${i}`).style.display = i===n ? '' : 'none';
+    const stepEl = document.getElementById(`pstep-${i}`);
+    stepEl.classList.toggle('active', i===n);
+    stepEl.classList.toggle('done', i<n);
+  });
+}
+
+function handlePdfDrop(e){
+  const file = e.dataTransfer.files[0];
+  if(file && file.type==='application/pdf') processPdfFile(file);
+  else toast('Fichier non reconnu — utilisez un PDF','error');
+}
+
+function handlePdfFile(e){
+  const file = e.target.files[0];
+  if(file) processPdfFile(file);
+}
+
+async function processPdfFile(file){
+  if(file.size > 10*1024*1024){toast('Fichier trop lourd (max 10 Mo)','error');return;}
+  const status = document.getElementById('pdf-extract-status');
+  status.textContent = '⏳ Lecture du PDF en cours...';
+  document.getElementById('pdf-drop-zone').style.opacity='0.6';
+
+  // Read file as base64
+  const b64 = await new Promise((res,rej)=>{
+    const reader = new FileReader();
+    reader.onload = e => res(e.target.result.split(',')[1]);
+    reader.onerror = rej;
+    reader.readAsDataURL(file);
+  });
+
+  status.textContent = '🤖 Analyse de la structure du CV...';
+  const data = await post('/api/pdf-import', {b64, name: file.name});
+  document.getElementById('pdf-drop-zone').style.opacity='1';
+
+  if(data.error){
+    status.textContent = '❌ ' + data.error;
+    toast(data.error,'error');
+    return;
+  }
+
+  pdfCvJson  = data.cv_json;
+  pdfRawText = data.raw_text || '';
+  status.textContent = '';
+
+  // Build CV preview card
+  const p = data.preview || {};
+  const card = document.getElementById('pdf-cv-card');
+  card.innerHTML = `
+    <div class="pdf-cv-avatar">📄</div>
+    <div style="flex:1;min-width:0">
+      <div class="pdf-cv-name">${S(p.name||'CV importé')}</div>
+      ${p.title ? `<div class="pdf-cv-title">${S(p.title)}</div>` : ''}
+      <div class="pdf-cv-meta">
+        ${p.n_exp  ? `<span class="pdf-cv-meta-item">💼 ${p.n_exp} expérience${p.n_exp>1?'s':''}</span>` : ''}
+        ${p.n_edu  ? `<span class="pdf-cv-meta-item">🎓 ${p.n_edu} formation${p.n_edu>1?'s':''}</span>` : ''}
+        ${p.n_skills ? `<span class="pdf-cv-meta-item">🛠️ ${p.n_skills} compétences</span>` : ''}
+        <span class="pdf-cv-meta-item" style="color:var(--green)">✅ CV extrait</span>
+      </div>
+    </div>`;
+
+  // Populate template selector
+  const sel = document.getElementById('pdf-template-sel');
+  sel.innerHTML = '<option value="">cv_vibe_modern (défaut)</option>';
+  templates.forEach(t=>{
+    if(!String(t.id).startsWith('_'))
+      sel.innerHTML += `<option value="${t.id}">${S(t.name)}</option>`;
+  });
+  if(activeTemplateId) sel.value = activeTemplateId;
+
+  pdfGoStep(2);
+  toast('CV analysé — renseignez l\'offre d\'emploi','success');
+}
+
+async function pdfAdapt(){
+  const company  = document.getElementById('pdf-company').value.trim();
+  const role     = document.getElementById('pdf-role').value.trim();
+  const job_desc = document.getElementById('pdf-job-desc').value.trim();
+  const tpl_id   = document.getElementById('pdf-template-sel').value;
+
+  if(job_desc.length < 30){toast('Collez la description complète de l\'offre','error');return;}
+
+  const btn    = document.getElementById('pdf-genbtn');
+  const status = document.getElementById('pdf-adapt-status');
+  btn.disabled = true; btn.textContent = '⏳ Génération en cours...';
+  status.textContent = '';
+
+  const payload = {
+    cv_json:     pdfCvJson,
+    raw_text:    pdfRawText,
+    job_desc, company, role,
+    template_id: tpl_id || null
+  };
+  const data = await post('/api/pdf-adapt', payload);
+  btn.disabled = false; btn.textContent = '✨ Générer mon CV adapté';
+
+  if(data.error){
+    status.textContent = '❌ ' + data.error;
+    toast(data.error,'error');
+    return;
+  }
+
+  pdfGenHtml     = data.html;
+  pdfGenFilename = data.filename || '';
+
+  // Show result
+  document.getElementById('pdf-cv-preview').srcdoc = pdfGenHtml;
+  document.getElementById('pdf-result-info').innerHTML =
+    `<strong>Entreprise :</strong> ${S(company||'—')}<br>
+     <strong>Poste :</strong> ${S(role||'—')}<br><br>
+     Fichier : <code style="color:var(--accent)">${S(pdfGenFilename)}</code><br><br>
+     <span style="color:var(--green)">✅ CV adapté et sauvegardé dans cv_adaptes/</span>`;
+  document.getElementById('pdf-savebtn').style.display = (company&&role) ? '' : 'none';
+  pdfGoStep(3);
+  toast('CV généré avec succès !','success');
+}
+
+function previewPdfCV(){
+  if(!pdfGenHtml) return;
+  const w = window.open('','_blank');
+  w.document.write(pdfGenHtml); w.document.close();
+}
+
+async function downloadPdfCV(){
+  if(!pdfGenFilename) return;
+  const btn = document.getElementById('pdf-pdfbtn');
+  btn.textContent = '⏳'; btn.disabled = true;
+  const resp = await fetch('/api/download-pdf', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({filename: pdfGenFilename})
+  });
+  btn.textContent = '⬇️ PDF'; btn.disabled = false;
+  if(!resp.ok){const e=await resp.json();toast(e.error||'Erreur PDF','error');return;}
+  const blob = await resp.blob();
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = pdfGenFilename.replace('.html','.pdf');
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+async function pdfSaveApp(){
+  const company = document.getElementById('pdf-company').value.trim();
+  const role    = document.getElementById('pdf-role').value.trim();
+  if(!company||!role) return;
+  const data = await post('/api/applications',{
+    company, role, status:'Envoyée',
+    date: new Date().toLocaleDateString('fr-FR')
+  });
+  if(data.error){toast(data.error,'error');return;}
+  apps.push(data);
+  renderDash(); renderKanban(); updateBadges();
+  toast(`Candidature ${company} enregistrée !`,'success');
+  document.getElementById('pdf-savebtn').style.display='none';
+}
+
+function switchAdpTab(tab, btn){
+  document.querySelectorAll('.adp-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const form=document.getElementById('adp-panel-form');
+  const preview=document.getElementById('adp-panel-preview');
+  if(tab==='form'){
+    form.classList.remove('adp-hidden');
+    preview.classList.add('adp-hidden');
+  } else {
+    form.classList.add('adp-hidden');
+    preview.classList.remove('adp-hidden');
+  }
+}
+// Auto-switch to preview when CV is generated
+function _adpShowPreview(){
+  const tabs=document.getElementById('adapter-tabs');
+  if(tabs && getComputedStyle(tabs).display!=='none'){
+    const previewBtn=tabs.querySelector('.adp-tab:last-child');
+    if(previewBtn) switchAdpTab('preview', previewBtn);
+  }
 }
 
 function importFromApp(id){
@@ -2678,6 +3241,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       ?'Le template cv_vibe_modern sera rempli par l\'IA avec vos infos adaptées au poste.'
       :'Votre CV de base HTML sera adapté par l\'IA selon l\'offre.';
   });
+  // Restore PDF CV banner if data was saved in a previous session
+  updateAdpPdfBanner();
 });
 
 async function generateCV(){
@@ -2687,11 +3252,12 @@ async function generateCV(){
   const useTemplate=document.getElementById('use-template').checked;
   if(desc.length<30){toast('Collez la description complète du poste ou récupérez via l\'URL','error');return;}
 
-  // Avertissement docs manquants
+  // Avertissement docs manquants (ignoré si CV PDF disponible)
   const remind=document.getElementById('doc-reminder');
   const hasSummary=config&&config.has_summary;
   const hasAnyDocs=docsLoaded||(config&&config.has_docs);
-  if(!hasAnyDocs&&!hasSummary){
+  const usePdfCheck = pdfCvJson && document.getElementById('use-pdf-cv') && document.getElementById('use-pdf-cv').checked;
+  if(!hasAnyDocs&&!hasSummary&&!usePdfCheck){
     // Blocage avec invitation à compléter le profil
     remind.style.display='';
     remind.innerHTML=`⚠️ Ton profil est vide — sans résumé ni documents, le CV sera générique.<br>
@@ -2740,7 +3306,12 @@ async function generateCV(){
   document.getElementById('savebtn').style.display='none';
 
   let data;
-  if(useTemplate){
+  const usePdfMode = pdfCvJson && document.getElementById('use-pdf-cv') && document.getElementById('use-pdf-cv').checked;
+  if(usePdfMode){
+    const payload={cv_json:pdfCvJson,raw_text:pdfRawText,job_desc:desc,company:co,role:ro};
+    if(activeTemplateId) payload.template_id=activeTemplateId;
+    data=await post('/api/pdf-adapt',payload);
+  } else if(useTemplate){
     const payload={company:co,role:ro,job_desc:desc};
     if(activeTemplateId) payload.template_id=activeTemplateId;
     data=await post('/api/adapt-cv-template',payload);
@@ -2757,6 +3328,7 @@ async function generateCV(){
   document.getElementById('gen-status').textContent=`✅ ${data.filename}`;
   document.getElementById('savebtn').style.display='';
   toast('CV adapté généré !','success');
+  _adpShowPreview();
 }
 
 function previewCV(){
@@ -2869,21 +3441,20 @@ function selApp(id){
   const a=apps.find(x=>x.id===id); if(!a) return;
   const panel=document.getElementById('prep-panel');
   panel.innerHTML=`
-    <div class="flex items-c justify-b" style="margin-bottom:18px;flex-shrink:0">
-      <div>
-        <div style="font-size:17px;font-weight:700;color:var(--text)">${a.company} — ${a.role}</div>
-        <div class="tx-sm tx-m mt1">Candidature : ${a.date||''}${a.interview_date?' · Entretien : '+a.interview_date:''}</div>
-      </div>
-      <div class="flex gap-2">
-        <button class="btn btn-primary btn-sm" id="prepbtn" onclick="genPrep('${a.id}')">✨ Générer fiche</button>
-        <button class="btn btn-secondary btn-sm" onclick="openPrepTab('${a.id}')">🖨️ Ouvrir</button>
-        <button class="btn btn-secondary btn-sm" onclick="savePrep('${a.id}')">💾</button>
+    <div class="prep-card-header">
+      <div class="prep-card-company">${a.company}</div>
+      <div class="prep-card-role">${a.role}</div>
+      ${(a.date||a.interview_date)?`<div class="prep-card-meta">${a.date?'📅 Candidature : '+a.date:''}${a.interview_date?' · 🎤 Entretien : '+a.interview_date:''}</div>`:''}
+      <div class="prep-card-actions">
+        <button class="btn btn-primary btn-sm" id="prepbtn" onclick="genPrep('${a.id}')">✨ Générer la fiche</button>
+        <button class="btn btn-secondary btn-sm" onclick="openPrepTab('${a.id}')" title="Ouvrir dans un onglet">🖨️ Imprimer</button>
+        <button class="btn btn-secondary btn-sm" onclick="savePrep('${a.id}')" title="Sauvegarder">💾 Sauver</button>
       </div>
     </div>
-    <div id="prep-content" style="flex:1">
+    <div id="prep-content" style="flex:1;overflow-y:auto;margin-top:16px">
       ${a.interview_prep
         ?`<div class="prep-raw">${a.interview_prep}</div>`
-        :`<div class="empty" style="margin:auto"><div class="empty-i">📋</div><h4>Aucune fiche générée</h4><p>Cliquez sur "✨ Générer fiche" pour créer votre préparation</p></div>`}
+        :`<div class="empty" style="margin:auto"><div class="empty-i">📋</div><h4>Aucune fiche générée</h4><p>Cliquez sur <strong>✨ Générer la fiche</strong> pour créer votre préparation</p></div>`}
     </div>`;
 }
 
@@ -2934,6 +3505,8 @@ async function loadSettings(){
   }
   // Photo
   renderPhotoCard();
+  // PDF CV card
+  renderSettingsPdfCard();
 }
 
 async function saveSummary(){
@@ -2974,7 +3547,8 @@ function fileMime(file){ return file.type||'application/octet-stream'; }
 // ── Photo profil ───────────────────────────────────────────────────────────────
 async function loadPhotoState(){
   const d=await api('/api/photo');
-  if(d.b64){ photoB64=d.b64; photoMime=d.mime||'image/jpeg'; }
+  photoB64  = d.b64  || '';
+  photoMime = d.mime || 'image/jpeg';
 }
 
 function renderPhotoCard(){

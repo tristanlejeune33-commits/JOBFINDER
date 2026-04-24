@@ -1174,6 +1174,260 @@ def route_admin_user(uid):
     return jsonify(dict(row))
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# ROUTES PDF IMPORT
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _extract_pdf_text(raw_bytes):
+    """Extracts text from PDF bytes. Tries pymupdf first, falls back to pypdf."""
+    # Try pymupdf (better extraction with layout awareness)
+    try:
+        import fitz  # pymupdf
+        doc = fitz.open(stream=raw_bytes, filetype="pdf")
+        pages = []
+        for page in doc:
+            pages.append(page.get_text("text"))
+        return "\n".join(pages)
+    except ImportError:
+        pass
+    except Exception:
+        pass
+    # Fallback: pypdf (already in requirements)
+    import pypdf, io
+    reader = pypdf.PdfReader(io.BytesIO(raw_bytes))
+    return "\n".join(p.extract_text() or "" for p in reader.pages)
+
+
+@app.route("/api/pdf-import", methods=["POST"])
+@require_auth
+def route_pdf_import():
+    """
+    Accepts: JSON { b64: "<base64 PDF>", name: "cv.pdf" }
+    Returns: { cv_json, raw_text, preview }
+    Extracts text from PDF, then asks LLM to structure it as JSON.
+    """
+    u    = get_current_user()
+    data = request.json or {}
+    b64  = data.get("b64", "")
+    if not b64:
+        return jsonify({"error": "Aucun fichier reçu."}), 400
+    try:
+        raw_bytes = base64.b64decode(b64)
+    except Exception:
+        return jsonify({"error": "Fichier invalide."}), 400
+
+    # ── Extraction texte ────────────────────────────────────────────────────
+    try:
+        raw_text = _extract_pdf_text(raw_bytes)
+    except Exception as e:
+        return jsonify({"error": f"Impossible d'extraire le PDF : {e}"}), 500
+
+    raw_text = raw_text.strip()
+    if len(raw_text) < 40:
+        return jsonify({"error": "PDF illisible ou scanné. Utilisez un PDF avec texte natif."}), 400
+
+    # ── Structuration LLM ───────────────────────────────────────────────────
+    provider, api_key = get_ai_keys(u)
+    if not api_key:
+        # Return raw text without structure (user can still adapt later)
+        return jsonify({
+            "cv_json": None,
+            "raw_text": raw_text[:8000],
+            "preview": {"name": "CV importé", "title": "", "n_exp": 0, "n_skills": 0}
+        })
+
+    extract_prompt = f"""Extract this CV into a structured JSON object.
+Return ONLY valid JSON — no markdown, no code fences, no explanation.
+
+CV text:
+{raw_text[:5500]}
+
+Required JSON schema:
+{{
+  "header": {{
+    "full_name": "string",
+    "title": "string or null",
+    "email": "string or null",
+    "phone": "string or null",
+    "location": "string or null",
+    "linkedin": "string or null"
+  }},
+  "summary": "string or null",
+  "experiences": [
+    {{
+      "company": "string",
+      "title": "string",
+      "start_date": "string",
+      "end_date": "string or null",
+      "current": false,
+      "bullets": ["string"]
+    }}
+  ],
+  "education": [
+    {{
+      "institution": "string",
+      "degree": "string",
+      "field": "string or null",
+      "start_date": "string or null",
+      "end_date": "string or null"
+    }}
+  ],
+  "skills": {{
+    "technical": ["string"],
+    "tools": ["string"],
+    "soft": ["string"]
+  }},
+  "languages": [{{"language": "string", "level": "string"}}],
+  "certifications": [{{"name": "string", "issuer": "string or null", "date": "string or null"}}]
+}}
+
+Strict rules:
+- Never invent any information not present in the text
+- Preserve exact company names, dates, institutions and degrees
+- If a field is missing, use null or []
+- Detect language from CV and respond in that language
+- Return ONLY the JSON object, nothing else"""
+
+    try:
+        raw_result = call_ai(provider, api_key, extract_prompt, max_tokens=3000)
+        clean = raw_result.strip()
+        clean = re.sub(r'^```[a-z]*\n?', '', clean)
+        clean = re.sub(r'\n?```$', '', clean)
+        cv_json = json.loads(clean)
+    except (json.JSONDecodeError, Exception):
+        # Still useful: return raw text, UI can continue without cv_json
+        cv_json = None
+
+    # ── Build preview summary ───────────────────────────────────────────────
+    if cv_json:
+        h = cv_json.get("header", {}) or {}
+        skills = cv_json.get("skills", {}) or {}
+        n_skills = len(skills.get("technical", []) or []) + len(skills.get("tools", []) or [])
+        preview = {
+            "name":     h.get("full_name") or "CV importé",
+            "title":    h.get("title") or "",
+            "n_exp":    len(cv_json.get("experiences", []) or []),
+            "n_edu":    len(cv_json.get("education", []) or []),
+            "n_skills": n_skills,
+        }
+    else:
+        preview = {"name": "CV importé", "title": "", "n_exp": 0, "n_skills": 0}
+
+    return jsonify({"cv_json": cv_json, "raw_text": raw_text[:8000], "preview": preview})
+
+
+@app.route("/api/pdf-adapt", methods=["POST"])
+@require_auth
+def route_pdf_adapt():
+    """
+    Accepts: { cv_json, raw_text, job_desc, company, role, template_id }
+    Returns: { html, filename }
+    Reuses the template rendering pipeline with CV extracted from PDF as context.
+    """
+    u    = get_current_user()
+    data = request.json or {}
+    provider, api_key = get_ai_keys(u)
+    if not api_key:
+        return jsonify({"error": "Clé API manquante. Configurez-la dans Paramètres."}), 400
+
+    cv_json  = data.get("cv_json")
+    raw_text = data.get("raw_text", "")
+    job_desc = data.get("job_desc", "")
+    company  = data.get("company", "")
+    role     = data.get("role", "")
+    tpl_id   = data.get("template_id")
+
+    if not cv_json and not raw_text:
+        return jsonify({"error": "Aucun CV fourni."}), 400
+    if not job_desc:
+        return jsonify({"error": "Description de l'offre manquante."}), 400
+
+    # ── Build CV context ────────────────────────────────────────────────────
+    if cv_json:
+        cv_context = ("=== CV STRUCTURÉ (source de vérité — ne rien inventer) ===\n"
+                      + json.dumps(cv_json, ensure_ascii=False, indent=2))
+    else:
+        cv_context = "=== TEXTE DU CV ===\n" + raw_text
+
+    # Merge with user personal summary if available
+    extra = get_docs_context(u["id"])
+
+    # ── Load template ───────────────────────────────────────────────────────
+    template_html = None
+    if tpl_id:
+        with get_db() as db:
+            row = db.execute("SELECT html_content FROM cv_templates WHERE id=? AND user_id=?",
+                             (tpl_id, u["id"])).fetchone()
+        if row:
+            template_html = row["html_content"]
+    if not template_html:
+        if not os.path.exists(TEMPLATE_CV):
+            return jsonify({"error": "Template CV introuvable."}), 400
+        with open(TEMPLATE_CV, encoding="utf-8") as f:
+            template_html = f.read()
+
+    # ── Split head / body ───────────────────────────────────────────────────
+    ud           = get_user_data(u["id"])
+    PHOTO_MARKER = "PORTRAIT_SRC_PLACEHOLDER"
+    head_match   = re.search(r'^([\s\S]*?<body[^>]*>)', template_html, re.IGNORECASE)
+    body_match   = re.search(r'<body[^>]*>([\s\S]*)</body>', template_html, re.IGNORECASE)
+    head_part    = head_match.group(1) if head_match else ""
+    body_part    = body_match.group(1) if body_match else template_html
+    body_for_ai  = re.sub(
+        r'(<div[^>]*class="portrait-wrap"[^>]*>\s*<img[^>]*\ssrc=")[^"]*(")',
+        lambda m: m.group(1) + PHOTO_MARKER + m.group(2), body_part, flags=re.DOTALL)
+
+    # ── LLM adaptation prompt ───────────────────────────────────────────────
+    prompt = f"""You are a professional CV writer. Rewrite this CV template using the candidate's real information, targeted for a specific job.
+
+Target position: {role}
+Company: {company}
+Job description:
+{job_desc[:3000]}
+
+{cv_context[:5000]}
+
+{("Additional candidate notes:\n" + extra[:2000]) if extra else ""}
+
+HTML body to rewrite (preserve all tags/classes/IDs/attributes exactly):
+{body_for_ai}
+
+Instructions:
+- Keep every HTML tag, class, ID and attribute exactly as-is
+- Replace text content ONLY with information from the CV and docs above
+- NEVER invent experiences, companies, degrees, dates, numbers or skills not present in the source
+- Adapt and prioritise skills/experiences most relevant to the target role
+- Rewrite the summary to target this specific position
+- Keep src="{PHOTO_MARKER}" exactly as-is
+
+Writing style — critical:
+- Short, direct sentences. No "highly motivated", "passionate", "dynamic", "results-driven".
+- Action verb + concrete result per bullet. Max 12 words per bullet.
+- Sounds like the candidate wrote it — confident, grounded, not inflated.
+- Vary sentence structure. Do not start every bullet the same way.
+
+Rewritten HTML body:"""
+
+    try:
+        result = call_ai(provider, api_key, prompt, max_tokens=8000)
+        result = re.sub(r'^```[\w]*\n?', '', result.strip())
+        result = re.sub(r'\n?```$', '', result.strip())
+        if head_part:
+            result = head_part + result + "\n</body>\n</html>"
+        # Inject photo
+        if ud.get("photo_b64"):
+            photo_src = f"data:{ud.get('photo_mime','image/jpeg')};base64,{ud['photo_b64']}"
+            result = result.replace(PHOTO_MARKER, photo_src)
+        else:
+            result = result.replace(PHOTO_MARKER, "")
+        fname = f"CV_{safe_name(company)}_{safe_name(role)}_{today()}.html"
+        with open(os.path.join(CV_DIR, fname), "w", encoding="utf-8") as f:
+            f.write(result)
+        return jsonify({"html": result, "filename": fname})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # LANCEMENT
 # ═══════════════════════════════════════════════════════════════════════════════
 
