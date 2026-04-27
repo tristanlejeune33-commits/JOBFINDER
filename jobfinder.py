@@ -2473,12 +2473,20 @@ def _color_dark(h):   return _adjust_color(h, 0.7)   # version foncée (gradient
 import html as _html_mod
 
 def _esc_html(s):
-    return _html_mod.escape(str(s)) if s is not None else ""
+    """Échappe pour HTML. Refuse de stringifier dict/list (anti-leak de contexte
+    si jamais une variable de template résolvait un objet complexe par erreur)."""
+    if s is None: return ""
+    if isinstance(s, (dict, list, tuple, set)): return ""
+    return _html_mod.escape(str(s))
 
 def _get_path(ctx, path):
-    """Résout 'a.b.c' dans ctx (dict ou liste de dicts)."""
+    """Résout 'a.b.c' dans ctx (dict ou liste de dicts).
+    Cas spécial : path "." retourne ctx["."] (item courant dans une boucle de scalars),
+    sinon ctx lui-même si pas de clé "." (compat)."""
     if path == ".":
-        return ctx
+        if isinstance(ctx, dict) and "." in ctx:
+            return ctx["."]
+        return ctx if not isinstance(ctx, dict) else ""
     cur = ctx
     for part in path.split("."):
         if isinstance(cur, dict):
