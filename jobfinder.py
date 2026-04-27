@@ -841,7 +841,8 @@ def route_register():
                 role  = "admin" if count == 0 else "membre"
             else:
                 role = "membre"
-            verified = 1 if (role == "admin" or not REQUIRE_EMAIL_VERIFICATION) else 0
+            # Python bool : SQLite le stocke comme 0/1 (INTEGER), Postgres comme BOOLEAN
+            verified = (role == "admin") or (not REQUIRE_EMAIL_VERIFICATION)
             cur = db.execute(
                 "INSERT INTO users(email,password_hash,name,role,email_verified) VALUES(?,?,?,?,?)",
                 (email, generate_password_hash(pwd), name or email.split("@")[0], role, verified)
@@ -975,7 +976,7 @@ def route_verify_email():
     if not uid:
         return Response("<h1>Lien invalide ou expiré</h1>", mimetype="text/html"), 400
     with get_db() as db:
-        db.execute("UPDATE users SET email_verified=1 WHERE id=?", (uid,))
+        db.execute("UPDATE users SET email_verified=? WHERE id=?", (True, uid))
         db.commit()
     log.info(f"email verified: user_id={uid}")
     # redirect vers l'app
@@ -2768,7 +2769,7 @@ def _send_interview_reminders():
                JOIN users u ON u.id = s.user_id
                JOIN applications a ON a.id = s.application_id
                WHERE s.scheduled_date = ?
-                 AND (s.reminder_sent = 0 OR s.reminder_sent IS NULL)
+                 AND (s.reminder_sent IS NULL OR NOT s.reminder_sent)
                  AND (s.result = 'En attente' OR s.result IS NULL OR s.result = '')
                  AND s.stage_type != 'Candidature envoyée'
                  AND (u.deleted_at = '' OR u.deleted_at IS NULL)""",
@@ -2800,7 +2801,7 @@ def _send_interview_reminders():
             )
             ok = send_email(r["email"], subj, text, html)
             if ok:
-                db.execute("UPDATE interview_stages SET reminder_sent=1 WHERE id=?", (r["id"],))
+                db.execute("UPDATE interview_stages SET reminder_sent=? WHERE id=?", (True, r["id"]))
                 sent += 1
             else:
                 errors.append({"stage_id": r["id"], "email": r["email"]})
@@ -2870,7 +2871,7 @@ def route_admin_stats():
     ym = _ym()
     with get_db() as db:
         total_users     = db.execute("SELECT COUNT(*) c FROM users").fetchone()["c"]
-        verified_users  = db.execute("SELECT COUNT(*) c FROM users WHERE email_verified=1").fetchone()["c"]
+        verified_users  = db.execute("SELECT COUNT(*) c FROM users WHERE email_verified").fetchone()["c"]
         new_users_week  = db.execute(
             "SELECT COUNT(*) c FROM users WHERE created_at >= datetime('now','-7 days')"
         ).fetchone()["c"]
