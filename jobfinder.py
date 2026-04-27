@@ -171,15 +171,17 @@ def healthz():
 def route_diag():
     """Diagnostic public : check DB connection + tables. Utilisé pour debug."""
     out = {
-        "db_backend": "postgres" if USE_POSTGRES else "sqlite",
-        "is_prod":    IS_PROD,
-        "smtp":       bool(SMTP_HOST),
-        "hcaptcha":   bool(HCAPTCHA_SECRET),
-        "openai":     bool(OPENAI_API_KEY),
-        "anthropic":  bool(ANTHROPIC_API_KEY),
-        "tables":     None,
-        "user_count": None,
-        "error":      None,
+        "db_backend":      "postgres" if USE_POSTGRES else "sqlite",
+        "is_prod":         IS_PROD,
+        "smtp":            bool(SMTP_HOST),
+        "hcaptcha_secret": bool(HCAPTCHA_SECRET),
+        "hcaptcha_key":    bool(HCAPTCHA_SITE_KEY),
+        "hcaptcha_active": HCAPTCHA_ENABLED,
+        "openai":          bool(OPENAI_API_KEY),
+        "anthropic":       bool(ANTHROPIC_API_KEY),
+        "tables":          None,
+        "user_count":      None,
+        "error":           None,
     }
     try:
         with get_db() as db:
@@ -216,13 +218,19 @@ if SENTRY_DSN:
     except Exception as e:
         log.warning(f"Sentry init failed: {e}")
 
-# ── hCaptcha (anti-bot register, no-op si HCAPTCHA_SECRET absent) ──────────────
+# ── hCaptcha (anti-bot register, no-op si non-configuré OU configuration partielle) ─
 HCAPTCHA_SECRET   = os.environ.get("HCAPTCHA_SECRET", "").strip()
 HCAPTCHA_SITE_KEY = os.environ.get("HCAPTCHA_SITE_KEY", "").strip()
+# On exige que LES DEUX soient set, sinon on désactive (config incomplète = foot-gun)
+HCAPTCHA_ENABLED  = bool(HCAPTCHA_SECRET and HCAPTCHA_SITE_KEY)
+if HCAPTCHA_SECRET and not HCAPTCHA_SITE_KEY:
+    log.warning("HCAPTCHA_SECRET défini mais HCAPTCHA_SITE_KEY manquant → captcha désactivé.")
+elif HCAPTCHA_SITE_KEY and not HCAPTCHA_SECRET:
+    log.warning("HCAPTCHA_SITE_KEY défini mais HCAPTCHA_SECRET manquant → captcha désactivé.")
 
 def verify_hcaptcha(token, ip):
-    """True si OK, False sinon. True aussi si captcha non configuré (no-op en dev)."""
-    if not HCAPTCHA_SECRET:
+    """True si OK, False sinon. True si captcha désactivé (no-op)."""
+    if not HCAPTCHA_ENABLED:
         return True
     if not token:
         return False
@@ -235,8 +243,7 @@ def verify_hcaptcha(token, ip):
         return bool(r.json().get("success"))
     except Exception as e:
         log.warning(f"hCaptcha network error: {e}")
-        # En cas d'échec réseau on accepte (fail-open) pour ne pas bloquer la prod
-        return True
+        return True  # fail-open
 
 # ── Email (SMTP, no-op si non configuré → log le lien à la place) ─────────────
 SMTP_HOST     = os.environ.get("SMTP_HOST", "").strip()
@@ -947,15 +954,17 @@ def route_logout():
 @app.route("/api/auth/me")
 def route_me():
     u = get_current_user()
+    # Site key uniquement si captcha est réellement activable côté serveur
+    site_key = HCAPTCHA_SITE_KEY if HCAPTCHA_ENABLED else ""
     if not u:
-        return jsonify({"user": None, "hcaptcha_site_key": HCAPTCHA_SITE_KEY})
+        return jsonify({"user": None, "hcaptcha_site_key": site_key})
     quota = get_quota_status(u["id"])
     return jsonify({
         "user": {"id": u["id"], "email": u["email"], "name": u["name"], "role": u["role"]},
         "email_verified": bool(u.get("email_verified", 0)),
         "needs_verification": REQUIRE_EMAIL_VERIFICATION and not bool(u.get("email_verified", 0)),
         "quota": quota,
-        "hcaptcha_site_key": HCAPTCHA_SITE_KEY,
+        "hcaptcha_site_key": site_key,
     })
 
 # ── Email verification ─────────────────────────────────────────────────────────
