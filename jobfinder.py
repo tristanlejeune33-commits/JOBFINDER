@@ -439,18 +439,21 @@ class _PgConn:
     def execute(self, sql, params=()):
         translated = _translate_sql(sql)
         cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        # Auto-RETURNING id sur les INSERT pour exposer lastrowid
         wrap = _PgCursor(cur)
         try:
-            if re.match(r"\s*INSERT\s+INTO\s+(\w+)", translated, re.IGNORECASE) and "RETURNING" not in translated.upper():
-                translated = translated.rstrip().rstrip(";") + " RETURNING id"
+            # Auto-RETURNING * sur les INSERT pour exposer lastrowid quand "id" existe.
+            # On utilise * et pas "id" car certaines tables (user_data, usage_quotas)
+            # n'ont pas de colonne id et provoqueraient une erreur.
+            is_insert = bool(re.match(r"\s*INSERT\s+INTO\s+(\w+)", translated, re.IGNORECASE))
+            if is_insert and "RETURNING" not in translated.upper():
+                translated = translated.rstrip().rstrip(";") + " RETURNING *"
                 cur.execute(translated, params or None)
                 try:
                     row = cur.fetchone()
-                    if row and "id" in row:
+                    if row and isinstance(row, dict) and "id" in row:
                         wrap.lastrowid = row["id"]
                 except psycopg2.ProgrammingError:
-                    pass  # pas de result set (ON CONFLICT DO NOTHING peut renvoyer rien)
+                    pass  # pas de result set (ON CONFLICT DO NOTHING + 0 row)
             else:
                 cur.execute(translated, params or None)
         except Exception:
@@ -1561,21 +1564,34 @@ def route_photo():
 @app.route("/api/docs", methods=["GET","POST"])
 @require_auth
 def route_docs():
-    u  = get_current_user()
-    ud = get_user_data(u["id"])
-    if request.method == "GET":
-        return jsonify({"text": ud.get("doc_text",""), "names": json.loads(ud.get("doc_names","[]")), "summary": ud.get("summary","")})
-    data = request.json or {}
-    with get_db() as db:
-        db.execute("INSERT OR IGNORE INTO user_data(user_id) VALUES(?)", (u["id"],))
-        sets, vals = [], []
-        if "text"    in data: sets.append("doc_text=?");  vals.append(data["text"])
-        if "names"   in data: sets.append("doc_names=?"); vals.append(json.dumps(data["names"]))
-        if "summary" in data: sets.append("summary=?");   vals.append(data["summary"])
-        if sets:
-            db.execute(f"UPDATE user_data SET {','.join(sets)} WHERE user_id=?", (*vals, u["id"]))
-            db.commit()
-    return jsonify({"ok": True})
+    try:
+        u  = get_current_user()
+        ud = get_user_data(u["id"])
+        if request.method == "GET":
+            try:
+                names = json.loads(ud.get("doc_names","[]") or "[]")
+                if not isinstance(names, list): names = []
+            except Exception:
+                names = []
+            return jsonify({
+                "text":    ud.get("doc_text","") or "",
+                "names":   names,
+                "summary": ud.get("summary","") or "",
+            })
+        data = request.json or {}
+        with get_db() as db:
+            db.execute("INSERT OR IGNORE INTO user_data(user_id) VALUES(?)", (u["id"],))
+            sets, vals = [], []
+            if "text"    in data: sets.append("doc_text=?");  vals.append(data["text"] or "")
+            if "names"   in data: sets.append("doc_names=?"); vals.append(json.dumps(data["names"] or []))
+            if "summary" in data: sets.append("summary=?");   vals.append(data["summary"] or "")
+            if sets:
+                db.execute(f"UPDATE user_data SET {','.join(sets)} WHERE user_id=?", (*vals, u["id"]))
+                db.commit()
+        return jsonify({"ok": True})
+    except Exception as e:
+        log.exception(f"/api/docs FAILED: {e}")
+        return jsonify({"error": f"Erreur serveur : {type(e).__name__}: {str(e)[:200]}"}), 500
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ROUTES IA (SEARCH, FETCH-URL, INTERVIEW-PREP, DOWNLOAD-PDF, EXTRACT-DOC)
