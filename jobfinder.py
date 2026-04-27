@@ -2194,9 +2194,27 @@ def route_adapt_cv_pdf():
 @app.route("/api/admin/users", methods=["GET"])
 @require_role("admin")
 def route_admin_users():
+    """Liste des users avec leur quota mensuel et leur consommation actuelle."""
+    ym = _ym()
     with get_db() as db:
-        rows = db.execute("SELECT id,email,name,role,created_at FROM users ORDER BY created_at DESC").fetchall()
-    return jsonify([dict(r) for r in rows])
+        rows = db.execute(
+            """SELECT u.id, u.email, u.name, u.role, u.created_at,
+                      u.email_verified, u.monthly_quota,
+                      COALESCE(q.count, 0) AS used
+               FROM users u
+               LEFT JOIN usage_quotas q ON q.user_id = u.id AND q.ym = ?
+               ORDER BY u.created_at DESC""",
+            (ym,)
+        ).fetchall()
+    out = []
+    for r in rows:
+        d = dict(r)
+        # 0 = défaut global (DEFAULT_MONTHLY_AI_QUOTA)
+        d["effective_quota"] = d["monthly_quota"] or DEFAULT_MONTHLY_AI_QUOTA
+        d["quota_is_default"] = (d["monthly_quota"] == 0 or d["monthly_quota"] is None)
+        d["ym"] = ym
+        out.append(d)
+    return jsonify(out)
 
 @app.route("/api/admin/users/<int:uid>", methods=["PUT","DELETE"])
 @require_role("admin")
@@ -2207,14 +2225,49 @@ def route_admin_user(uid):
             if uid == me["id"]:
                 return jsonify({"error": "Impossible de supprimer votre propre compte"}), 400
             db.execute("DELETE FROM users WHERE id=?", (uid,)); db.commit()
+            log.info(f"admin delete user: id={uid} by={me['id']}")
             return jsonify({"ok": True})
         data = request.json or {}
+        sets, vals = [], []
         if "role" in data:
             if data["role"] not in ("membre","pro","admin"):
                 return jsonify({"error": "Rôle invalide"}), 400
-            db.execute("UPDATE users SET role=? WHERE id=?", (data["role"], uid)); db.commit()
-        row = db.execute("SELECT id,email,name,role,created_at FROM users WHERE id=?", (uid,)).fetchone()
-    return jsonify(dict(row))
+            sets.append("role=?"); vals.append(data["role"])
+        if "monthly_quota" in data:
+            try:
+                q = int(data["monthly_quota"])
+            except (TypeError, ValueError):
+                return jsonify({"error": "Quota invalide (entier requis, 0 = défaut global)"}), 400
+            if q < 0 or q > 1_000_000:
+                return jsonify({"error": "Quota hors bornes (0 à 1 000 000)"}), 400
+            sets.append("monthly_quota=?"); vals.append(q)
+        if "reset_usage" in data and data["reset_usage"]:
+            # Reset compteur du mois courant pour cet utilisateur
+            db.execute("DELETE FROM usage_quotas WHERE user_id=? AND ym=?", (uid, _ym()))
+        if sets:
+            db.execute(f"UPDATE users SET {','.join(sets)} WHERE id=?", (*vals, uid))
+        db.commit()
+        log.info(f"admin update user: id={uid} fields={list(data.keys())} by={me['id']}")
+        # Renvoie le row mis à jour avec le format de la liste
+    # Réutilise la requête de listing pour cohérence
+    ym = _ym()
+    with get_db() as db:
+        row = db.execute(
+            """SELECT u.id, u.email, u.name, u.role, u.created_at,
+                      u.email_verified, u.monthly_quota,
+                      COALESCE(q.count, 0) AS used
+               FROM users u
+               LEFT JOIN usage_quotas q ON q.user_id = u.id AND q.ym = ?
+               WHERE u.id = ?""",
+            (ym, uid)
+        ).fetchone()
+    if not row:
+        return jsonify({"error": "Utilisateur introuvable"}), 404
+    d = dict(row)
+    d["effective_quota"] = d["monthly_quota"] or DEFAULT_MONTHLY_AI_QUOTA
+    d["quota_is_default"] = (d["monthly_quota"] == 0 or d["monthly_quota"] is None)
+    d["ym"] = ym
+    return jsonify(d)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # LANCEMENT

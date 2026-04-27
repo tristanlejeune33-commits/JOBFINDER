@@ -1818,16 +1818,25 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   </div>
   <div class="card">
     <div class="card-title">👥 Utilisateurs</div>
-    <table class="admin-table" style="width:100%;border-collapse:collapse">
+    <div class="tx-sm tx-m" style="margin-bottom:14px;line-height:1.6">
+      <strong>Quota mensuel</strong> : nombre d'appels IA autorisés par utilisateur et par mois.
+      <code style="background:var(--card2);padding:2px 6px;border-radius:4px">0</code> = utilise le défaut global (variable d'env <code style="background:var(--card2);padding:2px 6px;border-radius:4px">MONTHLY_AI_QUOTA</code>).
+      Le bouton <strong>↻ Reset</strong> remet le compteur du mois en cours à zéro pour l'utilisateur.
+    </div>
+    <div class="tbl-wrap" style="overflow-x:auto">
+    <table class="admin-table" style="width:100%;min-width:880px;border-collapse:collapse">
       <thead><tr style="border-bottom:1px solid var(--border)">
         <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Utilisateur</th>
         <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Email</th>
         <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Inscription</th>
         <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Rôle</th>
+        <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase" title="Quota mensuel d'appels IA. 0 = défaut global.">Quota / mois</th>
+        <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Usage en cours</th>
         <th style="padding:10px 14px"></th>
       </tr></thead>
       <tbody id="admin-users-tbody"></tbody>
     </table>
+    </div>
   </div>
 </div>
 
@@ -2458,29 +2467,73 @@ async function loadAdminUsers(){
   const data=await api('/api/admin/users');
   if(data.error){toast(data.error,'error');return;}
   const tbody=document.getElementById('admin-users-tbody');
-  tbody.innerHTML=data.map(u=>`
-    <tr style="border-top:1px solid var(--border)">
-      <td><strong>${esc(u.name||'—')}</strong></td>
-      <td style="color:var(--text2)">${esc(u.email)}</td>
-      <td style="color:var(--text3);font-size:12px">${esc(u.created_at?.slice(0,10)||'')}</td>
-      <td>
+  tbody.innerHTML=data.map(u=>{
+    const used   = u.used || 0;
+    const eff    = u.effective_quota || 200;
+    const pct    = Math.min(100, Math.round((used/Math.max(1,eff))*100));
+    const color  = pct>=90 ? 'var(--red)' : pct>=70 ? 'var(--yellow)' : 'var(--green)';
+    const verifBadge = u.email_verified
+      ? '<span title="Email vérifié" style="color:var(--green);font-size:11px;margin-left:4px">✓</span>'
+      : '<span title="Email non vérifié" style="color:var(--yellow);font-size:11px;margin-left:4px">⚠</span>';
+    return `
+    <tr style="border-top:1px solid var(--border)" data-uid="${u.id}">
+      <td style="padding:8px 14px"><strong>${esc(u.name||'—')}</strong></td>
+      <td style="padding:8px 14px;color:var(--text2)">${esc(u.email)}${verifBadge}</td>
+      <td style="padding:8px 14px;color:var(--text3);font-size:12px">${esc(u.created_at?.slice(0,10)||'')}</td>
+      <td style="padding:8px 14px">
         <select class="role-select" onchange="changeRole(${u.id},this.value)">
           <option ${u.role==='membre'?'selected':''}>membre</option>
           <option ${u.role==='pro'?'selected':''}>pro</option>
           <option ${u.role==='admin'?'selected':''}>admin</option>
         </select>
       </td>
-      <td>
+      <td style="padding:8px 14px">
+        <input type="number" min="0" max="1000000" step="1"
+          value="${u.monthly_quota||0}"
+          title="${u.quota_is_default?'Utilise le défaut global ('+eff+')':'Quota personnalisé'}"
+          style="width:90px;background:var(--card2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:5px 8px;font-size:13px"
+          onchange="changeQuota(${u.id}, this.value)">
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">
+          ${u.quota_is_default?'<em>défaut: '+eff+'</em>':'effectif: '+eff}
+        </div>
+      </td>
+      <td style="padding:8px 14px">
+        <div style="font-size:13px;font-weight:600;color:${color}">${used} / ${eff}</div>
+        <div style="height:4px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${color}"></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="resetUserUsage(${u.id})"
+          title="Reset le compteur du mois en cours" style="font-size:10px;padding:2px 6px;margin-top:3px">↻ Reset</button>
+      </td>
+      <td style="padding:8px 14px">
         ${u.id!==currentUser?.id?`<button class="btn btn-red btn-sm" onclick="deleteUser(${u.id})">Supprimer</button>`:'<span style="color:var(--text3);font-size:12px">Vous</span>'}
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 async function changeRole(uid, role){
-  const data=await fetch('/api/admin/users/'+uid,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({role})});
-  const d=await data.json();
-  if(d.error){toast(d.error,'error');return;}
+  const r = await put('/api/admin/users/'+uid, {role});
+  if(r.error){toast(r.error,'error');return;}
   toast(`Rôle mis à jour → ${role}`,'success');
+}
+
+async function changeQuota(uid, value){
+  const v = parseInt(value, 10);
+  if(isNaN(v) || v < 0){ toast('Quota invalide','error'); loadAdminUsers(); return; }
+  const r = await put('/api/admin/users/'+uid, {monthly_quota: v});
+  if(r.error){toast(r.error,'error'); loadAdminUsers(); return;}
+  toast(v===0 ? 'Quota → défaut global' : `Quota → ${v}/mois`,'success');
+  // Refresh juste cette ligne (l'effective_quota change si on passe à 0)
+  loadAdminUsers();
+}
+
+async function resetUserUsage(uid){
+  if(!confirm('Remettre le compteur du mois courant à 0 pour cet utilisateur ?')) return;
+  const r = await put('/api/admin/users/'+uid, {reset_usage: true});
+  if(r.error){toast(r.error,'error');return;}
+  toast('✅ Compteur reset','success');
+  loadAdminUsers();
 }
 
 async function deleteUser(uid){
