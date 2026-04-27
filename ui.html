@@ -1551,8 +1551,16 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
         <textarea id="a-desc" rows="8" placeholder="Collez ici le texte complet de l'offre (Indeed, LinkedIn, etc.) ou récupérez via l'URL..."></textarea>
       </div>
 
+      <!-- Mode PDF (priorité si CV PDF importé dans Paramètres) -->
+      <div class="fg" id="pdf-mode-row" style="margin-bottom:10px;display:none">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+          <input type="checkbox" id="use-pdf-cv" style="accent-color:var(--accent);width:16px;height:16px" onchange="togglePdfMode()">
+          <span>📄 Adapter mon CV PDF <strong id="pdf-cv-label"></strong> <span class="tx-sm tx-m">(préserve le design original)</span></span>
+        </label>
+      </div>
+
       <!-- Template mode toggle -->
-      <div class="fg" style="margin-bottom:10px">
+      <div class="fg" id="template-mode-row" style="margin-bottom:10px">
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
           <input type="checkbox" id="use-template" style="accent-color:var(--accent);width:16px;height:16px" checked onchange="toggleTemplateMode()">
           <span>Utiliser le template <strong id="active-tpl-label">cv_vibe_modern</strong> (recommandé)</span>
@@ -1647,6 +1655,17 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
         </div>
       </div>
       <div id="s-cv-status" class="tx-sm mt2" style="color:var(--green)"></div>
+
+      <div class="fg" style="margin-top:14px">
+        <label>📄 Importer votre CV PDF <span class="tx-sm tx-m" style="font-weight:400">— sera adapté en gardant le design original</span></label>
+        <div class="flex gap-2 items-c">
+          <input id="s-cv-pdf-name" placeholder="Aucun CV PDF importé" readonly style="flex:1">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('s-cv-pdf-inp').click()">📂 Choisir</button>
+          <input type="file" id="s-cv-pdf-inp" accept="application/pdf,.pdf" style="display:none" onchange="importCVPdf(event)">
+          <button class="btn btn-red btn-sm" id="s-cv-pdf-del" onclick="removeCVPdf()" style="display:none">🗑</button>
+        </div>
+        <div id="s-cv-pdf-status" class="tx-sm mt2" style="color:var(--green)"></div>
+      </div>
     </div>
     <div class="card" style="grid-column:1/-1">
       <div class="card-title">✍️ Mon résumé personnel</div>
@@ -1986,6 +2005,8 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <script>
 // ── State ──────────────────────────────────────────────────────────────────────
 let apps = [], config = {}, selAppId = null, generateCV_force = false;
+let cvPdfHas = false, cvPdfName = '';
+let generatedPdfBlobUrl = null, generatedPdfFilename = '';
 let generatedCV = '', generatedCVFilename = '', cvContent = '';
 let dragId = null;
 let currentUser = null;
@@ -2372,6 +2393,7 @@ async function initApp(){
   await loadApps();
   await loadPhotoState();
   await loadDocsState();
+  await loadCvPdfState();
   await loadStages();
   render();
 }
@@ -2611,6 +2633,13 @@ async function clearSettingsDocs(){
 
 // ── Télécharger CV en PDF ──────────────────────────────────────────────────────
 async function downloadPDF(){
+  // Mode PDF : on a déjà un blob PDF prêt à télécharger
+  if(generatedPdfBlobUrl){
+    const a=document.createElement('a');
+    a.href=generatedPdfBlobUrl; a.download=generatedPdfFilename||'cv.pdf'; a.click();
+    toast('✅ PDF téléchargé !','success');
+    return;
+  }
   if(!generatedCVFilename){toast('Générez d\'abord un CV','error');return;}
   const co=document.getElementById('a-co').value.trim()||'CV';
   const ro=document.getElementById('a-role').value.trim()||'poste';
@@ -2680,10 +2709,45 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 
+// ── PDF mode toggle (visible uniquement si un CV PDF est uploadé) ─────────────
+function refreshAdapterPdfMode(){
+  const row=document.getElementById('pdf-mode-row');
+  const chk=document.getElementById('use-pdf-cv');
+  const lbl=document.getElementById('pdf-cv-label');
+  if(!row || !chk) return;
+  if(cvPdfHas){
+    row.style.display='';
+    if(lbl) lbl.textContent=cvPdfName||'';
+    // Active automatiquement le mode PDF s'il n'a pas déjà été décoché manuellement
+    if(!chk.dataset.userToggled){ chk.checked=true; }
+    applyPdfModeUI();
+  } else {
+    chk.checked=false;
+    row.style.display='none';
+    applyPdfModeUI();
+  }
+}
+
+function togglePdfMode(){
+  const chk=document.getElementById('use-pdf-cv');
+  if(chk) chk.dataset.userToggled='1';
+  applyPdfModeUI();
+}
+
+function applyPdfModeUI(){
+  const pdfOn=document.getElementById('use-pdf-cv')?.checked;
+  const tplRow=document.getElementById('template-mode-row');
+  const cvBaseRow=document.getElementById('cv-base-row');
+  // En mode PDF, on masque le toggle template + le sélecteur HTML CV
+  if(tplRow) tplRow.style.display=pdfOn?'none':'';
+  if(cvBaseRow && pdfOn) cvBaseRow.style.display='none';
+}
+
 async function generateCV(){
   const co=document.getElementById('a-co').value.trim();
   const ro=document.getElementById('a-role').value.trim();
   const desc=document.getElementById('a-desc').value.trim();
+  const usePdf=document.getElementById('use-pdf-cv')?.checked && cvPdfHas;
   const useTemplate=document.getElementById('use-template').checked;
   if(desc.length<30){toast('Collez la description complète du poste ou récupérez via l\'URL','error');return;}
 
@@ -2740,7 +2804,34 @@ async function generateCV(){
   document.getElementById('savebtn').style.display='none';
 
   let data;
-  if(useTemplate){
+  if(usePdf){
+    // Mode PDF : binaire en retour, pas de JSON
+    try{
+      const resp=await fetch('/api/adapt-cv-pdf',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        credentials:'same-origin',
+        body:JSON.stringify({company:co,role:ro,job_desc:desc})
+      });
+      if(!resp.ok){
+        const err=await resp.json().catch(()=>({error:'Erreur serveur'}));
+        data={error:err.error||'Erreur serveur'};
+      } else {
+        const blob=await resp.blob();
+        if(generatedPdfBlobUrl) URL.revokeObjectURL(generatedPdfBlobUrl);
+        generatedPdfBlobUrl=URL.createObjectURL(blob);
+        generatedPdfFilename=resp.headers.get('X-CV-Filename') || `CV_${co||'entreprise'}_${ro||'poste'}.pdf`;
+        const fallback=resp.headers.get('X-CV-Fallback')==='1';
+        const iframe=document.getElementById('cv-preview');
+        iframe.removeAttribute('srcdoc');
+        iframe.src=generatedPdfBlobUrl;
+        // Marqueurs pour les autres flows (saveAndApply, etc.)
+        generatedCV='';
+        generatedCVFilename=generatedPdfFilename;
+        data={ok:true, filename:generatedPdfFilename, fallback};
+      }
+    }catch(e){ data={error:e.message||'Erreur réseau'}; }
+  } else if(useTemplate){
     const payload={company:co,role:ro,job_desc:desc};
     if(activeTemplateId) payload.template_id=activeTemplateId;
     data=await post('/api/adapt-cv-template',payload);
@@ -2751,6 +2842,14 @@ async function generateCV(){
   overlay.classList.remove('show'); btn.disabled=false; btn.textContent='✨ Générer mon CV';
 
   if(data.error){toast(data.error,'error');document.getElementById('gen-status').textContent='❌ '+data.error;return;}
+  if(usePdf){
+    document.getElementById('gen-status').textContent = data.fallback
+      ? `⚠️ IA en échec — PDF original renvoyé (${data.filename})`
+      : `✅ ${data.filename}`;
+    document.getElementById('savebtn').style.display='';
+    toast(data.fallback?'IA en échec — PDF original renvoyé':'CV PDF adapté généré !', data.fallback?'info':'success');
+    return;
+  }
   generatedCV=data.html;
   generatedCVFilename=data.filename||'';
   document.getElementById('cv-preview').srcdoc=generatedCV;
@@ -2760,6 +2859,7 @@ async function generateCV(){
 }
 
 function previewCV(){
+  if(generatedPdfBlobUrl){ window.open(generatedPdfBlobUrl,'_blank'); return; }
   if(!generatedCV){toast('Générez d\'abord un CV','error');return;}
   const w=window.open('','_blank'); w.document.write(generatedCV); w.document.close();
 }
@@ -2932,8 +3032,27 @@ async function loadSettings(){
     document.getElementById('s-doc-names').value=d.names.join(', ');
     document.getElementById('s-doc-status').textContent=`✅ ${d.names.length} document(s) — ${(d.text||'').length} caractères`;
   }
+  // CV PDF
+  await loadCvPdfState();
   // Photo
   renderPhotoCard();
+}
+
+async function loadCvPdfState(){
+  try{
+    const p=await api('/api/cv-pdf');
+    cvPdfHas=!!p.has_pdf; cvPdfName=p.name||'';
+    const nameInput=document.getElementById('s-cv-pdf-name');
+    const statusEl=document.getElementById('s-cv-pdf-status');
+    const delBtn=document.getElementById('s-cv-pdf-del');
+    if(nameInput && cvPdfHas){
+      nameInput.value=cvPdfName;
+      statusEl.style.color='var(--green)';
+      statusEl.textContent='✅ '+cvPdfName;
+      if(delBtn) delBtn.style.display='';
+    }
+    refreshAdapterPdfMode();
+  }catch(e){/* page not visible yet */}
 }
 
 async function saveSummary(){
@@ -2959,6 +3078,43 @@ async function importCV(e){
     toast('CV importé : '+file.name,'success');
   };
   reader.readAsText(file);
+}
+
+// ── CV PDF (uploadé dans Paramètres, adapté en gardant le design) ─────────────
+async function importCVPdf(e){
+  const file=e.target.files[0]; if(!file) return;
+  if(file.type!=='application/pdf' && !file.name.toLowerCase().endsWith('.pdf')){
+    toast('Ce fichier n\'est pas un PDF','error');return;
+  }
+  if(file.size>10*1024*1024){ toast('PDF trop volumineux (>10 Mo)','error'); return; }
+  const st=document.getElementById('s-cv-pdf-status');
+  st.style.color='var(--yellow)'; st.textContent='Upload en cours...';
+  try{
+    const b64=await fileToB64(file);
+    const r=await post('/api/cv-pdf',{b64,name:file.name});
+    if(r.error){ st.style.color='var(--red)'; st.textContent='❌ '+r.error; toast(r.error,'error'); return; }
+    document.getElementById('s-cv-pdf-name').value=file.name;
+    st.style.color='var(--green)'; st.textContent='✅ '+file.name;
+    document.getElementById('s-cv-pdf-del').style.display='';
+    cvPdfName=file.name; cvPdfHas=true;
+    refreshAdapterPdfMode();
+    toast('CV PDF importé : '+file.name,'success');
+  }catch(err){
+    st.style.color='var(--red)'; st.textContent='❌ '+err.message;
+    toast('Erreur upload PDF','error');
+  }
+  e.target.value='';
+}
+
+async function removeCVPdf(){
+  if(!confirm('Supprimer le CV PDF ?')) return;
+  await fetch('/api/cv-pdf',{method:'DELETE',credentials:'same-origin'});
+  document.getElementById('s-cv-pdf-name').value='';
+  document.getElementById('s-cv-pdf-status').textContent='';
+  document.getElementById('s-cv-pdf-del').style.display='none';
+  cvPdfName=''; cvPdfHas=false;
+  refreshAdapterPdfMode();
+  toast('CV PDF supprimé','info');
 }
 
 // ── Utilities ──────────────────────────────────────────────────────────────────

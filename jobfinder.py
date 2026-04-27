@@ -116,6 +116,18 @@ def init_db():
 
 init_db()
 
+# Migration : nouvelles colonnes pour le CV PDF (ajout idempotent)
+def _migrate_user_data_pdf():
+    with get_db() as db:
+        for col, ddl in [("cv_pdf_b64",  "TEXT DEFAULT ''"),
+                         ("cv_pdf_name", "TEXT DEFAULT ''")]:
+            try:
+                db.execute(f"ALTER TABLE user_data ADD COLUMN {col} {ddl}")
+            except sqlite3.OperationalError:
+                pass  # colonne déjà présente
+        db.commit()
+_migrate_user_data_pdf()
+
 # ── Helpers SQL ─────────────────────────────────────────────────────────────────
 def row_to_dict(row):
     return dict(row) if row else None
@@ -1143,6 +1155,288 @@ def _html_to_pdf_response(html_content, name):
             headers={"Content-Disposition":f'attachment; filename="{safe_name}.pdf"'})
     finally:
         if tmp and os.path.exists(tmp): os.unlink(tmp)
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ADAPTATION CV PDF — direct (sans passer par HTML)
+# Pipeline : PDF → extraction blocs (fitz) → IA → ré-injection texte → PDF
+# ═══════════════════════════════════════════════════════════════════════════════
+import fitz  # PyMuPDF
+
+PDF_MIN_BLOCK_CHARS = 6        # ignore mini-blocs (numéros de page, puces seules)
+PDF_MIN_TOTAL_CHARS = 200      # en dessous = PDF probablement scanné/image
+PDF_SHRINK_STEPS    = (1.0, 0.96, 0.92, 0.88, 0.84, 0.80)
+MAX_PDF_SIZE_MB     = 10
+
+
+def _pdf_int_to_rgb(c):
+    """Couleur span PyMuPDF (int 0xRRGGBB) → tuple (r,g,b) en 0..1."""
+    if isinstance(c, int):
+        return (((c >> 16) & 0xFF)/255, ((c >> 8) & 0xFF)/255, (c & 0xFF)/255)
+    return (0, 0, 0)
+
+
+def _safe_fontname(font_name):
+    """Mappe le nom de police embarqué vers une police builtin PyMuPDF
+    (helv/tiro/cour + variantes bold/italic). Pas d'embedding de la police
+    d'origine — choix MVP."""
+    if not font_name:
+        return "helv"
+    f = font_name.lower()
+    bold   = any(k in f for k in ("bold", "black", "heavy", "semibold", "demi"))
+    italic = any(k in f for k in ("italic", "oblique"))
+    serif  = (any(k in f for k in ("times", "serif", "roman", "cambria",
+                                    "georgia", "garamond")) and "sans" not in f)
+    mono   = any(k in f for k in ("mono", "cour", "consol"))
+    if mono:
+        return "cour"
+    if serif:
+        return "tibi" if (bold and italic) else "tibo" if bold else "tiit" if italic else "tiro"
+    return "hebi" if (bold and italic) else "hebo" if bold else "heli" if italic else "helv"
+
+
+def _extract_pdf_blocks(doc):
+    """Extrait les blocs texte avec leurs propriétés. Returns (blocks, total_chars)."""
+    blocks = []
+    total = 0
+    for page_idx, page in enumerate(doc):
+        d = page.get_text("dict")
+        for b in d.get("blocks", []):
+            if b.get("type") != 0:   # 0 = texte, 1 = image
+                continue
+            lines = []
+            for line in b.get("lines", []):
+                spans = line.get("spans", [])
+                if not spans:
+                    continue
+                txt = "".join(s.get("text", "") for s in spans)
+                if not txt.strip():
+                    continue
+                first = spans[0]
+                lines.append({
+                    "text":  txt,
+                    "font":  first.get("font", "helv"),
+                    "size":  float(first.get("size", 11)),
+                    "color": first.get("color", 0),
+                })
+            if not lines:
+                continue
+            block_text = "\n".join(l["text"] for l in lines).strip()
+            if len(block_text) < PDF_MIN_BLOCK_CHARS:
+                continue
+            blocks.append({
+                "page":  page_idx,
+                "bbox":  tuple(b["bbox"]),
+                "text":  block_text,
+                "font":  lines[0]["font"],
+                "size":  lines[0]["size"],
+                "color": lines[0]["color"],
+            })
+            total += len(block_text)
+    return blocks, total
+
+
+def _ai_adapt_pdf_blocks(provider, api_key, blocks, job_offer_text, docs_text=""):
+    """Envoie les blocs à l'IA en JSON, attend un JSON [{id, text}, ...]
+    avec mêmes ids et longueur ±10%."""
+    payload = [{"id": i, "text": b["text"]} for i, b in enumerate(blocks)]
+    prompt = f"""You are a professional CV writer. You will receive CV text blocks extracted from a PDF and a target job offer. Rewrite each block to better match the offer.
+
+Target job offer:
+{job_offer_text[:4000]}
+
+{("Candidate documentation (additional source of truth — do not invent beyond this):" + chr(10) + docs_text[:3000]) if docs_text else ""}
+
+CV blocks (JSON array, in reading order):
+{json.dumps(payload, ensure_ascii=False)}
+
+CRITICAL constraints (the layout of the original PDF must not break):
+- Return a JSON array with the EXACT same ids and the EXACT same number of items.
+- Each adapted text MUST keep approximately the same character length (±10%) as the original. Going over WILL break the layout.
+- Preserve line breaks: if the original text has N "\\n", the rewritten text should have a similar count.
+- Do NOT invent any experience, qualification, date, name, company, school, certification or skill.
+- Keep dates, proper nouns, contact info, section headings unchanged unless trivially generic.
+- Highlight skills/experiences relevant to the offer; reorder words within a sentence if useful, do not add new bullets.
+- Style: short, direct sentences. No filler ("dynamic", "motivated", "passionate", "team player", "synergy", "leverage", "results-driven", "proven track record").
+- Output: ONLY a JSON array of objects {{"id": int, "text": str}}. No markdown, no fences, no commentary.
+
+Output:"""
+    raw = call_ai(provider, api_key, prompt, max_tokens=8000)
+    raw = re.sub(r"^```[\w]*\s*", "", raw.strip())
+    raw = re.sub(r"\s*```$",       "", raw.strip())
+    m = re.search(r"\[[\s\S]*\]", raw)
+    if not m:
+        raise ValueError(f"Réponse IA non parsable : {raw[:200]}")
+    arr = json.loads(m.group(0))
+    return {int(it["id"]): str(it.get("text", "")) for it in arr if "id" in it}
+
+
+def _insert_text_fit(page, bbox, text, fontname, fontsize, color):
+    """Insère le texte dans bbox en réduisant la police progressivement.
+    Tronque en dernier recours. Renvoie True si OK."""
+    rect = fitz.Rect(bbox)
+    col  = _pdf_int_to_rgb(color)
+    sf   = _safe_fontname(fontname)
+    for k in PDF_SHRINK_STEPS:
+        size = max(fontsize * k, 6.0)
+        rc = page.insert_textbox(
+            rect, text, fontname=sf, fontsize=size, color=col,
+            align=fitz.TEXT_ALIGN_LEFT,
+        )
+        if rc >= 0:   # rc = espace vertical restant ; négatif = débordement
+            return True
+    # Dernier recours : tronquer
+    t = text
+    while len(t) > 16:
+        t = t[: int(len(t) * 0.85)].rstrip() + "…"
+        rc = page.insert_textbox(
+            rect, t, fontname=sf, fontsize=max(fontsize * 0.80, 6.0),
+            color=col, align=fitz.TEXT_ALIGN_LEFT,
+        )
+        if rc >= 0:
+            return True
+    return False
+
+
+def adapt_pdf_cv(input_pdf_path, job_offer_text, output_pdf_path,
+                 provider=None, api_key=None, docs_text=""):
+    """Adapte un CV PDF à une offre en conservant le design.
+    Returns dict ok/error (cf. docstring de l'API)."""
+    if not provider or not api_key:
+        return {"error": "Clé API manquante."}
+    try:
+        doc = fitz.open(input_pdf_path)
+    except Exception as e:
+        return {"error": f"PDF illisible : {e}"}
+    try:
+        blocks, total_chars = _extract_pdf_blocks(doc)
+        if not blocks or total_chars < PDF_MIN_TOTAL_CHARS:
+            return {"error": "PDF non éditable proprement"}
+        try:
+            adapted = _ai_adapt_pdf_blocks(provider, api_key, blocks,
+                                           job_offer_text, docs_text=docs_text)
+        except Exception as e:
+            print(f"[adapt_pdf_cv] IA échouée → fallback original : {e}")
+            doc.save(output_pdf_path)
+            return {"error": f"Adaptation IA échouée : {e}",
+                    "fallback": output_pdf_path}
+        # Préparation : redactions (efface l'ancien texte) avant ré-injection
+        replacements   = []
+        pages_touched  = set()
+        for i, b in enumerate(blocks):
+            new_t = (adapted.get(i) or "").strip()
+            if not new_t or new_t == b["text"]:
+                continue
+            page = doc[b["page"]]
+            page.add_redact_annot(fitz.Rect(b["bbox"]), fill=(1, 1, 1))
+            pages_touched.add(b["page"])
+            replacements.append((b, new_t))
+        for pi in pages_touched:
+            doc[pi].apply_redactions(images=fitz.PDF_REDACT_IMAGE_NONE)
+        # Ré-injection
+        ok = 0
+        for b, new_t in replacements:
+            if _insert_text_fit(doc[b["page"]], b["bbox"], new_t,
+                                b["font"], b["size"], b["color"]):
+                ok += 1
+            else:
+                # Fallback bloc : remet l'original pour éviter une zone blanche
+                _insert_text_fit(doc[b["page"]], b["bbox"], b["text"],
+                                 b["font"], b["size"], b["color"])
+        doc.save(output_pdf_path, garbage=4, deflate=True, clean=True)
+        return {"ok": True, "path": output_pdf_path,
+                "blocks_total": len(blocks), "blocks_replaced": ok}
+    except Exception as e:
+        return {"error": f"Erreur lors de l'adaptation : {e}"}
+    finally:
+        try: doc.close()
+        except Exception: pass
+
+
+# ── Routes : upload du CV PDF (Paramètres) + adaptation ────────────────────────
+@app.route("/api/cv-pdf", methods=["GET", "POST", "DELETE"])
+@require_auth
+def route_cv_pdf():
+    u  = get_current_user()
+    ud = get_user_data(u["id"])
+    if request.method == "GET":
+        return jsonify({
+            "has_pdf": bool(ud.get("cv_pdf_b64", "")),
+            "name":    ud.get("cv_pdf_name", ""),
+        })
+    with get_db() as db:
+        if request.method == "DELETE":
+            db.execute("UPDATE user_data SET cv_pdf_b64='', cv_pdf_name='' WHERE user_id=?", (u["id"],))
+            db.commit()
+            return jsonify({"ok": True})
+        data = request.json or {}
+        b64  = (data.get("b64") or "").strip()
+        name = (data.get("name") or "cv.pdf").strip()
+        if not b64:
+            return jsonify({"error": "PDF manquant"}), 400
+        # Sanity : taille brute (octets décodés)
+        try:
+            raw_size = (len(b64) * 3) // 4
+        except Exception:
+            raw_size = 0
+        if raw_size > MAX_PDF_SIZE_MB * 1024 * 1024:
+            return jsonify({"error": f"PDF trop volumineux (>{MAX_PDF_SIZE_MB} Mo)"}), 400
+        db.execute("INSERT OR IGNORE INTO user_data(user_id) VALUES(?)", (u["id"],))
+        db.execute("UPDATE user_data SET cv_pdf_b64=?, cv_pdf_name=? WHERE user_id=?",
+                   (b64, name, u["id"]))
+        db.commit()
+    return jsonify({"ok": True, "name": name})
+
+
+@app.route("/api/adapt-cv-pdf", methods=["POST"])
+@require_auth
+def route_adapt_cv_pdf():
+    """Adapte le CV PDF stocké en paramètres. Renvoie directement le PDF adapté."""
+    u = get_current_user()
+    provider, api_key = get_ai_keys(u)
+    if not api_key:
+        return jsonify({"error": "Clé API manquante. Configurez-la dans Paramètres."}), 400
+    ud = get_user_data(u["id"])
+    pdf_b64 = ud.get("cv_pdf_b64", "")
+    if not pdf_b64:
+        return jsonify({"error": "Aucun CV PDF dans vos paramètres. Importez-le d'abord."}), 400
+    data = request.json or {}
+    job_desc = (data.get("job_desc", "") or "").strip()
+    company  = (data.get("company", "")  or "").strip()
+    role     = (data.get("role", "")     or "").strip()
+    if len(job_desc) < 30:
+        return jsonify({"error": "Collez la description complète du poste"}), 400
+    job_offer = f"Poste : {role}\nEntreprise : {company}\n\n{job_desc}"
+    docs_text = get_docs_context(u["id"])
+
+    in_name  = f"_in_{secrets.token_hex(8)}.pdf"
+    out_name = f"CV_{safe_name(company)}_{safe_name(role)}_{today()}.pdf"
+    in_path  = os.path.join(CV_DIR, in_name)
+    out_path = os.path.join(CV_DIR, out_name)
+    try:
+        with open(in_path, "wb") as f:
+            f.write(base64.b64decode(pdf_b64))
+    except Exception as e:
+        return jsonify({"error": f"PDF stocké invalide : {e}"}), 400
+
+    try:
+        result = adapt_pdf_cv(in_path, job_offer, out_path,
+                              provider=provider, api_key=api_key,
+                              docs_text=docs_text)
+    finally:
+        try: os.unlink(in_path)
+        except Exception: pass
+
+    # Erreur dure (pas d'output produit)
+    if "error" in result and not os.path.exists(out_path):
+        return jsonify(result), 400
+    # On renvoie le PDF en attachment ; on remonte aussi le filename via header custom
+    resp = send_file(out_path, mimetype="application/pdf",
+                     as_attachment=True, download_name=out_name)
+    resp.headers["X-CV-Filename"] = out_name
+    if result.get("fallback"):
+        resp.headers["X-CV-Fallback"] = "1"
+    return resp
+
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ROUTES ADMIN
