@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>{{name}} — CV</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Raleway:wght@300;400;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:{{color}};
+  --primary-d:{{color_dark}};
+  --primary-l:{{color_light}};
+  --text:#1a1a1a;
+  --text2:#3a3a3a;
+  --text3:#888;
+  --bg:#fff;
+}
+body{font-family:'Raleway',sans-serif;background:#f3f4f8;color:var(--text);line-height:1.6;font-size:13px}
+.cv{max-width:794px;min-height:1123px;margin:0 auto;background:var(--bg);box-shadow:0 4px 30px rgba(0,0,0,.08);position:relative;overflow:hidden}
+
+/* Header diagonal */
+.header{background:linear-gradient(135deg,var(--primary) 0%,var(--primary-d) 100%);color:#fff;padding:40px 50px 70px;clip-path:polygon(0 0,100% 0,100% 88%,0 100%);position:relative}
+.header::before{content:'';position:absolute;top:-50px;right:-50px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,.07)}
+.header::after{content:'';position:absolute;bottom:50px;left:-100px;width:250px;height:250px;border-radius:50%;background:rgba(255,255,255,.05)}
+.header-inner{display:flex;align-items:center;gap:30px;position:relative;z-index:1}
+.photo{width:120px;height:120px;border-radius:50%;border:4px solid #fff;overflow:hidden;flex-shrink:0;box-shadow:0 4px 14px rgba(0,0,0,.2);background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Poppins',sans-serif;font-size:38px;font-weight:800}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.head-text{flex:1}
+.name{font-family:'Poppins',sans-serif;font-size:38px;font-weight:800;line-height:1.05;margin-bottom:6px;letter-spacing:-.02em}
+.title{font-size:15px;font-weight:500;letter-spacing:.04em;opacity:.95;margin-bottom:10px}
+.contact-row{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;opacity:.92}
+.contact-row span{display:flex;align-items:center;gap:5px}
+
+/* Body */
+.body-cv{padding:0 50px 40px;margin-top:-30px;position:relative;z-index:2}
+.summary{background:#fff;padding:18px 22px;border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,.06);font-size:13px;color:var(--text2);line-height:1.7;border-left:5px solid var(--primary);margin-bottom:30px}
+
+.section{margin-bottom:26px}
+.section-title{font-family:'Poppins',sans-serif;font-size:18px;font-weight:700;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:12px;letter-spacing:-.01em}
+.section-title::before{content:'';width:32px;height:4px;background:var(--primary);border-radius:99px;flex-shrink:0}
+
+/* Experience: timeline */
+.exp{position:relative;padding-left:24px;margin-bottom:18px;padding-bottom:14px}
+.exp::before{content:'';position:absolute;left:8px;top:14px;bottom:-14px;width:2px;background:linear-gradient(to bottom,var(--primary) 0%,var(--primary-l) 100%)}
+.exp:last-child::before{display:none}
+.exp::after{content:'';position:absolute;left:0;top:5px;width:18px;height:18px;border-radius:50%;background:var(--primary);border:4px solid var(--bg);box-shadow:0 0 0 2px var(--primary)}
+.exp-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:3px}
+.exp-role{font-family:'Poppins',sans-serif;font-size:14.5px;font-weight:600;color:var(--text)}
+.exp-date{font-size:11.5px;font-weight:600;color:var(--primary);background:var(--primary-l);padding:3px 10px;border-radius:99px}
+.exp-co{font-size:13px;color:var(--text2);font-weight:500;margin-bottom:6px}
+.exp-desc{list-style:none;margin-top:5px}
+.exp-desc li{position:relative;padding-left:16px;font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:3px}
+.exp-desc li::before{content:'◆';position:absolute;left:0;color:var(--primary);font-size:8px;top:5px}
+
+/* Two-col split */
+.split{display:grid;grid-template-columns:1.2fr 1fr;gap:30px}
+
+/* Education */
+.edu-item{background:#f8f9fc;padding:12px 14px;border-radius:10px;margin-bottom:8px;border-left:4px solid var(--primary)}
+.edu-deg{font-family:'Poppins',sans-serif;font-size:13.5px;font-weight:600;color:var(--text)}
+.edu-school{font-size:12px;color:var(--text2)}
+.edu-date{font-size:11px;color:var(--text3);margin-top:2px}
+
+/* Skills as tags */
+.skills-grid{display:flex;flex-wrap:wrap;gap:6px}
+.skill-tag{background:linear-gradient(135deg,var(--primary-l) 0%,#fff 100%);border:1px solid var(--primary-l);color:var(--primary-d);padding:5px 11px;border-radius:99px;font-size:11.5px;font-weight:500;display:inline-flex;align-items:center;gap:5px}
+.skill-tag::before{content:'●';font-size:8px;color:var(--primary)}
+
+/* Languages */
+.lang{display:flex;justify-content:space-between;align-items:center;background:#f8f9fc;padding:8px 12px;border-radius:8px;margin-bottom:6px;font-size:12.5px}
+.lang-name{font-weight:600;color:var(--text)}
+.lang-level{font-size:11px;color:var(--primary);font-weight:600;background:var(--primary-l);padding:2px 8px;border-radius:99px}
+
+/* Certifications & Interests */
+.cert-list{display:flex;flex-wrap:wrap;gap:6px}
+.cert-item{background:var(--primary-l);color:var(--primary-d);padding:6px 12px;border-radius:8px;font-size:11.5px;font-weight:500}
+
+.interest{display:inline-block;border:1.5px dashed var(--primary);padding:3px 10px;border-radius:99px;font-size:11px;color:var(--primary-d);margin:0 4px 4px 0;font-weight:500}
+
+@media print{
+  body{background:#fff}
+  .cv{box-shadow:none;margin:0}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="cv">
+  <header class="header">
+    <div class="header-inner">
+      <div class="photo">{{photo_or_initials}}</div>
+      <div class="head-text">
+        <h1 class="name">{{name}}</h1>
+        {{#title}}<div class="title">{{title}}</div>{{/title}}
+        <div class="contact-row">
+          {{#contact.email}}<span>✉ {{contact.email}}</span>{{/contact.email}}
+          {{#contact.phone}}<span>☎ {{contact.phone}}</span>{{/contact.phone}}
+          {{#contact.location}}<span>📍 {{contact.location}}</span>{{/contact.location}}
+          {{#contact.linkedin}}<span>in/{{contact.linkedin}}</span>{{/contact.linkedin}}
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="body-cv">
+    {{#summary}}<div class="summary">{{summary}}</div>{{/summary}}
+
+    {{#has_experience}}
+    <section class="section">
+      <div class="section-title">Expérience</div>
+      {{#experience}}
+      <div class="exp">
+        <div class="exp-head">
+          <div class="exp-role">{{role}}</div>
+          <div class="exp-date">{{date}}</div>
+        </div>
+        <div class="exp-co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+        {{#has_bullets}}
+        <ul class="exp-desc">{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+        {{/has_bullets}}
+      </div>
+      {{/experience}}
+    </section>
+    {{/has_experience}}
+
+    <div class="split">
+      <div>
+        {{#has_education}}
+        <section class="section">
+          <div class="section-title">Formation</div>
+          {{#education}}
+          <div class="edu-item">
+            <div class="edu-deg">{{degree}}</div>
+            <div class="edu-school">{{school}}{{#location}} — {{location}}{{/location}}</div>
+            <div class="edu-date">{{date}}</div>
+          </div>
+          {{/education}}
+        </section>
+        {{/has_education}}
+      </div>
+
+      <div>
+        {{#has_skills}}
+        <section class="section">
+          <div class="section-title">Compétences</div>
+          <div class="skills-grid">
+            {{#skills}}<span class="skill-tag">{{name}}</span>{{/skills}}
+          </div>
+        </section>
+        {{/has_skills}}
+
+        {{#has_languages}}
+        <section class="section">
+          <div class="section-title">Langues</div>
+          {{#languages}}
+          <div class="lang"><span class="lang-name">{{name}}</span><span class="lang-level">{{level}}</span></div>
+          {{/languages}}
+        </section>
+        {{/has_languages}}
+      </div>
+    </div>
+
+    {{#has_certifications}}
+    <section class="section">
+      <div class="section-title">Certifications</div>
+      <div class="cert-list">
+        {{#certifications}}<span class="cert-item">{{name}}{{#date}} · {{date}}{{/date}}</span>{{/certifications}}
+      </div>
+    </section>
+    {{/has_certifications}}
+
+    {{#has_interests}}
+    <section class="section">
+      <div class="section-title">Centres d'intérêt</div>
+      <div>{{#interests}}<span class="interest">{{.}}</span>{{/interests}}</div>
+    </section>
+    {{/has_interests}}
+  </div>
+</div>
+</body>
+</html>

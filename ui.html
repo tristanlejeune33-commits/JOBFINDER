@@ -1234,6 +1234,92 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
 }
 
+/* ══ CV STUDIO ══════════════════════════════════════════════════════════════ */
+.cvs-layout{
+  display:grid;grid-template-columns:1fr 380px;gap:18px;
+  height:calc(100vh - 180px);min-height:700px;
+}
+.cvs-preview-col{
+  display:flex;flex-direction:column;gap:10px;background:var(--card);
+  border:1px solid var(--border);border-radius:14px;overflow:hidden;
+}
+.cvs-preview-toolbar{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
+  padding:14px 18px;background:var(--card2);border-bottom:1px solid var(--border);
+}
+.cvs-tpl-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.cvs-tpl-tab{
+  padding:6px 12px;border:1px solid var(--border2);background:#fff;border-radius:8px;
+  font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:var(--t);
+}
+.cvs-tpl-tab:hover{border-color:var(--accent);color:var(--accent)}
+.cvs-tpl-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cvs-color-picker{display:flex;align-items:center;gap:10px}
+.cvs-color-picker input[type=color]{
+  width:34px;height:34px;border:1px solid var(--border2);border-radius:8px;cursor:pointer;
+  padding:0;background:#fff;
+}
+.cvs-presets{display:flex;gap:5px}
+.cvs-presets button{
+  width:22px;height:22px;border-radius:50%;border:2px solid #fff;cursor:pointer;
+  box-shadow:0 0 0 1px var(--border2);transition:transform .15s;
+}
+.cvs-presets button:hover{transform:scale(1.18)}
+
+.cvs-preview-frame{
+  flex:1;background:#eef0f5;overflow:auto;display:flex;justify-content:center;padding:18px;
+}
+.cvs-preview-frame iframe{
+  width:794px;min-width:794px;min-height:1123px;border:none;background:#fff;
+  box-shadow:0 4px 20px rgba(0,0,0,.08);
+}
+
+.cvs-editor-col{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.cvs-editor-hd{padding:14px;border-bottom:1px solid var(--border);background:var(--card2)}
+.cvs-editor-body{flex:1;overflow-y:auto;padding:14px}
+
+.cvs-section-card{
+  background:var(--card2);border:1px solid var(--border);border-radius:10px;
+  padding:12px;margin-bottom:10px;
+}
+.cvs-section-title{
+  font-size:11.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;
+}
+.cvs-section-title button{
+  background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;font-weight:600;
+}
+.cvs-row{display:flex;gap:6px;margin-bottom:6px}
+.cvs-row input,.cvs-row textarea{
+  flex:1;background:#fff;border:1px solid var(--border);color:var(--text);
+  border-radius:6px;padding:6px 8px;font-size:12.5px;font-family:inherit;
+}
+.cvs-row textarea{min-height:50px;resize:vertical}
+.cvs-row .btn-mini{
+  background:var(--card);border:1px solid var(--border);color:var(--text3);
+  cursor:pointer;border-radius:6px;width:28px;height:28px;flex-shrink:0;
+}
+.cvs-row .btn-mini:hover{color:var(--red);border-color:var(--red)}
+.cvs-item{
+  background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 10px;margin-bottom:6px;
+}
+.cvs-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.cvs-item-num{font-size:10.5px;color:var(--text3);font-weight:700;text-transform:uppercase}
+.cvs-add-btn{
+  width:100%;padding:7px;background:none;border:1px dashed var(--border2);
+  border-radius:6px;color:var(--text3);font-size:12px;cursor:pointer;
+}
+.cvs-add-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+@media(max-width:900px){
+  .cvs-layout{grid-template-columns:1fr;height:auto}
+  .cvs-preview-frame{padding:8px}
+  .cvs-preview-frame iframe{min-width:0;width:100%;transform-origin:top left}
+}
+
 /* ══════════════════════════════════════════════════════════
    GLOBAL PREMIUM POLISH
 ══════════════════════════════════════════════════════════ */
@@ -1491,9 +1577,13 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <span class="nav-icon">📅</span>
       <span class="nav-label"><span class="nav-label-main">Planning</span><span class="nav-label-sub">Calendrier d'entretiens</span></span>
     </div>
-    <div class="nav-item" data-page="templates">
+    <div class="nav-item" data-page="cvstudio">
       <span class="nav-icon">🎨</span>
-      <span class="nav-label"><span class="nav-label-main">Templates CV</span><span class="nav-label-sub">Créer & gérer ses modèles</span></span>
+      <span class="nav-label"><span class="nav-label-main">CV Studio</span><span class="nav-label-sub">Crée &amp; édite ton CV</span></span>
+    </div>
+    <div class="nav-item" data-page="templates" style="display:none">
+      <span class="nav-icon">📐</span>
+      <span class="nav-label"><span class="nav-label-main">Templates CV (legacy)</span><span class="nav-label-sub">Ancien wizard</span></span>
     </div>
     <div class="nav-item" data-page="settings">
       <span class="nav-icon">⚙️</span>
@@ -1839,7 +1929,57 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   </div>
 </div>
 
-<!-- Templates CV -->
+<!-- CV Studio (nouveau système) -->
+<div id="page-cvstudio" class="page">
+  <div class="ph">
+    <div class="ph-text"><h2>🎨 CV Studio</h2><p>Crée un CV joli en 1 clic, édite-le, change le style. Aucun design à toucher.</p></div>
+    <div class="flex gap-2" style="flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="cvStudio.generate()">✨ Générer depuis mon profil</button>
+      <button class="btn btn-secondary btn-sm" onclick="cvStudio.save()">💾 Sauvegarder</button>
+      <button class="btn btn-secondary btn-sm" onclick="cvStudio.downloadPdf()">⬇️ PDF</button>
+    </div>
+  </div>
+
+  <div class="cvs-layout">
+    <!-- Colonne gauche : aperçu -->
+    <div class="cvs-preview-col">
+      <div class="cvs-preview-toolbar">
+        <div class="cvs-tpl-tabs" id="cvs-tpl-tabs"></div>
+        <div class="cvs-color-picker">
+          <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Couleur</label>
+          <input type="color" id="cvs-color" value="#2F5DA8" oninput="cvStudio.onColorChange(this.value)">
+          <div class="cvs-presets">
+            <button onclick="cvStudio.setColor('#2F5DA8')" style="background:#2F5DA8" title="Bleu confiance"></button>
+            <button onclick="cvStudio.setColor('#1f6f4f')" style="background:#1f6f4f" title="Vert sage"></button>
+            <button onclick="cvStudio.setColor('#7c3aed')" style="background:#7c3aed" title="Violet créatif"></button>
+            <button onclick="cvStudio.setColor('#dc2626')" style="background:#dc2626" title="Rouge impact"></button>
+            <button onclick="cvStudio.setColor('#ea580c')" style="background:#ea580c" title="Orange chaleureux"></button>
+            <button onclick="cvStudio.setColor('#0f172a')" style="background:#0f172a" title="Noir élégant"></button>
+          </div>
+        </div>
+      </div>
+      <div class="cvs-preview-frame">
+        <iframe id="cvs-preview" sandbox="allow-same-origin" srcdoc="<body style='font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100%;color:#888;text-align:center;padding:40px'><div><div style='font-size:60px'>🎨</div><div style='margin-top:20px;font-size:14px'>Clique sur <strong>Générer depuis mon profil</strong> pour créer ton CV.<br><br>Tu pourras ensuite changer le style et la couleur en 1 clic, et éditer chaque champ ci-contre.</div></div></body>"></iframe>
+      </div>
+    </div>
+
+    <!-- Colonne droite : éditeur -->
+    <div class="cvs-editor-col">
+      <div class="cvs-editor-hd">
+        <input type="text" id="cvs-name" placeholder="Nom du CV" value="Mon CV"
+          style="background:var(--card2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:6px 10px;font-size:13px;width:100%"
+          onchange="cvStudio.markDirty()">
+      </div>
+      <div class="cvs-editor-body" id="cvs-editor-body">
+        <div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">
+          ✨ Aucun CV généré pour l'instant.<br>Clique sur <strong>Générer depuis mon profil</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Templates CV (legacy, masqué par défaut) -->
 <div id="page-templates" class="page">
   <div class="ph">
     <div class="ph-text"><h2>🎨 Templates CV</h2><p>Vos modèles de CV — créez-en un via le wizard ou importez le vôtre</p></div>
@@ -2726,6 +2866,7 @@ function nav(id){
   if(id==='settings')     loadSettings();
   if(id==='planning'){loadStages().then(renderPlanning);}
   if(id==='templates')    loadTemplates();
+  if(id==='cvstudio')     cvStudio.init();
   if(id==='admin')        loadAdminAll();
   if(id==='adapter')      updateAdapterTemplateLabel();
   // Close sidebar on mobile when navigating
@@ -3355,6 +3496,316 @@ function openPrepTab(id){
     <body><h1>🎤 ${a.company} — ${a.role}</h1><pre>${esc}</pre></body></html>`);
   w.document.close();
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CV STUDIO — éditeur avec preview live, switch instant template/couleur
+// ══════════════════════════════════════════════════════════════════════════════
+const cvStudio = {
+  state: {
+    docId: null,
+    name: 'Mon CV',
+    template_id: 'modern',
+    color: '#2F5DA8',
+    data: null,
+    dirty: false,
+    rendering: false,
+  },
+  templates: [],
+  renderTimer: null,
+
+  async init(){
+    if(this.templates.length===0){
+      this.templates = await api('/api/cv/templates');
+      this.renderTabs();
+    }
+    // Charge le dernier CV ou crée vierge
+    const docs = await api('/api/cv/documents');
+    if(docs && docs.length){
+      const last = docs[0];
+      const full = await api('/api/cv/documents/'+last.id);
+      this.state.docId = full.id;
+      this.state.name = full.name;
+      this.state.template_id = full.template_id;
+      this.state.color = full.color;
+      this.state.data = full.data;
+      document.getElementById('cvs-name').value = this.state.name;
+      document.getElementById('cvs-color').value = this.state.color;
+      this.activeTab(this.state.template_id);
+      this.renderEditor();
+      this.scheduleRender();
+    }
+  },
+
+  renderTabs(){
+    const w = document.getElementById('cvs-tpl-tabs');
+    if(!w) return;
+    w.innerHTML = this.templates.map(t=>`
+      <button class="cvs-tpl-tab" data-tpl="${esc(t.id)}" onclick="cvStudio.setTemplate('${esc(t.id)}')" title="${esc(t.preview)}">${esc(t.name)}</button>
+    `).join('');
+    this.activeTab(this.state.template_id);
+  },
+
+  activeTab(id){
+    document.querySelectorAll('.cvs-tpl-tab').forEach(b=>{
+      b.classList.toggle('active', b.dataset.tpl === id);
+    });
+  },
+
+  setTemplate(id){
+    this.state.template_id = id;
+    this.activeTab(id);
+    this.markDirty();
+    this.scheduleRender(0);
+  },
+
+  setColor(c){
+    this.state.color = c;
+    document.getElementById('cvs-color').value = c;
+    this.markDirty();
+    this.scheduleRender(0);
+  },
+
+  onColorChange(c){
+    this.state.color = c;
+    this.markDirty();
+    this.scheduleRender(150);
+  },
+
+  markDirty(){ this.state.dirty = true; this.state.name = document.getElementById('cvs-name').value || 'Mon CV'; },
+
+  scheduleRender(delay=200){
+    if(!this.state.data) return;
+    clearTimeout(this.renderTimer);
+    this.renderTimer = setTimeout(()=>this.renderPreview(), delay);
+  },
+
+  async renderPreview(){
+    if(!this.state.data || this.state.rendering) return;
+    this.state.rendering = true;
+    try{
+      const r = await post('/api/cv/render', {
+        data: this.state.data,
+        template_id: this.state.template_id,
+        color: this.state.color,
+      });
+      if(r && r.html){
+        const iframe = document.getElementById('cvs-preview');
+        iframe.removeAttribute('srcdoc');
+        iframe.srcdoc = r.html;
+      }
+    } finally {
+      this.state.rendering = false;
+    }
+  },
+
+  async generate(){
+    if(this.state.data && !confirm('Régénérer le CV depuis ton profil va écraser les modifications non sauvegardées. Continuer ?')) return;
+    toast('🪄 Extraction des infos depuis ton profil...', 'info');
+    const r = await post('/api/cv/extract', {});
+    if(r.error){ toast(r.error,'error'); return; }
+    this.state.data = r.data;
+    this.state.dirty = true;
+    this.renderEditor();
+    this.scheduleRender(0);
+    toast('✨ CV généré ! Édite à droite et change le style à gauche.','success');
+  },
+
+  async save(){
+    if(!this.state.data){ toast('Génère d\'abord un CV','error'); return; }
+    this.state.name = document.getElementById('cvs-name').value || 'Mon CV';
+    const payload = {
+      name: this.state.name,
+      data: this.state.data,
+      template_id: this.state.template_id,
+      color: this.state.color,
+    };
+    let r;
+    if(this.state.docId){
+      r = await put('/api/cv/documents/'+this.state.docId, payload);
+    } else {
+      r = await post('/api/cv/documents', payload);
+      if(r && r.id) this.state.docId = r.id;
+    }
+    if(r && r.error){ toast(r.error,'error'); return; }
+    this.state.dirty = false;
+    toast('💾 CV sauvegardé','success');
+  },
+
+  async downloadPdf(){
+    if(!this.state.data){ toast('Génère d\'abord un CV','error'); return; }
+    // On rend d'abord, puis on PDF via /api/preview-pdf qui prend du HTML
+    const r = await post('/api/cv/render', {
+      data: this.state.data, template_id: this.state.template_id, color: this.state.color,
+    });
+    if(!r || !r.html){ toast('Erreur rendu','error'); return; }
+    toast('⏳ Génération PDF...','info');
+    try{
+      const resp = await fetch('/api/preview-pdf',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        credentials:'same-origin',
+        body: JSON.stringify({html: r.html, name: this.state.name || 'CV'})
+      });
+      if(!resp.ok){ toast('PDF impossible','error'); return; }
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url;
+      a.download = (this.state.name || 'CV').replace(/[^\w\-]/g,'_') + '.pdf';
+      a.click();
+      setTimeout(()=>URL.revokeObjectURL(url), 5000);
+      toast('✅ PDF téléchargé','success');
+    }catch(e){ toast('Erreur : '+e.message,'error'); }
+  },
+
+  // ── Éditeur formulaire ────────────────────────────────────────────────────
+  renderEditor(){
+    const d = this.state.data;
+    const body = document.getElementById('cvs-editor-body');
+    if(!d){ body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">Génère un CV d\'abord ✨</div>'; return; }
+    body.innerHTML = `
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Identité</div>
+        <div class="cvs-row"><input placeholder="Nom complet" value="${esc(d.name||'')}" oninput="cvStudio.upd('name', this.value)"></div>
+        <div class="cvs-row"><input placeholder="Titre / poste recherché" value="${esc(d.title||'')}" oninput="cvStudio.upd('title', this.value)"></div>
+        <div class="cvs-row"><textarea placeholder="Accroche (2 phrases)" oninput="cvStudio.upd('summary', this.value)">${esc(d.summary||'')}</textarea></div>
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Contact</div>
+        <div class="cvs-row"><input placeholder="Email" value="${esc(d.contact?.email||'')}" oninput="cvStudio.upd('contact.email', this.value)"></div>
+        <div class="cvs-row"><input placeholder="Téléphone" value="${esc(d.contact?.phone||'')}" oninput="cvStudio.upd('contact.phone', this.value)"></div>
+        <div class="cvs-row"><input placeholder="Ville" value="${esc(d.contact?.location||'')}" oninput="cvStudio.upd('contact.location', this.value)"></div>
+        <div class="cvs-row"><input placeholder="LinkedIn (handle ou URL)" value="${esc(d.contact?.linkedin||'')}" oninput="cvStudio.upd('contact.linkedin', this.value)"></div>
+        <div class="cvs-row"><input placeholder="Site / portfolio" value="${esc(d.contact?.website||'')}" oninput="cvStudio.upd('contact.website', this.value)"></div>
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Expérience <button onclick="cvStudio.addItem('experience')">+ Ajouter</button></div>
+        ${(d.experience||[]).map((e,i)=>`
+          <div class="cvs-item">
+            <div class="cvs-item-head">
+              <span class="cvs-item-num">Poste #${i+1}</span>
+              <button class="btn-mini" onclick="cvStudio.removeItem('experience',${i})" title="Supprimer">✕</button>
+            </div>
+            <div class="cvs-row"><input placeholder="Poste" value="${esc(e.role||'')}" oninput="cvStudio.updIdx('experience',${i},'role', this.value)"></div>
+            <div class="cvs-row"><input placeholder="Entreprise" value="${esc(e.company||'')}" oninput="cvStudio.updIdx('experience',${i},'company', this.value)"></div>
+            <div class="cvs-row">
+              <input placeholder="Lieu" value="${esc(e.location||'')}" oninput="cvStudio.updIdx('experience',${i},'location', this.value)">
+              <input placeholder="Dates (ex: 2022-Présent)" value="${esc(e.date||'')}" oninput="cvStudio.updIdx('experience',${i},'date', this.value)">
+            </div>
+            <div class="cvs-row"><textarea placeholder="Bullets (1 par ligne)" oninput="cvStudio.updBullets('experience',${i}, this.value)">${esc((e.bullets||[]).join('\n'))}</textarea></div>
+          </div>`).join('')}
+        ${(d.experience||[]).length===0 ? '<button class="cvs-add-btn" onclick="cvStudio.addItem(\'experience\')">+ Ajouter une expérience</button>' : ''}
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Formation <button onclick="cvStudio.addItem('education')">+ Ajouter</button></div>
+        ${(d.education||[]).map((e,i)=>`
+          <div class="cvs-item">
+            <div class="cvs-item-head">
+              <span class="cvs-item-num">Diplôme #${i+1}</span>
+              <button class="btn-mini" onclick="cvStudio.removeItem('education',${i})" title="Supprimer">✕</button>
+            </div>
+            <div class="cvs-row"><input placeholder="Diplôme" value="${esc(e.degree||'')}" oninput="cvStudio.updIdx('education',${i},'degree', this.value)"></div>
+            <div class="cvs-row"><input placeholder="École / Université" value="${esc(e.school||'')}" oninput="cvStudio.updIdx('education',${i},'school', this.value)"></div>
+            <div class="cvs-row">
+              <input placeholder="Lieu" value="${esc(e.location||'')}" oninput="cvStudio.updIdx('education',${i},'location', this.value)">
+              <input placeholder="Dates" value="${esc(e.date||'')}" oninput="cvStudio.updIdx('education',${i},'date', this.value)">
+            </div>
+          </div>`).join('')}
+        ${(d.education||[]).length===0 ? '<button class="cvs-add-btn" onclick="cvStudio.addItem(\'education\')">+ Ajouter une formation</button>' : ''}
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Compétences <button onclick="cvStudio.addItem('skills')">+ Ajouter</button></div>
+        ${(d.skills||[]).map((s,i)=>`
+          <div class="cvs-row">
+            <input placeholder="Nom" value="${esc(s.name||'')}" oninput="cvStudio.updIdx('skills',${i},'name', this.value)">
+            <input type="number" min="1" max="5" placeholder="1-5" value="${s.level||4}" style="width:60px" oninput="cvStudio.updIdx('skills',${i},'level', parseInt(this.value)||4)">
+            <button class="btn-mini" onclick="cvStudio.removeItem('skills',${i})">✕</button>
+          </div>`).join('')}
+        ${(d.skills||[]).length===0 ? '<button class="cvs-add-btn" onclick="cvStudio.addItem(\'skills\')">+ Ajouter une compétence</button>' : ''}
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Langues <button onclick="cvStudio.addItem('languages')">+ Ajouter</button></div>
+        ${(d.languages||[]).map((l,i)=>`
+          <div class="cvs-row">
+            <input placeholder="Langue" value="${esc(l.name||'')}" oninput="cvStudio.updIdx('languages',${i},'name', this.value)">
+            <input placeholder="Niveau (ex: C1, Natif)" value="${esc(l.level||'')}" oninput="cvStudio.updIdx('languages',${i},'level', this.value)">
+            <button class="btn-mini" onclick="cvStudio.removeItem('languages',${i})">✕</button>
+          </div>`).join('')}
+        ${(d.languages||[]).length===0 ? '<button class="cvs-add-btn" onclick="cvStudio.addItem(\'languages\')">+ Ajouter une langue</button>' : ''}
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Certifications <button onclick="cvStudio.addItem('certifications')">+ Ajouter</button></div>
+        ${(d.certifications||[]).map((c,i)=>`
+          <div class="cvs-row">
+            <input placeholder="Nom" value="${esc(c.name||'')}" oninput="cvStudio.updIdx('certifications',${i},'name', this.value)">
+            <input placeholder="Année" value="${esc(c.date||'')}" style="width:80px" oninput="cvStudio.updIdx('certifications',${i},'date', this.value)">
+            <button class="btn-mini" onclick="cvStudio.removeItem('certifications',${i})">✕</button>
+          </div>`).join('')}
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Centres d'intérêt</div>
+        <div class="cvs-row"><input placeholder="Séparés par virgule (ex: Cyclisme, Musique, Voyages)"
+          value="${esc((d.interests||[]).join(', '))}"
+          oninput="cvStudio.updInterests(this.value)"></div>
+      </div>
+    `;
+  },
+
+  upd(path, value){
+    const parts = path.split('.');
+    let cur = this.state.data;
+    for(let i=0;i<parts.length-1;i++){
+      if(!cur[parts[i]]) cur[parts[i]] = {};
+      cur = cur[parts[i]];
+    }
+    cur[parts[parts.length-1]] = value;
+    this.markDirty();
+    this.scheduleRender();
+  },
+  updIdx(arrKey, idx, field, value){
+    if(!this.state.data[arrKey]) this.state.data[arrKey] = [];
+    if(!this.state.data[arrKey][idx]) this.state.data[arrKey][idx] = {};
+    this.state.data[arrKey][idx][field] = value;
+    this.markDirty();
+    this.scheduleRender();
+  },
+  updBullets(arrKey, idx, value){
+    const lines = value.split('\n').map(l=>l.trim()).filter(Boolean);
+    this.state.data[arrKey][idx].bullets = lines;
+    this.markDirty();
+    this.scheduleRender();
+  },
+  updInterests(value){
+    this.state.data.interests = value.split(',').map(s=>s.trim()).filter(Boolean);
+    this.markDirty();
+    this.scheduleRender();
+  },
+  addItem(arrKey){
+    if(!this.state.data[arrKey]) this.state.data[arrKey] = [];
+    const blank = {
+      experience:    {role:'',company:'',location:'',date:'',bullets:[]},
+      education:     {degree:'',school:'',location:'',date:''},
+      skills:        {name:'',level:4},
+      languages:     {name:'',level:''},
+      certifications:{name:'',date:''},
+    }[arrKey] || {};
+    this.state.data[arrKey].push(blank);
+    this.markDirty();
+    this.renderEditor();
+    this.scheduleRender();
+  },
+  removeItem(arrKey, idx){
+    this.state.data[arrKey].splice(idx, 1);
+    this.markDirty();
+    this.renderEditor();
+    this.scheduleRender();
+  },
+};
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 async function loadSettings(){

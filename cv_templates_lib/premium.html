@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>{{name}} — CV</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:{{color}};
+  --primary-d:{{color_dark}};
+  --primary-l:{{color_light}};
+  --text:#1a1a1a;
+  --text2:#3a3a3a;
+  --text3:#7a7a7a;
+  --bg:#fafaf6;
+  --gold:#c9a44c;
+  --line:#d8d3c5;
+}
+body{font-family:'Montserrat',sans-serif;background:#e8e6df;color:var(--text);line-height:1.6;font-size:13px;font-weight:300}
+.cv{max-width:794px;min-height:1123px;margin:0 auto;background:var(--bg);padding:50px 56px 44px;box-shadow:0 4px 30px rgba(0,0,0,.06)}
+
+/* Header — 2 colonnes */
+.header{display:grid;grid-template-columns:1fr 130px;gap:24px;align-items:center;padding-bottom:30px;border-bottom:1px solid var(--line);margin-bottom:30px;position:relative}
+.header::after{content:'❖';position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);background:var(--bg);padding:0 12px;color:var(--primary);font-size:14px}
+.name{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:600;color:var(--text);line-height:1.05;letter-spacing:-.01em;margin-bottom:6px}
+.title{font-size:13.5px;color:var(--primary);font-weight:500;text-transform:uppercase;letter-spacing:.18em;margin-bottom:14px}
+.title::before{content:'';display:inline-block;width:24px;height:1px;background:var(--primary);vertical-align:middle;margin-right:10px}
+.contact-row{display:flex;flex-wrap:wrap;gap:14px;font-size:11.5px;color:var(--text3)}
+.contact-row span{display:flex;align-items:center;gap:5px}
+
+.photo{width:130px;height:130px;border:3px solid var(--primary);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--primary-l);color:var(--primary);font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:700}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Sections */
+.section{margin-bottom:26px}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--text);margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.section-title::before{content:'';display:block;width:6px;height:6px;background:var(--primary);transform:rotate(45deg);flex-shrink:0}
+.section-title::after{content:'';flex:1;height:1px;background:var(--line);margin-left:8px}
+
+/* Summary */
+.summary{font-size:13px;color:var(--text2);line-height:1.75;font-style:italic;font-weight:400;padding:0 12px;border-left:2px solid var(--primary);margin-bottom:12px}
+
+/* Experience — 2 columns */
+.exp{display:grid;grid-template-columns:130px 1fr;gap:18px;margin-bottom:18px;padding-bottom:14px;border-bottom:1px dashed var(--line)}
+.exp:last-child{border-bottom:none}
+.exp-date{font-size:11.5px;font-weight:500;color:var(--primary);letter-spacing:.05em;padding-top:2px}
+.exp-date small{display:block;font-weight:300;color:var(--text3);font-size:11px;margin-top:2px;letter-spacing:0;font-style:italic}
+.exp-role{font-size:14.5px;font-weight:600;color:var(--text);margin-bottom:1px}
+.exp-co{font-size:12.5px;color:var(--text2);margin-bottom:6px;font-weight:500}
+.exp-co em{color:var(--text3);font-weight:300;font-style:italic}
+.exp-desc{list-style:none;margin-top:5px}
+.exp-desc li{position:relative;padding-left:14px;font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:3px}
+.exp-desc li::before{content:'—';position:absolute;left:0;color:var(--primary)}
+
+/* Education */
+.edu-item{display:grid;grid-template-columns:130px 1fr;gap:18px;margin-bottom:12px}
+.edu-date{font-size:11.5px;color:var(--primary);font-weight:500;padding-top:2px}
+.edu-deg{font-size:13.5px;font-weight:600;color:var(--text)}
+.edu-school{font-size:12px;color:var(--text2);font-style:italic}
+
+/* Two-col split for skills/languages */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:30px}
+
+/* Skills with rings */
+.skill{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.skill-ring{flex-shrink:0;width:34px;height:34px;border-radius:50%;background:conic-gradient(var(--primary) calc({{level_pct}}*1%), var(--primary-l) 0);display:flex;align-items:center;justify-content:center;position:relative}
+.skill-ring::after{content:'';position:absolute;inset:4px;background:var(--bg);border-radius:50%}
+.skill-ring span{position:relative;z-index:1;font-size:10px;font-weight:600;color:var(--primary)}
+.skill-info{flex:1}
+.skill-name{font-size:12.5px;font-weight:500;color:var(--text)}
+
+/* Languages */
+.lang{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;margin-bottom:6px;padding:4px 0;border-bottom:1px solid var(--line)}
+.lang:last-child{border-bottom:none}
+.lang-name{font-weight:500;color:var(--text)}
+.lang-level{font-size:11px;color:var(--text3);font-style:italic;letter-spacing:.05em}
+
+/* Certifications */
+.cert{display:flex;justify-content:space-between;align-items:baseline;font-size:12.5px;color:var(--text2);margin-bottom:5px;padding:3px 0}
+.cert-name{font-weight:500;color:var(--text)}
+.cert-date{font-size:11px;color:var(--text3);font-style:italic}
+
+/* Interests */
+.interest{display:inline-block;border:1px solid var(--line);padding:3px 11px;border-radius:99px;font-size:11px;color:var(--text2);margin:0 5px 5px 0;background:#fff}
+
+@media print{
+  body{background:#fff}
+  .cv{box-shadow:none;margin:0;padding:32px 40px}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="cv">
+  <header class="header">
+    <div>
+      <h1 class="name">{{name}}</h1>
+      {{#title}}<div class="title">{{title}}</div>{{/title}}
+      <div class="contact-row">
+        {{#contact.email}}<span>✉ {{contact.email}}</span>{{/contact.email}}
+        {{#contact.phone}}<span>☎ {{contact.phone}}</span>{{/contact.phone}}
+        {{#contact.location}}<span>📍 {{contact.location}}</span>{{/contact.location}}
+        {{#contact.linkedin}}<span>in {{contact.linkedin}}</span>{{/contact.linkedin}}
+      </div>
+    </div>
+    <div class="photo">{{photo_or_initials}}</div>
+  </header>
+
+  {{#summary}}
+  <section class="section">
+    <div class="summary">{{summary}}</div>
+  </section>
+  {{/summary}}
+
+  {{#has_experience}}
+  <section class="section">
+    <div class="section-title">Expérience professionnelle</div>
+    {{#experience}}
+    <div class="exp">
+      <div class="exp-date">{{date}}{{#location}}<small>{{location}}</small>{{/location}}</div>
+      <div>
+        <div class="exp-role">{{role}}</div>
+        <div class="exp-co">{{company}}</div>
+        {{#has_bullets}}
+        <ul class="exp-desc">{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+        {{/has_bullets}}
+      </div>
+    </div>
+    {{/experience}}
+  </section>
+  {{/has_experience}}
+
+  <div class="split">
+    {{#has_education}}
+    <section class="section" style="grid-column:1/-1">
+      <div class="section-title">Formation</div>
+      {{#education}}
+      <div class="edu-item">
+        <div class="edu-date">{{date}}</div>
+        <div>
+          <div class="edu-deg">{{degree}}</div>
+          <div class="edu-school">{{school}}{{#location}} — {{location}}{{/location}}</div>
+        </div>
+      </div>
+      {{/education}}
+    </section>
+    {{/has_education}}
+  </div>
+
+  <div class="split">
+    {{#has_skills}}
+    <section class="section">
+      <div class="section-title">Compétences</div>
+      {{#skills}}
+      <div class="skill">
+        <div class="skill-info"><div class="skill-name">{{name}}</div></div>
+      </div>
+      {{/skills}}
+    </section>
+    {{/has_skills}}
+
+    {{#has_languages}}
+    <section class="section">
+      <div class="section-title">Langues</div>
+      {{#languages}}
+      <div class="lang"><span class="lang-name">{{name}}</span><span class="lang-level">{{level}}</span></div>
+      {{/languages}}
+    </section>
+    {{/has_languages}}
+  </div>
+
+  {{#has_certifications}}
+  <section class="section">
+    <div class="section-title">Certifications</div>
+    {{#certifications}}<div class="cert"><span class="cert-name">{{name}}</span>{{#date}}<span class="cert-date">{{date}}</span>{{/date}}</div>{{/certifications}}
+  </section>
+  {{/has_certifications}}
+
+  {{#has_interests}}
+  <section class="section">
+    <div class="section-title">Centres d'intérêt</div>
+    <div>{{#interests}}<span class="interest">{{.}}</span>{{/interests}}</div>
+  </section>
+  {{/has_interests}}
+</div>
+</body>
+</html>

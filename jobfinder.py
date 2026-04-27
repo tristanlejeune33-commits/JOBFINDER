@@ -2205,6 +2205,349 @@ def route_adapt_cv_pdf():
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
+# ✨ NOUVEAU SYSTÈME CV : data JSON + templates HTML statiques + render rapide
+# ═══════════════════════════════════════════════════════════════════════════════
+CV_TEMPLATES_DIR = os.path.join(BASE_DIR, "cv_templates_lib")
+
+CV_TEMPLATES = {
+    "modern":   {"name": "Moderne",  "file": "modern.html",   "preview": "Sidebar colorée, photo ronde, timeline expérience"},
+    "premium":  {"name": "Premium",  "file": "premium.html",  "preview": "Élégant, typographie serif, raffiné"},
+    "creative": {"name": "Créatif",  "file": "creative.html", "preview": "Header coloré, formes géométriques, tags"},
+}
+
+def _hex_to_rgb(h):
+    h = h.lstrip("#")
+    if len(h) == 3: h = "".join(c*2 for c in h)
+    try: return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
+    except Exception: return (47, 93, 168)  # default accent
+
+def _adjust_color(h, factor):
+    """Éclaircit (factor>1) ou assombrit (factor<1) une couleur hex."""
+    r, g, b = _hex_to_rgb(h)
+    if factor > 1:
+        # éclaircit vers blanc
+        r = int(r + (255 - r) * (factor - 1))
+        g = int(g + (255 - g) * (factor - 1))
+        b = int(b + (255 - b) * (factor - 1))
+    else:
+        r, g, b = int(r * factor), int(g * factor), int(b * factor)
+    r, g, b = max(0, min(255, r)), max(0, min(255, g)), max(0, min(255, b))
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+def _color_light(h):  return _adjust_color(h, 1.85)  # version très claire (fonds)
+def _color_dark(h):   return _adjust_color(h, 0.7)   # version foncée (gradients)
+
+# ── Mini moteur de templates "Mustache-like" (sections + variables) ────────────
+import html as _html_mod
+
+def _esc_html(s):
+    return _html_mod.escape(str(s)) if s is not None else ""
+
+def _get_path(ctx, path):
+    """Résout 'a.b.c' dans ctx (dict ou liste de dicts)."""
+    if path == ".":
+        return ctx
+    cur = ctx
+    for part in path.split("."):
+        if isinstance(cur, dict):
+            cur = cur.get(part)
+        else:
+            return None
+        if cur is None:
+            return None
+    return cur
+
+def _is_truthy(v):
+    if v is None or v is False or v == "" or v == 0:
+        return False
+    if isinstance(v, (list, dict)) and len(v) == 0:
+        return False
+    return True
+
+def _render_template(tpl, ctx):
+    """Mini moteur :
+    - {{path}}            → valeur escapée
+    - {{#path}}...{{/path}}: section. Si liste → boucle (chaque item devient ctx local).
+                              Si truthy → render une fois. Si falsy → skip.
+    - {{.}}               → valeur courante (dans une boucle de strings)
+    Pas d'inversion {{^}}, pas de partials. Suffit pour notre cas.
+    """
+    # Pattern qui matche les sections (gère 1 niveau d'imbrication minimal via récursion)
+    section_re = re.compile(
+        r"\{\{#([\w\.]+)\}\}([\s\S]*?)\{\{/\1\}\}", re.MULTILINE
+    )
+
+    def render_sections(text, local_ctx):
+        # Boucle jusqu'à ce qu'il n'y ait plus de section
+        while True:
+            m = section_re.search(text)
+            if not m:
+                break
+            path, inner = m.group(1), m.group(2)
+            val = _get_path(local_ctx, path)
+            if isinstance(val, list):
+                rendered = ""
+                for item in val:
+                    if isinstance(item, dict):
+                        sub_ctx = {**local_ctx, **item}
+                    else:
+                        sub_ctx = {**local_ctx, ".": item}
+                    rendered += render_sections(inner, sub_ctx)
+                text = text[:m.start()] + rendered + text[m.end():]
+            elif _is_truthy(val):
+                text = text[:m.start()] + render_sections(inner, local_ctx) + text[m.end():]
+            else:
+                text = text[:m.start()] + text[m.end():]
+        # Variables
+        def var_sub(mv):
+            p = mv.group(1)
+            v = _get_path(local_ctx, p)
+            return _esc_html(v) if v is not None else ""
+        text = re.sub(r"\{\{([\w\.]+)\}\}", var_sub, text)
+        return text
+
+    return render_sections(tpl, ctx)
+
+# ── Schéma JSON CV (canonique) ─────────────────────────────────────────────────
+def _empty_cv_data():
+    return {
+        "name": "", "title": "", "summary": "",
+        "contact": {"email": "", "phone": "", "location": "", "linkedin": "", "website": ""},
+        "experience": [],   # [{role, company, location, date, bullets:[]}]
+        "education": [],    # [{degree, school, location, date}]
+        "skills": [],       # [{name, level}]   level 1..5
+        "languages": [],    # [{name, level}]
+        "certifications": [], # [{name, date}]
+        "interests": [],    # [str]
+    }
+
+def _normalize_cv_data(d):
+    """Force le schéma + dérive les flags has_X et level_pct."""
+    base = _empty_cv_data()
+    if isinstance(d, dict):
+        for k in base:
+            if k in d:
+                base[k] = d[k]
+    # contact safe
+    contact = base.get("contact") or {}
+    base["contact"] = {**_empty_cv_data()["contact"], **(contact if isinstance(contact, dict) else {})}
+    # listes safe
+    for key in ("experience", "education", "skills", "languages", "certifications", "interests"):
+        if not isinstance(base.get(key), list):
+            base[key] = []
+    # experience: bullets list + has_bullets
+    for exp in base["experience"]:
+        if not isinstance(exp.get("bullets"), list):
+            exp["bullets"] = []
+        exp["has_bullets"] = bool(exp["bullets"])
+    # skills: level_pct
+    for s in base["skills"]:
+        try: lvl = int(s.get("level", 4))
+        except (TypeError, ValueError): lvl = 4
+        s["level"] = max(1, min(5, lvl))
+        s["level_pct"] = s["level"] * 20
+    # flags has_*
+    base["has_experience"]     = bool(base["experience"])
+    base["has_education"]      = bool(base["education"])
+    base["has_skills"]         = bool(base["skills"])
+    base["has_languages"]      = bool(base["languages"])
+    base["has_certifications"] = bool(base["certifications"])
+    base["has_interests"]      = bool(base["interests"])
+    return base
+
+def _initials(name):
+    parts = (name or "").split()
+    if not parts: return "?"
+    if len(parts) == 1: return parts[0][:2].upper()
+    return (parts[0][0] + parts[-1][0]).upper()
+
+def _render_cv(data, template_id="modern", color="#2F5DA8", photo_data_uri=""):
+    """Render JSON CV → HTML via template choisi."""
+    if template_id not in CV_TEMPLATES:
+        template_id = "modern"
+    tpl_path = os.path.join(CV_TEMPLATES_DIR, CV_TEMPLATES[template_id]["file"])
+    with open(tpl_path, encoding="utf-8") as f:
+        tpl = f.read()
+    ctx = _normalize_cv_data(data)
+    ctx["color"]       = color
+    ctx["color_dark"]  = _color_dark(color)
+    ctx["color_light"] = _color_light(color)
+    if photo_data_uri:
+        ctx["photo_or_initials"] = f'<img src="{photo_data_uri}" alt="">'
+    else:
+        ctx["photo_or_initials"] = _initials(ctx.get("name", ""))
+    return _render_template(tpl, ctx)
+
+# ── DB schema pour les CV utilisateurs ─────────────────────────────────────────
+def _migrate_cv_documents():
+    with get_db() as db:
+        db.execute("""
+        CREATE TABLE IF NOT EXISTS cv_documents (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id     INTEGER NOT NULL,
+            name        TEXT DEFAULT 'Mon CV',
+            data_json   TEXT NOT NULL,
+            template_id TEXT DEFAULT 'modern',
+            color       TEXT DEFAULT '#2F5DA8',
+            created_at  TEXT DEFAULT (datetime('now')),
+            updated_at  TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        )
+        """)
+        db.commit()
+_migrate_cv_documents()
+
+# ── Endpoints CV V2 ────────────────────────────────────────────────────────────
+@app.route("/api/cv/templates", methods=["GET"])
+@require_auth
+def route_cv_templates_list():
+    """Liste statique des templates dispos."""
+    return jsonify([{"id": k, **v} for k, v in CV_TEMPLATES.items()])
+
+@app.route("/api/cv/extract", methods=["POST"])
+@require_auth
+@rate_limit(max_calls=20, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
+@require_quota
+def route_cv_extract():
+    """Extrait un JSON CV structuré depuis le résumé + docs de l'user via IA.
+    À appeler 1 fois pour générer la base, puis l'user édite manuellement."""
+    u    = get_current_user()
+    ud   = get_user_data(u["id"])
+    provider, api_key = get_ai_keys(u)
+    if not api_key:
+        return jsonify({"error": "Service IA non configuré"}), 503
+    summary = (ud.get("summary","") or "").strip()
+    docs    = (ud.get("doc_text","") or "").strip()
+    if not summary and not docs:
+        return jsonify({"error": "Ajoute d'abord ton résumé personnel ou tes documents dans Paramètres."}), 400
+
+    schema_hint = json.dumps(_empty_cv_data(), ensure_ascii=False, indent=2)
+    prompt = f"""Tu es un expert RH. À partir des informations suivantes sur le candidat, génère un JSON structuré pour son CV.
+
+Nom : {u.get("name","")}
+Email : {u.get("email","")}
+
+=== RÉSUMÉ PERSONNEL ===
+{summary[:4000]}
+
+=== DOCUMENTS / CV IMPORTÉS ===
+{docs[:6000]}
+
+=== SCHÉMA JSON ATTENDU ===
+{schema_hint}
+
+CONSIGNES :
+- Remplis chaque champ basé UNIQUEMENT sur les informations ci-dessus. N'INVENTE rien.
+- Si une info est manquante, laisse le champ vide ("") ou la liste vide ([]).
+- "title" = titre / poste actuel ou souhaité (ex: "Développeur Full Stack").
+- "summary" = 2 phrases max, accroche professionnelle. Ton naturel, pas de RH-speak.
+- "experience" : tableau d'expériences, ordre antichronologique. "bullets" = 2-4 puces concrètes par poste, max 12 mots, verbe d'action + résultat si possible.
+- "education" : antichronologique aussi.
+- "skills" : 6 à 12 compétences. "level" entre 1 et 5 (auto-évalué : 5 = expert, 3 = bon, 1 = base).
+- "languages" : avec niveau type "Natif", "C2", "B2", "Bonnes notions", etc.
+- "certifications", "interests" : facultatif si pertinent.
+- Tons des descriptions : direct, sans adjectifs creux ("dynamique", "passionné", "motivé" → INTERDIT).
+
+Retourne UNIQUEMENT le JSON, pas de markdown, pas de commentaire."""
+
+    try:
+        raw = call_ai(provider, api_key, prompt, max_tokens=4000)
+        raw = re.sub(r"^```[\w]*\s*", "", raw.strip())
+        raw = re.sub(r"\s*```$", "", raw.strip())
+        m = re.search(r"\{[\s\S]*\}", raw)
+        if not m:
+            return jsonify({"error": "Réponse IA non parsable"}), 500
+        data = json.loads(m.group(0))
+        # Sanity : pré-remplit nom/email si vides
+        if not data.get("name"):    data["name"]    = u.get("name", "")
+        if not (data.get("contact") or {}).get("email"):
+            data.setdefault("contact", {})["email"] = u.get("email", "")
+        return jsonify({"data": _normalize_cv_data(data)})
+    except Exception as e:
+        log.exception("cv-extract failed")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/cv/render", methods=["POST"])
+@require_auth
+def route_cv_render():
+    """Rendu instantané d'un JSON + template + couleur → HTML. Pas d'IA, pas de quota."""
+    u    = get_current_user()
+    data = request.json or {}
+    cv_data     = data.get("data") or {}
+    template_id = data.get("template_id", "modern")
+    color       = (data.get("color", "#2F5DA8") or "#2F5DA8").strip()
+    if not re.match(r"^#[0-9a-fA-F]{6}$", color):
+        color = "#2F5DA8"
+    ud = get_user_data(u["id"])
+    photo_uri = ""
+    if ud.get("photo_b64"):
+        photo_uri = f"data:{ud.get('photo_mime','image/jpeg')};base64,{ud['photo_b64']}"
+    html = _render_cv(cv_data, template_id, color, photo_uri)
+    return jsonify({"html": html})
+
+@app.route("/api/cv/documents", methods=["GET"])
+@require_auth
+def route_cv_documents_list():
+    u = get_current_user()
+    with get_db() as db:
+        rows = db.execute(
+            "SELECT id,name,template_id,color,created_at,updated_at FROM cv_documents WHERE user_id=? ORDER BY updated_at DESC",
+            (u["id"],)
+        ).fetchall()
+    return jsonify([dict(r) for r in rows])
+
+@app.route("/api/cv/documents", methods=["POST"])
+@require_auth
+def route_cv_documents_create():
+    u = get_current_user()
+    data = request.json or {}
+    name = (data.get("name") or "Mon CV")[:120]
+    cv_data = data.get("data") or _empty_cv_data()
+    template_id = data.get("template_id", "modern")
+    color = data.get("color", "#2F5DA8")
+    if template_id not in CV_TEMPLATES: template_id = "modern"
+    if not re.match(r"^#[0-9a-fA-F]{6}$", color or ""): color = "#2F5DA8"
+    with get_db() as db:
+        cur = db.execute(
+            "INSERT INTO cv_documents(user_id,name,data_json,template_id,color) VALUES(?,?,?,?,?)",
+            (u["id"], name, json.dumps(cv_data, ensure_ascii=False), template_id, color)
+        )
+        cv_id = cur.lastrowid
+        db.commit()
+        row = db.execute("SELECT id,name,template_id,color,created_at,updated_at FROM cv_documents WHERE id=?", (cv_id,)).fetchone()
+    return jsonify(dict(row))
+
+@app.route("/api/cv/documents/<int:cv_id>", methods=["GET","PUT","DELETE"])
+@require_auth
+def route_cv_documents_one(cv_id):
+    u = get_current_user()
+    with get_db() as db:
+        row = db.execute("SELECT * FROM cv_documents WHERE id=? AND user_id=?", (cv_id, u["id"])).fetchone()
+        if not row: return jsonify({"error":"Non trouvé"}), 404
+        if request.method == "DELETE":
+            db.execute("DELETE FROM cv_documents WHERE id=?", (cv_id,))
+            db.commit()
+            return jsonify({"ok": True})
+        if request.method == "PUT":
+            data = request.json or {}
+            sets, vals = [], []
+            if "name" in data:        sets.append("name=?");        vals.append(data["name"][:120])
+            if "data" in data:        sets.append("data_json=?");   vals.append(json.dumps(data["data"], ensure_ascii=False))
+            if "template_id" in data and data["template_id"] in CV_TEMPLATES:
+                sets.append("template_id=?"); vals.append(data["template_id"])
+            if "color" in data and re.match(r"^#[0-9a-fA-F]{6}$", data.get("color","") or ""):
+                sets.append("color=?"); vals.append(data["color"])
+            if sets:
+                sets.append("updated_at=datetime('now')")
+                db.execute(f"UPDATE cv_documents SET {','.join(sets)} WHERE id=?", (*vals, cv_id))
+                db.commit()
+            row = db.execute("SELECT * FROM cv_documents WHERE id=?", (cv_id,)).fetchone()
+    out = dict(row)
+    out["data"] = json.loads(out.pop("data_json") or "{}")
+    return jsonify(out)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
 # ROUTES ADMIN
 # ═══════════════════════════════════════════════════════════════════════════════
 
