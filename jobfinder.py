@@ -338,11 +338,134 @@ def consume_email_token(token, kind, max_age_hours=24):
         return row["user_id"]
 
 # ── Base de données ─────────────────────────────────────────────────────────────
+# Support transparent SQLite (dev) / PostgreSQL (prod via DATABASE_URL).
+# Le reste du code utilise la même API : `with get_db() as db: db.execute(...)`.
+DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
+USE_POSTGRES = bool(DATABASE_URL)
+
+if USE_POSTGRES:
+    import psycopg2
+    import psycopg2.extras
+    log.info("Backend DB : PostgreSQL (DATABASE_URL détecté)")
+else:
+    log.info(f"Backend DB : SQLite ({DB_PATH})")
+
+# Traductions SQLite → Postgres (idempotentes pour SQLite)
+_LASTROWID_MARKER = "__LASTROWID__"
+
+def _translate_sql(sql):
+    """Traduit du SQLite-flavored SQL en Postgres."""
+    s = sql
+    # Placeholders ? → %s
+    s = s.replace("?", "%s")
+    # AUTOINCREMENT
+    s = s.replace("INTEGER PRIMARY KEY AUTOINCREMENT", "SERIAL PRIMARY KEY")
+    # Functions de date
+    s = re.sub(r"datetime\('now'\)", "(now() at time zone 'utc')::text", s)
+    s = re.sub(r"date\('now'\)", "current_date::text", s)
+    s = re.sub(r"datetime\('now','-(\d+)\s*days'\)", r"((now() at time zone 'utc') - interval '\1 days')::text", s)
+    # INSERT OR IGNORE → INSERT ... ON CONFLICT DO NOTHING
+    if re.search(r"\bINSERT\s+OR\s+IGNORE\b", s, re.IGNORECASE):
+        s = re.sub(r"\bINSERT\s+OR\s+IGNORE\b", "INSERT", s, flags=re.IGNORECASE)
+        if "ON CONFLICT" not in s.upper():
+            s = s.rstrip().rstrip(";") + " ON CONFLICT DO NOTHING"
+    # Strip PRAGMA (Postgres ne connaît pas)
+    s = re.sub(r"PRAGMA[^;]+;?", "", s, flags=re.IGNORECASE)
+    return s
+
+
+class _PgCursor:
+    """Wrapper minimaliste : émule l'API SQLite (.execute/.fetchone/.fetchall/.lastrowid)."""
+    def __init__(self, raw):
+        self._cur = raw
+        self.lastrowid = None
+    def fetchone(self):
+        row = self._cur.fetchone()
+        return row  # déjà un dict-like (RealDictRow)
+    def fetchall(self):
+        return self._cur.fetchall()
+    def __iter__(self):
+        return iter(self._cur)
+    def close(self):
+        self._cur.close()
+
+
+class _PgConn:
+    """Wrapper qui présente l'API SQLite tout en parlant à Postgres."""
+    def __init__(self):
+        self._conn = psycopg2.connect(DATABASE_URL)
+        self._conn.autocommit = False
+
+    def execute(self, sql, params=()):
+        translated = _translate_sql(sql)
+        cur = self._conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        # Auto-RETURNING id sur les INSERT pour exposer lastrowid
+        wrap = _PgCursor(cur)
+        try:
+            if re.match(r"\s*INSERT\s+INTO\s+(\w+)", translated, re.IGNORECASE) and "RETURNING" not in translated.upper():
+                translated = translated.rstrip().rstrip(";") + " RETURNING id"
+                cur.execute(translated, params or None)
+                try:
+                    row = cur.fetchone()
+                    if row and "id" in row:
+                        wrap.lastrowid = row["id"]
+                except psycopg2.ProgrammingError:
+                    pass  # pas de result set (ON CONFLICT DO NOTHING peut renvoyer rien)
+            else:
+                cur.execute(translated, params or None)
+        except Exception:
+            self._conn.rollback()
+            raise
+        return wrap
+
+    def executescript(self, script):
+        # Postgres : on découpe sur ; et on exécute chaque statement
+        cur = self._conn.cursor()
+        try:
+            for stmt in re.split(r";\s*\n", script):
+                stmt = stmt.strip()
+                if not stmt: continue
+                cur.execute(_translate_sql(stmt))
+        except Exception:
+            self._conn.rollback()
+            raise
+        finally:
+            cur.close()
+
+    def commit(self):
+        self._conn.commit()
+
+    def rollback(self):
+        self._conn.rollback()
+
+    def close(self):
+        self._conn.close()
+
+    def __enter__(self):
+        return self
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        if exc_type is None:
+            try: self._conn.commit()
+            except Exception: pass
+        else:
+            try: self._conn.rollback()
+            except Exception: pass
+        self.close()
+
+
 def get_db():
+    if USE_POSTGRES:
+        return _PgConn()
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
+
+
+# Erreur d'index/colonne — pour les migrations idempotentes
+def _is_dup_column_err(e):
+    msg = str(e).lower()
+    return ("duplicate column" in msg) or ("already exists" in msg) or ("operationalerror" in msg)
 
 def init_db():
     with get_db() as db:
@@ -444,13 +567,16 @@ def _migrate_columns():
         ("users",            "deleted_at",     "TEXT DEFAULT ''"),
         ("interview_stages", "reminder_sent",  "INTEGER DEFAULT 0"),
     ]
-    with get_db() as db:
-        for table, col, ddl in cols:
-            try:
+    for table, col, ddl in cols:
+        # Postgres ne tolère pas un ALTER qui rate dans une transaction → 1 conn par essai
+        try:
+            with get_db() as db:
                 db.execute(f"ALTER TABLE {table} ADD COLUMN {col} {ddl}")
-            except sqlite3.OperationalError:
-                pass
-        db.commit()
+                db.commit()
+        except Exception as e:
+            if not _is_dup_column_err(e):
+                # Vraie erreur (ex: table absente) — log mais on continue
+                log.warning(f"migrate {table}.{col}: {e}")
 _migrate_columns()
 
 # ── Helpers SQL ─────────────────────────────────────────────────────────────────
@@ -2634,13 +2760,20 @@ def route_admin_run_reminders():
 @app.route("/api/admin/backup-db", methods=["GET"])
 @require_role("admin")
 def route_admin_backup_db():
-    """Téléchargement de la DB SQLite (snapshot cohérent via VACUUM INTO).
-    À hitter quotidiennement par un cron externe pour backup automatique."""
+    """Backup snapshot de la DB.
+    - SQLite : VACUUM INTO + send_file
+    - Postgres : redirige vers Railway Backups (intégré, plus efficace)"""
+    if USE_POSTGRES:
+        return jsonify({
+            "info": "DB Postgres détectée. Utilise les Backups Railway intégrés "
+                    "(onglet Backups du service Postgres) → snapshots automatiques + restauration en 1 clic.",
+            "use_railway_backups": True,
+        })
     import tempfile
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
     tmp.close()
     try:
-        os.unlink(tmp.name)  # VACUUM INTO refuse un fichier qui existe
+        os.unlink(tmp.name)
     except Exception: pass
     try:
         with get_db() as db:
