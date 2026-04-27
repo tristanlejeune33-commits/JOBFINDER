@@ -36,9 +36,10 @@ except ImportError:
     def web_session(): return http_req.Session()
 
 # ── Secrets / clés API ──────────────────────────────────────────────────────────
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "").strip()
-if IS_PROD and not OPENAI_API_KEY:
-    log.warning("OPENAI_API_KEY non défini — les endpoints IA partagés ne fonctionneront pas.")
+OPENAI_API_KEY    = os.environ.get("OPENAI_API_KEY", "").strip()
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "").strip()
+if IS_PROD and not (OPENAI_API_KEY or ANTHROPIC_API_KEY):
+    log.warning("Aucune clé IA (OPENAI_API_KEY / ANTHROPIC_API_KEY) — les endpoints IA renverront 503.")
 
 SECRET_KEY = os.environ.get("SECRET_KEY", "").strip()
 if IS_PROD and not SECRET_KEY:
@@ -181,42 +182,6 @@ if SENTRY_DSN:
         log.info("Sentry initialisé.")
     except Exception as e:
         log.warning(f"Sentry init failed: {e}")
-
-# ── Chiffrement des clés API stockées en DB (Fernet) ────────────────────────────
-FERNET_KEY = os.environ.get("FERNET_KEY", "").strip()
-_fernet = None
-if FERNET_KEY:
-    try:
-        from cryptography.fernet import Fernet, InvalidToken
-        _fernet = Fernet(FERNET_KEY.encode())
-        log.info("FERNET_KEY actif — clés API chiffrées en DB.")
-    except Exception as e:
-        log.error(f"FERNET_KEY invalide ({e}). Génère-en une avec: "
-                  "python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"")
-        _fernet = None
-else:
-    if IS_PROD:
-        log.warning("FERNET_KEY non défini — clés API en clair en DB. Recommandé en prod.")
-
-def enc_secret(s):
-    """Chiffre une clé API avant DB. Idempotent (préfixe 'enc:')."""
-    if not s or not _fernet: return s or ""
-    if s.startswith("enc:"):  return s
-    try:
-        return "enc:" + _fernet.encrypt(s.encode()).decode()
-    except Exception:
-        return s
-
-def dec_secret(s):
-    """Déchiffre une clé API depuis DB."""
-    if not s or not _fernet:    return s or ""
-    if not s.startswith("enc:"): return s
-    try:
-        from cryptography.fernet import InvalidToken
-        return _fernet.decrypt(s[4:].encode()).decode()
-    except Exception:
-        log.error("Déchiffrement clé API échoué (FERNET_KEY a changé ?)")
-        return ""
 
 # ── hCaptcha (anti-bot register, no-op si HCAPTCHA_SECRET absent) ──────────────
 HCAPTCHA_SECRET   = os.environ.get("HCAPTCHA_SECRET", "").strip()
@@ -559,10 +524,11 @@ def call_ai(provider, api_key, prompt, max_tokens=8000):
         )
         return msg.content[0].text
 
-def get_ai_keys(user):
-    claude_key = dec_secret((user.get("api_key_claude", "") or "").strip())
-    if claude_key:
-        return "Claude (Anthropic)", claude_key
+def get_ai_keys(user=None):
+    """Renvoie (provider, api_key) à partir des clés globales (env).
+    Priorité Anthropic si présent, sinon OpenAI."""
+    if ANTHROPIC_API_KEY:
+        return "Claude (Anthropic)", ANTHROPIC_API_KEY
     return "OpenAI (ChatGPT)", OPENAI_API_KEY
 
 def get_docs_context(user_id):
@@ -957,30 +923,19 @@ def route_privacy():
 @app.route("/api/config", methods=["GET","POST"])
 @require_auth
 def route_config():
+    """État du profil utilisateur (pour les bandeaux d'onboarding).
+    Plus de gestion de clé API par user : tout passe par les clés globales
+    OPENAI_API_KEY / ANTHROPIC_API_KEY (env)."""
     u = get_current_user()
     if request.method == "GET":
         ud = get_user_data(u["id"])
         return jsonify({
-            "provider":       u.get("ai_provider","Claude (Anthropic)"),
-            "has_claude_key": bool(u.get("api_key_claude","")),
-            "has_openai_key": True,
-            "has_summary":    bool(ud.get("summary","").strip()),
-            "has_docs":       bool(ud.get("doc_text","").strip()),
-            "has_photo":      bool(ud.get("photo_b64","").strip()),
+            "has_summary": bool(ud.get("summary","").strip()),
+            "has_docs":    bool(ud.get("doc_text","").strip()),
+            "has_photo":   bool(ud.get("photo_b64","").strip()),
+            "ai_ready":    bool(OPENAI_API_KEY or ANTHROPIC_API_KEY),
         })
-    data = request.json or {}
-    sets = {}
-    if "provider" in data:
-        sets["ai_provider"] = data["provider"]
-    if data.get("api_key"):
-        sets["api_key_claude"] = enc_secret(data["api_key"].strip())
-    if data.get("api_key_openai"):
-        sets["api_key_openai"] = enc_secret(data["api_key_openai"].strip())
-    if sets:
-        cols = ", ".join(f"{k}=?" for k in sets)
-        with get_db() as db:
-            db.execute(f"UPDATE users SET {cols} WHERE id=?", (*sets.values(), u["id"]))
-            db.commit()
+    # POST : conservé pour compatibilité, plus de champ accepté.
     return jsonify({"ok": True})
 
 # ═══════════════════════════════════════════════════════════════════════════════
