@@ -40,3 +40,7 @@ desktop.ini
 
 # ── Logs ─────────────────────────────────────────────────────────────────
 *.log
+
+# ── Claude Code (config locale, ne pas pusher) ───────────────────────────
+.claude/settings.local.json
+.claude/worktrees/
