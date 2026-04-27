@@ -1946,6 +1946,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
     <div class="cvs-preview-col">
       <div class="cvs-preview-toolbar">
         <div class="cvs-tpl-tabs" id="cvs-tpl-tabs"></div>
+        <button class="btn btn-secondary btn-sm" onclick="cvLibrary.open()" style="white-space:nowrap" title="Voir tous les templates">📚 Bibliothèque</button>
         <div class="cvs-color-picker">
           <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Couleur</label>
           <input type="color" id="cvs-color" value="#2F5DA8" oninput="cvStudio.onColorChange(this.value)">
@@ -1977,6 +1978,23 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══ BIBLIOTHÈQUE TEMPLATES (modal plein écran) ══ -->
+<div id="cv-library-modal" style="display:none;position:fixed;inset:0;background:rgba(10,15,30,.92);backdrop-filter:blur(8px);z-index:9999;overflow-y:auto">
+  <div style="max-width:1280px;margin:0 auto;padding:30px 24px 60px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:14px">
+      <div>
+        <h2 style="color:#fff;font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px">📚 Bibliothèque de templates</h2>
+        <p style="color:rgba(255,255,255,.65);font-size:13px"><span id="cvlib-count">…</span> templates disponibles · clique pour appliquer</p>
+      </div>
+      <button onclick="cvLibrary.close()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px">✕</button>
+    </div>
+
+    <div id="cvlib-cats" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px"></div>
+
+    <div id="cvlib-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px"></div>
   </div>
 </div>
 
@@ -3649,7 +3667,9 @@ const cvStudio = {
 
   async init(){
     if(this.templates.length===0){
-      this.templates = await api('/api/cv/templates');
+      const r = await api('/api/cv/templates');
+      // Compat : nouvelle API renvoie {templates, categories} ; ancienne renvoyait []
+      this.templates = Array.isArray(r) ? r : (r.templates || []);
       this.renderTabs();
     }
     // Charge le dernier CV ou crée vierge
@@ -3673,9 +3693,16 @@ const cvStudio = {
   renderTabs(){
     const w = document.getElementById('cvs-tpl-tabs');
     if(!w) return;
-    w.innerHTML = this.templates.map(t=>`
+    // Affiche les 6 premiers (les "core") en onglets, le reste accessible via la bibliothèque
+    const tabsToShow = this.templates.slice(0, 6);
+    const extra = Math.max(0, this.templates.length - 6);
+    let html = tabsToShow.map(t=>`
       <button class="cvs-tpl-tab" data-tpl="${esc(t.id)}" onclick="cvStudio.setTemplate('${esc(t.id)}')" title="${esc(t.preview)}">${esc(t.name)}</button>
     `).join('');
+    if(extra > 0){
+      html += `<button class="cvs-tpl-tab" onclick="cvLibrary.open()" style="background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;border-color:transparent">+${extra} autres →</button>`;
+    }
+    w.innerHTML = html;
     this.activeTab(this.state.template_id);
   },
 
@@ -3940,6 +3967,148 @@ const cvStudio = {
     this.scheduleRender();
   },
 };
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CV LIBRARY — galerie modal pour parcourir tous les templates
+// ══════════════════════════════════════════════════════════════════════════════
+const cvLibrary = {
+  cache: null,
+  activeCategory: 'Tous',
+  // Données fictives pour les thumbnails (cohérent visuellement)
+  sampleData: {
+    name: 'Marie Dupont', title: 'Designer Senior',
+    summary: 'Designer produit avec 8 ans d\'expérience. Construire des interfaces utiles et belles.',
+    contact: {email:'marie@example.com', phone:'+33 6 12 34 56', location:'Paris', linkedin:'marie-dupont', website:''},
+    experience: [
+      {role:'Lead Designer', company:'Acme Corp', location:'Paris', date:'2022 - Présent',
+       bullets:['Refonte UX complète, +35% conversion','Système de design 200+ composants','Manager 3 designers']},
+      {role:'Product Designer', company:'Globex', location:'Lyon', date:'2019 - 2022',
+       bullets:['Design app mobile (4M users)','User research lead','Workshop facilitation']},
+    ],
+    education:[{degree:'Master Design Numérique', school:'Strate École', location:'Paris', date:'2015 - 2017'}],
+    skills:[{name:'Figma',level:5},{name:'UI/UX',level:5},{name:'Prototyping',level:4},{name:'Recherche utilisateur',level:4},{name:'Design systems',level:5}],
+    languages:[{name:'Français',level:'Natif'},{name:'Anglais',level:'C1'}],
+    certifications:[{name:'NN/g UX Master',date:'2021'}],
+    interests:['Photo argentique','Cyclisme','Cuisine'],
+  },
+
+  async open(){
+    document.getElementById('cv-library-modal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    if(!this.cache){
+      const r = await api('/api/cv/templates');
+      this.cache = r;
+    }
+    this.renderCategories();
+    this.renderGrid();
+  },
+
+  close(){
+    document.getElementById('cv-library-modal').style.display = 'none';
+    document.body.style.overflow = '';
+  },
+
+  renderCategories(){
+    const wrap = document.getElementById('cvlib-cats');
+    if(!this.cache) return;
+    const cats = this.cache.categories || ['Tous'];
+    wrap.innerHTML = cats.map(c => `
+      <button onclick="cvLibrary.setCategory('${esc(c)}')"
+        class="cvlib-cat ${c === this.activeCategory ? 'active' : ''}"
+        style="padding:8px 16px;border-radius:99px;border:1px solid rgba(255,255,255,.18);
+               background:${c === this.activeCategory ? '#fff' : 'rgba(255,255,255,.06)'};
+               color:${c === this.activeCategory ? '#0a0a0a' : '#fff'};
+               font-size:12.5px;font-weight:600;cursor:pointer;transition:.2s">
+        ${esc(c)}
+      </button>
+    `).join('');
+  },
+
+  setCategory(cat){
+    this.activeCategory = cat;
+    this.renderCategories();
+    this.renderGrid();
+  },
+
+  async renderGrid(){
+    const grid = document.getElementById('cvlib-grid');
+    const counter = document.getElementById('cvlib-count');
+    if(!this.cache) return;
+    let templates = this.cache.templates || [];
+    if(this.activeCategory && this.activeCategory !== 'Tous'){
+      templates = templates.filter(t => t.category === this.activeCategory);
+    }
+    counter.textContent = templates.length;
+
+    if(!templates.length){
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:rgba(255,255,255,.5)">Aucun template dans cette catégorie</div>`;
+      return;
+    }
+
+    // Couleur de prévisualisation = couleur active CV studio (ou bleu par défaut)
+    const previewColor = (cvStudio.state.color || '#2F5DA8');
+    const data = (cvStudio.state.data && Object.keys(cvStudio.state.data).length) ? cvStudio.state.data : this.sampleData;
+
+    grid.innerHTML = templates.map(t => {
+      const active = (cvStudio.state.template_id === t.id);
+      return `
+      <div class="cvlib-card" data-tid="${esc(t.id)}"
+           style="background:#fff;border-radius:14px;overflow:hidden;cursor:pointer;
+                  transition:.25s;border:3px solid ${active ? previewColor : 'transparent'};
+                  box-shadow:0 4px 24px rgba(0,0,0,.4);position:relative">
+        <div style="aspect-ratio:794/1123;background:#eee;overflow:hidden;position:relative">
+          <iframe sandbox="allow-same-origin" data-tid="${esc(t.id)}"
+                  style="width:794px;height:1123px;border:none;transform:scale(.31);transform-origin:top left;
+                         pointer-events:none"></iframe>
+          ${active ? '<div style="position:absolute;top:10px;right:10px;background:'+previewColor+';color:#fff;padding:4px 10px;border-radius:99px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Sélectionné</div>' : ''}
+        </div>
+        <div style="padding:14px 16px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+            <strong style="font-size:14.5px;color:var(--text)">${esc(t.name)}</strong>
+            <span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;background:var(--card2);padding:2px 8px;border-radius:99px">${esc(t.category)}</span>
+          </div>
+          <div style="font-size:11.5px;color:var(--text3);line-height:1.5">${esc(t.preview)}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Click handler + lazy render des thumbnails
+    grid.querySelectorAll('.cvlib-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const tid = card.dataset.tid;
+        cvStudio.setTemplate(tid);
+        // Update active state visuel
+        cvLibrary.renderGrid();
+        // Ferme après un petit délai pour qu'on voie la sélection
+        setTimeout(() => cvLibrary.close(), 350);
+      });
+      card.addEventListener('mouseenter', () => {
+        if(card.style.borderColor === 'transparent') card.style.transform = 'translateY(-4px)';
+      });
+      card.addEventListener('mouseleave', () => {
+        card.style.transform = '';
+      });
+    });
+
+    // Render thumbnails async (un par un pour pas tout bloquer)
+    grid.querySelectorAll('iframe[data-tid]').forEach(async (iframe, i) => {
+      setTimeout(async () => {
+        const tid = iframe.dataset.tid;
+        try{
+          const r = await post('/api/cv/render', {data, template_id: tid, color: previewColor});
+          if(r && r.html){ iframe.srcdoc = r.html; }
+        }catch(e){ /* silent */ }
+      }, i * 60);  // 60 ms entre chaque pour étaler la charge
+    });
+  },
+};
+
+// ESC ferme le modal
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape' && document.getElementById('cv-library-modal')?.style.display === 'block'){
+    cvLibrary.close();
+  }
+});
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 async function loadSettings(){

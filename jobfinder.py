@@ -2438,14 +2438,73 @@ def route_adapt_cv_pdf():
 # ═══════════════════════════════════════════════════════════════════════════════
 CV_TEMPLATES_DIR = os.path.join(BASE_DIR, "cv_templates_lib")
 
-CV_TEMPLATES = {
-    "modern":    {"name": "Moderne",   "file": "modern.html",    "preview": "Sidebar gradient, photo, timeline avec dropcap"},
-    "editorial": {"name": "Éditorial", "file": "editorial.html", "preview": "Magazine luxe, typo Fraunces, dropcap, lead citation"},
-    "bold":      {"name": "Bold",      "file": "bold.html",      "preview": "Hero asymétrique, typo Archivo Black, cards stack"},
-    "tech":      {"name": "Tech",      "file": "tech.html",      "preview": "Dark mode, terminal-style, JetBrains Mono"},
-    "premium":   {"name": "Premium",   "file": "premium.html",   "preview": "Serif élégant, raffiné, dates en colonne"},
-    "creative":  {"name": "Créatif",   "file": "creative.html",  "preview": "Header gradient, formes géométriques, tags"},
+# Métadonnées par défaut pour les templates "core" (peuvent être surchargées
+# par un commentaire <!-- meta: {...} --> dans le fichier HTML)
+_TEMPLATES_META_DEFAULTS = {
+    "modern":    {"name": "Moderne",   "category": "Moderne",  "preview": "Sidebar gradient, photo, timeline avec dropcap"},
+    "editorial": {"name": "Éditorial", "category": "Premium",  "preview": "Magazine luxe, typo Fraunces, dropcap"},
+    "bold":      {"name": "Bold",      "category": "Créatif",  "preview": "Hero asymétrique, Archivo Black, néobrutaliste"},
+    "tech":      {"name": "Tech",      "category": "Tech",     "preview": "Dark mode, terminal-style, JetBrains Mono"},
+    "premium":   {"name": "Premium",   "category": "Premium",  "preview": "Serif élégant, raffiné, dates en colonne"},
+    "creative":  {"name": "Créatif",   "category": "Créatif",  "preview": "Header gradient, formes géométriques"},
 }
+
+# Cache (re-scanné au démarrage et toutes les 60 sec si fichiers ajoutés)
+_templates_cache = {"data": None, "ts": 0}
+
+def _parse_template_meta(html_head):
+    """Cherche un commentaire <!-- meta: {...} --> en tête du HTML.
+    Retourne dict ou {} si pas trouvé."""
+    m = re.search(r"<!--\s*meta\s*:\s*(\{[\s\S]*?\})\s*-->", html_head[:2000])
+    if not m: return {}
+    try:
+        return json.loads(m.group(1))
+    except Exception:
+        return {}
+
+def _discover_templates(force=False):
+    """Scanne CV_TEMPLATES_DIR et renvoie un dict {id: meta}."""
+    if not force and _templates_cache["data"] is not None and (time.time() - _templates_cache["ts"]) < 60:
+        return _templates_cache["data"]
+    out = {}
+    if not os.path.isdir(CV_TEMPLATES_DIR):
+        _templates_cache["data"] = {}; _templates_cache["ts"] = time.time()
+        return {}
+    for fname in sorted(os.listdir(CV_TEMPLATES_DIR)):
+        if not fname.endswith(".html"): continue
+        if fname.startswith("_"): continue  # _partials cachés
+        path = os.path.join(CV_TEMPLATES_DIR, fname)
+        tid = re.sub(r"\.html$", "", fname)
+        try:
+            with open(path, encoding="utf-8") as f:
+                head = f.read(3000)
+        except Exception as e:
+            log.warning(f"template read fail {fname}: {e}")
+            continue
+        meta_inline = _parse_template_meta(head)
+        defaults = _TEMPLATES_META_DEFAULTS.get(tid, {})
+        out[tid] = {
+            "id":       tid,
+            "name":     meta_inline.get("name")     or defaults.get("name") or tid.replace("_", " ").title(),
+            "category": meta_inline.get("category") or defaults.get("category") or "Autres",
+            "preview":  meta_inline.get("preview")  or defaults.get("preview") or "",
+            "tags":     meta_inline.get("tags")     or [],
+            "file":     fname,
+        }
+    _templates_cache["data"] = out
+    _templates_cache["ts"] = time.time()
+    return out
+
+# Rétro-compat : on expose CV_TEMPLATES comme une vue dynamique
+class _TemplatesProxy:
+    def __getitem__(self, k): return _discover_templates()[k]
+    def __contains__(self, k): return k in _discover_templates()
+    def __iter__(self): return iter(_discover_templates())
+    def get(self, k, default=None): return _discover_templates().get(k, default)
+    def items(self): return _discover_templates().items()
+    def keys(self): return _discover_templates().keys()
+    def values(self): return _discover_templates().values()
+CV_TEMPLATES = _TemplatesProxy()
 
 def _hex_to_rgb(h):
     h = h.lstrip("#")
@@ -2757,8 +2816,23 @@ _migrate_cv_documents()
 @app.route("/api/cv/templates", methods=["GET"])
 @require_auth
 def route_cv_templates_list():
-    """Liste statique des templates dispos."""
-    return jsonify([{"id": k, **v} for k, v in CV_TEMPLATES.items()])
+    """Liste dynamique des templates (auto-découverte du dossier)."""
+    cat_filter = (request.args.get("category") or "").strip()
+    items = list(CV_TEMPLATES.values())
+    if cat_filter and cat_filter.lower() != "tous":
+        items = [t for t in items if t.get("category", "").lower() == cat_filter.lower()]
+    # Ordre : core templates d'abord, puis alpha
+    core_order = ["modern", "editorial", "bold", "tech", "premium", "creative"]
+    items.sort(key=lambda t: (
+        core_order.index(t["id"]) if t["id"] in core_order else 999,
+        t.get("name", "")
+    ))
+    cats = sorted({t.get("category", "Autres") for t in CV_TEMPLATES.values()})
+    return jsonify({
+        "templates": items,
+        "categories": ["Tous"] + cats,
+        "total": len(items),
+    })
 
 @app.route("/api/cv/extract", methods=["POST"])
 @require_auth
