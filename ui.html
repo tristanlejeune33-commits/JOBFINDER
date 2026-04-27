@@ -1587,7 +1587,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <div class="flex items-c justify-b">
         <span class="card-title" style="margin-bottom:0">👁️ Aperçu du CV adapté</span>
       </div>
-      <iframe id="cv-preview" srcdoc="<body style='font-family:system-ui;color:#6B7280;display:flex;height:100%;align-items:center;justify-content:center;background:#F4F7FD;padding:24px;box-sizing:border-box'><div style='text-align:center;max-width:300px'><div style='font-size:40px;margin-bottom:14px'>✨</div><div style='font-size:15px;font-weight:700;color:#374151;margin-bottom:10px'>Comment ça marche</div><ol style='text-align:left;font-size:12px;line-height:1.8;color:#6B7280;padding-left:18px'><li>Choisissez une <b>candidature</b> ou collez l&apos;URL d&apos;une offre</li><li>Renseignez l&apos;entreprise et le poste</li><li>Cliquez sur <b>✨ Générer mon CV</b></li></ol><div style='font-size:11px;color:#9CA3AF;margin-top:12px'>Votre CV adapté apparaîtra ici</div></div></body>"></iframe>
+      <iframe id="cv-preview" sandbox="allow-same-origin" srcdoc="<body style='font-family:system-ui;color:#6B7280;display:flex;height:100%;align-items:center;justify-content:center;background:#F4F7FD;padding:24px;box-sizing:border-box'><div style='text-align:center;max-width:300px'><div style='font-size:40px;margin-bottom:14px'>✨</div><div style='font-size:15px;font-weight:700;color:#374151;margin-bottom:10px'>Comment ça marche</div><ol style='text-align:left;font-size:12px;line-height:1.8;color:#6B7280;padding-left:18px'><li>Choisissez une <b>candidature</b> ou collez l&apos;URL d&apos;une offre</li><li>Renseignez l&apos;entreprise et le poste</li><li>Cliquez sur <b>✨ Générer mon CV</b></li></ol><div style='font-size:11px;color:#9CA3AF;margin-top:12px'>Votre CV adapté apparaîtra ici</div></div></body>"></iframe>
       <div class="gen-overlay" id="gen-overlay">
         <div class="gen-photo-ring">
           <div class="gen-photo-inner" id="gen-photo-inner">🤖</div>
@@ -1708,9 +1708,29 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <div class="card-title">ℹ️ À propos</div>
       <div class="tx-sm tx-m" style="line-height:1.7">
         JobFinder — Le copilote de ta recherche d'emploi<br>
-        Compatible Claude &amp; ChatGPT · Interface web locale<br>
-        Données stockées dans le dossier <code style="color:var(--accent)">data/</code>
+        Compatible Claude &amp; ChatGPT<br>
+        <a href="/cgu" target="_blank" style="color:var(--accent)">CGU</a> ·
+        <a href="/privacy" target="_blank" style="color:var(--accent)">Confidentialité</a>
       </div>
+    </div>
+
+    <!-- Mon compte / RGPD -->
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-title">🛡️ Mon compte &amp; RGPD</div>
+
+      <div id="s-verify-banner" style="display:none;padding:10px 12px;background:var(--yellow-d);border-left:3px solid var(--yellow);border-radius:6px;margin-bottom:12px;font-size:13px">
+        ⚠️ <strong>Email non vérifié.</strong>
+        <button class="btn btn-secondary btn-sm" style="margin-left:8px" onclick="resendVerification()">📧 Renvoyer le lien</button>
+      </div>
+
+      <div id="s-quota-row" class="tx-sm tx-m" style="margin-bottom:14px"></div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+        <button class="btn btn-secondary btn-sm" onclick="changePasswordPrompt()">🔑 Changer le mot de passe</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportMyData()">📥 Exporter mes données (RGPD)</button>
+        <button class="btn btn-red btn-sm" onclick="deleteMyAccountPrompt()">🗑️ Supprimer mon compte</button>
+      </div>
+      <div id="s-account-status" class="tx-sm mt2" style="color:var(--text3)"></div>
     </div>
   </div>
 </div>
@@ -1967,13 +1987,22 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
         <div class="fg"><label>Mot de passe</label><input type="password" id="a-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
         <div class="auth-error" id="login-err"></div>
         <button class="btn btn-primary" style="width:100%;margin-top:16px;padding:13px;font-size:14px" onclick="doLogin()">→ Se connecter</button>
+        <div style="text-align:center;margin-top:12px;font-size:12px">
+          <a href="#" onclick="forgotPasswordPrompt();return false" style="color:var(--accent)">Mot de passe oublié ?</a>
+        </div>
       </div>
       <div id="auth-register-form" style="display:none">
         <div class="fg"><label>Prénom</label><input type="text" id="r-name" placeholder="Votre prénom"></div>
         <div class="fg"><label>Email</label><input type="email" id="r-email" placeholder="vous@email.com"></div>
-        <div class="fg"><label>Mot de passe</label><input type="password" id="r-pwd" placeholder="Min 6 caractères" onkeydown="if(event.key==='Enter')doRegister()"></div>
+        <div class="fg"><label>Mot de passe</label><input type="password" id="r-pwd" placeholder="Min 8 caractères" onkeydown="if(event.key==='Enter')doRegister()"></div>
+        <div id="r-hcaptcha-wrap" style="margin:10px 0"></div>
         <div class="auth-error" id="register-err"></div>
         <button class="btn btn-primary" style="width:100%;margin-top:16px;padding:13px;font-size:14px" onclick="doRegister()">✨ Créer mon compte gratuit</button>
+        <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text3)">
+          En créant un compte, tu acceptes les
+          <a href="/cgu" target="_blank" style="color:var(--accent)">CGU</a> et la
+          <a href="/privacy" target="_blank" style="color:var(--accent)">politique de confidentialité</a>.
+        </div>
       </div>
       <div class="auth-trust">
         <span class="auth-trust-item"><span>🔒</span> Sécurisé</span>
@@ -2094,9 +2123,97 @@ async function doRegister(){
   const pwd=document.getElementById('r-pwd').value;
   const err=document.getElementById('register-err');
   err.style.display='none';
-  const data=await post('/api/auth/register',{name,email,password:pwd});
-  if(data.error){err.textContent=data.error;err.style.display='';return;}
+  let captcha_token = '';
+  if(window.hcaptcha && window._hcaptcha_widget_id !== undefined){
+    captcha_token = window.hcaptcha.getResponse(window._hcaptcha_widget_id) || '';
+  }
+  const data=await post('/api/auth/register',{name,email,password:pwd,hcaptcha_token:captcha_token});
+  if(data.error){
+    err.textContent=data.error;err.style.display='';
+    if(window.hcaptcha) try{window.hcaptcha.reset(window._hcaptcha_widget_id);}catch(e){}
+    return;
+  }
+  if(data.needs_verification){
+    toast('📧 Compte créé ! Vérifie ton email pour activer.','success');
+  }
   onLogin(data.user);
+}
+
+async function forgotPasswordPrompt(){
+  const email = (document.getElementById('a-email').value || '').trim()
+             || prompt('Email du compte à réinitialiser :');
+  if(!email) return;
+  const r = await post('/api/auth/forgot-password',{email});
+  toast(r.message || (r.error || 'Si l\'email existe, un lien a été envoyé.'), r.error?'error':'success');
+}
+
+// Si l'URL contient ?reset_token=... on affiche un formulaire de reset
+function maybeShowResetForm(){
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('reset_token');
+  if(!token) return false;
+  const ov = document.getElementById('auth-overlay');
+  if(ov) ov.style.display='flex';
+  // Cache login/register, montre formulaire reset
+  const card = ov.querySelector('.auth-tabs')?.parentElement;
+  if(!card) return false;
+  document.getElementById('auth-login-form').style.display='none';
+  document.getElementById('auth-register-form').style.display='none';
+  // Insère le formulaire si pas déjà
+  if(!document.getElementById('auth-reset-form')){
+    const div = document.createElement('div');
+    div.id = 'auth-reset-form';
+    div.innerHTML = `
+      <div style="text-align:center;font-weight:700;font-size:15px;margin-bottom:14px">🔑 Nouveau mot de passe</div>
+      <div class="fg"><label>Nouveau mot de passe (min 8)</label>
+        <input type="password" id="reset-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doResetPassword()"></div>
+      <div class="auth-error" id="reset-err"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:14px;padding:13px;font-size:14px" onclick="doResetPassword()">✓ Mettre à jour</button>
+    `;
+    card.appendChild(div);
+  }
+  document.getElementById('auth-reset-form').style.display='';
+  window._reset_token = token;
+  return true;
+}
+async function doResetPassword(){
+  const pwd = document.getElementById('reset-pwd').value;
+  const err = document.getElementById('reset-err');
+  err.style.display='none';
+  if(!pwd || pwd.length < 8){
+    err.textContent='Mot de passe trop court (min 8)'; err.style.display=''; return;
+  }
+  const r = await post('/api/auth/reset-password',{token: window._reset_token, password: pwd});
+  if(r.error){ err.textContent = r.error; err.style.display=''; return; }
+  toast('✅ Mot de passe mis à jour. Connecte-toi.','success');
+  // Cleanup URL
+  history.replaceState({},'',window.location.pathname);
+  document.getElementById('auth-reset-form').style.display='none';
+  document.getElementById('auth-login-form').style.display='';
+}
+
+// Init hCaptcha widget si site key disponible
+async function initHcaptchaIfNeeded(){
+  const me = await api('/api/auth/me');
+  const siteKey = me.hcaptcha_site_key;
+  if(!siteKey) return;
+  // Charge le script hcaptcha
+  if(!document.getElementById('hcaptcha-script')){
+    const s=document.createElement('script');
+    s.id='hcaptcha-script'; s.src='https://hcaptcha.com/1/api.js'; s.async=true; s.defer=true;
+    document.head.appendChild(s);
+  }
+  // Render lazily quand l'user clique sur l'onglet register
+  const tryRender=()=>{
+    const wrap=document.getElementById('r-hcaptcha-wrap');
+    if(window.hcaptcha && wrap && !wrap.dataset.rendered){
+      try{
+        window._hcaptcha_widget_id = window.hcaptcha.render(wrap, {sitekey: siteKey});
+        wrap.dataset.rendered='1';
+      }catch(e){ /* déjà rendered */ }
+    }
+  };
+  setInterval(tryRender, 1000);
 }
 
 function onLogin(user){
@@ -2126,12 +2243,16 @@ async function logout(){
 }
 
 async function checkAuth(){
+  // Si l'URL contient ?reset_token=, on saute le check (l'user est en flow reset)
+  if(maybeShowResetForm()){ return; }
   const data=await api('/api/auth/me');
   if(data.user){onLogin(data.user);}
   else{
     document.getElementById('auth-overlay').style.display='flex';
     setTimeout(()=>window._initAuthAnim&&window._initAuthAnim(), 100);
   }
+  // Init hCaptcha si configuré côté serveur
+  initHcaptchaIfNeeded();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -2339,9 +2460,9 @@ async function loadAdminUsers(){
   const tbody=document.getElementById('admin-users-tbody');
   tbody.innerHTML=data.map(u=>`
     <tr style="border-top:1px solid var(--border)">
-      <td><strong>${u.name||'—'}</strong></td>
-      <td style="color:var(--text2)">${u.email}</td>
-      <td style="color:var(--text3);font-size:12px">${u.created_at?.slice(0,10)||''}</td>
+      <td><strong>${esc(u.name||'—')}</strong></td>
+      <td style="color:var(--text2)">${esc(u.email)}</td>
+      <td style="color:var(--text3);font-size:12px">${esc(u.created_at?.slice(0,10)||'')}</td>
       <td>
         <select class="role-select" onchange="changeRole(${u.id},this.value)">
           <option ${u.role==='membre'?'selected':''}>membre</option>
@@ -2430,17 +2551,40 @@ function toast(msg, type='info'){
   setTimeout(()=>{el.style.animation='toastIn .25s ease reverse';setTimeout(()=>el.remove(),250);},3400);
 }
 
+// ── HTML escape (anti-XSS pour innerHTML) ─────────────────────────────────────
+function esc(s){
+  if(s==null) return '';
+  return String(s)
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    .replaceAll('"','&quot;').replaceAll("'",'&#39;');
+}
+
 // ── API helpers ────────────────────────────────────────────────────────────────
 async function api(url, opts={}){
   const r = await fetch(url,{headers:{'Content-Type':'application/json'},...opts});
   if(r.status===401){
     // Session expirée → retour au login
     currentUser=null;
-    document.getElementById('auth-overlay').style.display='flex';
+    const ov=document.getElementById('auth-overlay');
+    if(ov) ov.style.display='flex';
     setTimeout(()=>window._initAuthAnim&&window._initAuthAnim(), 100);
     return {error:'Session expirée, reconnectez-vous'};
   }
-  return r.json();
+  if(r.status===429){
+    let body={};
+    try{ body=await r.json(); }catch(e){}
+    const msg = body.quota_exceeded
+      ? `⛔ Quota mensuel IA atteint (${body.used||'?'}/${body.quota||'?'}). Reset le 1er du mois prochain.`
+      : (body.error || '⚠️ Trop de requêtes — réessaye dans quelques minutes.');
+    if(typeof toast==='function') toast(msg,'error');
+    return {error: msg, rate_limited: true, ...body};
+  }
+  if(r.status===413){
+    if(typeof toast==='function') toast('Fichier trop volumineux (max 12 Mo)','error');
+    return {error:'Fichier trop volumineux'};
+  }
+  try{ return await r.json(); }
+  catch(e){ return {error:'Réponse serveur invalide'}; }
 }
 const post = (url,data)=>api(url,{method:'POST',body:JSON.stringify(data)});
 const put  = (url,data)=>api(url,{method:'PUT', body:JSON.stringify(data)});
@@ -2550,13 +2694,13 @@ function renderDash(){
   const tbody=document.getElementById('dash-tbody');
   if(!recent.length){ tbody.innerHTML=`<tr><td colspan="6">${emptyHtml}</td></tr>`; }
   else { tbody.innerHTML=recent.map(a=>`
-    <tr onclick="openModal('${a.id}')">
-      <td class="tx-m tx-sm">${a.date||''}</td>
-      <td><strong>${a.company||''}</strong></td>
-      <td class="tx-m">${a.role||''}</td>
-      <td><span class="sbadge s-${S_KEY(a.status)}">${S_ICON[a.status]||''} ${a.status}</span></td>
-      <td class="tx-sm" style="color:var(--blue)">${a.interview_date?'📅 '+a.interview_date:''}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openModal('${a.id}')">✏️</button></td>
+    <tr onclick="openModal('${esc(a.id)}')">
+      <td class="tx-m tx-sm">${esc(a.date||'')}</td>
+      <td><strong>${esc(a.company||'')}</strong></td>
+      <td class="tx-m">${esc(a.role||'')}</td>
+      <td><span class="sbadge s-${esc(S_KEY(a.status))}">${esc(S_ICON[a.status]||'')} ${esc(a.status)}</span></td>
+      <td class="tx-sm" style="color:var(--blue)">${a.interview_date?'📅 '+esc(a.interview_date):''}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openModal('${esc(a.id)}')">✏️</button></td>
     </tr>`).join(''); }
 
   // Cards (mobile)
@@ -2564,14 +2708,14 @@ function renderDash(){
   if(cards){
     if(!recent.length){ cards.innerHTML=emptyHtml; }
     else { cards.innerHTML=recent.map(a=>`
-      <div class="m-app-card" onclick="openModal('${a.id}')">
+      <div class="m-app-card" onclick="openModal('${esc(a.id)}')">
         <div class="m-app-card-body">
-          <div class="m-app-card-co">${a.company||''}</div>
-          <div class="m-app-card-role">${a.role||''}</div>
+          <div class="m-app-card-co">${esc(a.company||'')}</div>
+          <div class="m-app-card-role">${esc(a.role||'')}</div>
           <div class="m-app-card-foot">
-            <span class="sbadge s-${S_KEY(a.status)}" style="font-size:10px;padding:2px 7px">${S_ICON[a.status]||''} ${a.status}</span>
-            <span class="m-app-card-date">${a.date||''}</span>
-            ${a.interview_date?`<span style="font-size:11px;color:var(--blue)">🎤 ${a.interview_date}</span>`:''}
+            <span class="sbadge s-${esc(S_KEY(a.status))}" style="font-size:10px;padding:2px 7px">${esc(S_ICON[a.status]||'')} ${esc(a.status)}</span>
+            <span class="m-app-card-date">${esc(a.date||'')}</span>
+            ${a.interview_date?`<span style="font-size:11px;color:var(--blue)">🎤 ${esc(a.interview_date)}</span>`:''}
           </div>
         </div>
         <div class="m-app-card-arrow">›</div>
@@ -2892,13 +3036,13 @@ function renderKanban(){
       <div class="kcol-hd">${S_ICON[s]} ${s}<span class="cnt">${col.length}</span></div>
       <div class="kcol-body">
         ${col.map(a=>`
-          <div class="kcard" draggable="true" ondragstart="dStart(event,'${a.id}')" onclick="openModal('${a.id}')">
-            <h5>${a.company}</h5>
-            <div class="kcard-co">${a.role}</div>
-            <div class="kcard-date">📅 ${a.date||''}</div>
-            ${a.interview_date?`<div class="kcard-int">🎤 ${a.interview_date}</div>`:''}
+          <div class="kcard" draggable="true" ondragstart="dStart(event,'${esc(a.id)}')" onclick="openModal('${esc(a.id)}')">
+            <h5>${esc(a.company)}</h5>
+            <div class="kcard-co">${esc(a.role)}</div>
+            <div class="kcard-date">📅 ${esc(a.date||'')}</div>
+            ${a.interview_date?`<div class="kcard-int">🎤 ${esc(a.interview_date)}</div>`:''}
             ${a.cv_filename?`<div class="kcard-note">📄 CV adapté disponible</div>`:''}
-            ${a.notes?`<div class="kcard-note">📝 ${a.notes}</div>`:''}
+            ${a.notes?`<div class="kcard-note">📝 ${esc(a.notes)}</div>`:''}
           </div>`).join('')||`<div class="drop-zone" ondragover="dOver(event)" ondrop="dDrop(event,'${s}')">Déposez ici</div>`}
       </div>
     </div>`;
@@ -2922,16 +3066,16 @@ function renderKanbanMobile(){
     return;
   }
   list.innerHTML=filtered.map(a=>`
-    <div class="m-app-card" onclick="openModal('${a.id}')">
+    <div class="m-app-card" onclick="openModal('${esc(a.id)}')">
       <div class="m-app-card-body">
-        <div class="m-app-card-co">${a.company||''}</div>
-        <div class="m-app-card-role">${a.role||''}</div>
+        <div class="m-app-card-co">${esc(a.company||'')}</div>
+        <div class="m-app-card-role">${esc(a.role||'')}</div>
         <div class="m-app-card-foot">
-          <span class="sbadge s-${S_KEY(a.status)}" style="font-size:10px;padding:2px 7px">${S_ICON[a.status]||''} ${a.status}</span>
-          <span class="m-app-card-date">${a.date||''}</span>
-          ${a.interview_date?`<span style="font-size:11px;color:var(--blue)">🎤 ${a.interview_date}</span>`:''}
+          <span class="sbadge s-${esc(S_KEY(a.status))}" style="font-size:10px;padding:2px 7px">${esc(S_ICON[a.status]||'')} ${esc(a.status)}</span>
+          <span class="m-app-card-date">${esc(a.date||'')}</span>
+          ${a.interview_date?`<span style="font-size:11px;color:var(--blue)">🎤 ${esc(a.interview_date)}</span>`:''}
         </div>
-        ${a.notes?`<div style="font-size:11px;color:var(--text3);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📝 ${a.notes}</div>`:''}
+        ${a.notes?`<div style="font-size:11px;color:var(--text3);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📝 ${esc(a.notes)}</div>`:''}
       </div>
       <div class="m-app-card-arrow">›</div>
     </div>`).join('');
@@ -2957,9 +3101,9 @@ function renderAL(){
   const al=document.getElementById('al');
   if(!apps.length){al.innerHTML=`<div class="empty"><div class="empty-i">🎤</div><h4>Aucun entretien planifié</h4><p>Vos entretiens apparaîtront ici une fois vos candidatures au statut <strong>Entretien</strong>.</p></div>`;return;}
   al.innerHTML=[...apps].reverse().map(a=>`
-    <div class="al-item${selAppId===a.id?' active':''}" onclick="selApp('${a.id}')">
-      <h5>${S_ICON[a.status]||'📋'} ${a.company}</h5>
-      <p>${a.role}</p>
+    <div class="al-item${selAppId===a.id?' active':''}" onclick="selApp('${esc(a.id)}')">
+      <h5>${esc(S_ICON[a.status]||'📋')} ${esc(a.company)}</h5>
+      <p>${esc(a.role)}</p>
       ${a.interview_prep?'<div class="prep-ok">📝 Fiche prête</div>':''}
     </div>`).join('');
 }
@@ -2971,18 +3115,18 @@ function selApp(id){
   panel.innerHTML=`
     <div class="flex items-c justify-b" style="margin-bottom:18px;flex-shrink:0">
       <div>
-        <div style="font-size:17px;font-weight:700;color:var(--text)">${a.company} — ${a.role}</div>
-        <div class="tx-sm tx-m mt1">Candidature : ${a.date||''}${a.interview_date?' · Entretien : '+a.interview_date:''}</div>
+        <div style="font-size:17px;font-weight:700;color:var(--text)">${esc(a.company)} — ${esc(a.role)}</div>
+        <div class="tx-sm tx-m mt1">Candidature : ${esc(a.date||'')}${a.interview_date?' · Entretien : '+esc(a.interview_date):''}</div>
       </div>
       <div class="flex gap-2">
-        <button class="btn btn-primary btn-sm" id="prepbtn" onclick="genPrep('${a.id}')">✨ Générer fiche</button>
-        <button class="btn btn-secondary btn-sm" onclick="openPrepTab('${a.id}')">🖨️ Ouvrir</button>
-        <button class="btn btn-secondary btn-sm" onclick="savePrep('${a.id}')">💾</button>
+        <button class="btn btn-primary btn-sm" id="prepbtn" onclick="genPrep('${esc(a.id)}')">✨ Générer fiche</button>
+        <button class="btn btn-secondary btn-sm" onclick="openPrepTab('${esc(a.id)}')">🖨️ Ouvrir</button>
+        <button class="btn btn-secondary btn-sm" onclick="savePrep('${esc(a.id)}')">💾</button>
       </div>
     </div>
     <div id="prep-content" style="flex:1">
       ${a.interview_prep
-        ?`<div class="prep-raw">${a.interview_prep}</div>`
+        ?`<div class="prep-raw">${esc(a.interview_prep)}</div>`
         :`<div class="empty" style="margin:auto"><div class="empty-i">📋</div><h4>Aucune fiche générée</h4><p>Cliquez sur "✨ Générer fiche" pour créer votre préparation</p></div>`}
     </div>`;
 }
@@ -2996,7 +3140,7 @@ async function genPrep(id){
   btn.textContent='✨ Générer fiche'; btn.disabled=false;
   if(data.error){toast(data.error,'error');return;}
   a.interview_prep=data.prep;
-  document.getElementById('prep-content').innerHTML=`<div class="prep-raw">${data.prep}</div>`;
+  document.getElementById('prep-content').innerHTML=`<div class="prep-raw">${esc(data.prep)}</div>`;
   renderAL(); toast('Fiche générée !','success');
 }
 
@@ -3036,6 +3180,64 @@ async function loadSettings(){
   await loadCvPdfState();
   // Photo
   renderPhotoCard();
+  // Compte / RGPD (quota, vérif email)
+  await loadAccountStatus();
+}
+
+async function loadAccountStatus(){
+  const me=await api('/api/auth/me');
+  const qRow=document.getElementById('s-quota-row');
+  const banner=document.getElementById('s-verify-banner');
+  if(qRow && me.quota){
+    const {used,quota,remaining,ym}=me.quota;
+    const pct=Math.min(100, Math.round((used/Math.max(1,quota))*100));
+    const color = pct>=90 ? 'var(--red)' : pct>=70 ? 'var(--yellow)' : 'var(--green)';
+    qRow.innerHTML = `📊 Quota IA mensuel (${esc(ym)}) : <strong>${used}/${quota}</strong> appels — <span style="color:${color}">${remaining} restants</span>`;
+  }
+  if(banner){
+    banner.style.display = me.needs_verification ? '' : 'none';
+  }
+}
+
+async function resendVerification(){
+  const r=await post('/api/auth/resend-verification',{});
+  toast(r.error ? r.error : (r.already_verified ? 'Déjà vérifié' : '📧 Email envoyé'), r.error?'error':'success');
+}
+
+async function changePasswordPrompt(){
+  const me=await api('/api/auth/me');
+  const email = me.user?.email || '';
+  if(!email){ toast('Erreur — non connecté','error'); return; }
+  if(!confirm(`Un email de réinitialisation va être envoyé à ${email}. Continuer ?`)) return;
+  const r=await post('/api/auth/forgot-password',{email});
+  toast(r.error ? r.error : '📧 Lien de réinitialisation envoyé. Vérifie ta boîte mail.', r.error?'error':'success');
+}
+
+async function exportMyData(){
+  try{
+    const resp=await fetch('/api/auth/export-data',{credentials:'same-origin'});
+    if(!resp.ok){
+      if(resp.status===429){ toast('Trop de demandes — réessaye plus tard','error'); return; }
+      toast('Erreur export','error'); return;
+    }
+    const blob=await resp.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url;
+    a.download=`jobfinder_export_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    toast('✅ Export téléchargé','success');
+  }catch(e){ toast('Erreur : '+e.message,'error'); }
+}
+
+async function deleteMyAccountPrompt(){
+  const pwd=prompt('⚠️ Suppression DÉFINITIVE de ton compte et de toutes tes données.\n\nTape ton mot de passe pour confirmer :');
+  if(!pwd) return;
+  if(!confirm('Es-tu vraiment sûr ? Cette action est IRRÉVERSIBLE.')) return;
+  const r=await post('/api/auth/delete-account',{password:pwd});
+  if(r.error){ toast(r.error,'error'); return; }
+  toast('Compte supprimé. Au revoir 👋','info');
+  setTimeout(()=>window.location.reload(), 1200);
 }
 
 async function loadCvPdfState(){
@@ -3821,7 +4023,7 @@ async function generateTemplate(){
         <span style="font-size:11px;color:var(--text3);margin-left:6px">Aperçu — ${name}</span>
       </div>
       <div style="height:460px;background:#fff;overflow:auto">
-        <iframe id="wiz-preview-frame" style="width:100%;height:100%;border:none;display:block" scrolling="yes"></iframe>
+        <iframe id="wiz-preview-frame" sandbox="allow-same-origin" style="width:100%;height:100%;border:none;display:block" scrolling="yes"></iframe>
       </div>
     </div>`;
   document.getElementById('wiz-preview-frame').srcdoc=tplGeneratedHTML;
@@ -3958,7 +4160,7 @@ async function previewTpl(id){
   document.getElementById('wiz-step-lbl').textContent='Aperçu';
   document.getElementById('wiz-body').innerHTML=`
     <div style="height:420px;background:var(--surface);border-radius:12px;overflow:hidden;border:1px solid var(--border)">
-      <iframe style="width:100%;height:100%;border:none" srcdoc="${data.html_content.replace(/"/g,'&quot;')}"></iframe>
+      <iframe sandbox="allow-same-origin" style="width:100%;height:100%;border:none" srcdoc="${data.html_content.replace(/"/g,'&quot;')}"></iframe>
     </div>`;
   const isAct=activeTemplateId===id;
   document.getElementById('wiz-foot').innerHTML=`
@@ -3998,7 +4200,7 @@ function renderTemplates(){
     return `
     <div class="tpl-card${isActive?' tpl-card-active':''}">
       <div class="tpl-thumb" onclick="previewTpl(${t.id})">
-        <iframe srcdoc="" data-tpl-id="${t.id}" loading="lazy"></iframe>
+        <iframe sandbox="allow-same-origin" srcdoc="" data-tpl-id="${t.id}" loading="lazy"></iframe>
         <div class="tpl-thumb-overlay"><span style="color:#fff;font-size:13px;font-weight:600">👁️ Aperçu</span></div>
         ${isActive?`<div class="tpl-active-badge">✅ Actif</div>`:''}
       </div>
