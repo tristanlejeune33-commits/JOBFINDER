@@ -4,72 +4,91 @@
 <meta charset="UTF-8">
 <title>{{name}} — CV</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@500;600;700&display=swap');
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
   --primary:{{color}};
   --primary-d:{{color_dark}};
   --primary-l:{{color_light}};
-  --text:#1a1a1a;
-  --text2:#4a4a4a;
-  --text3:#888;
-  --bg:#fff;
-  --sidebar-bg:var(--primary);
+  --ink:#0a0a0a;
+  --ink2:#3a3a3a;
+  --ink3:#7a7a7a;
+  --paper:#fafbfc;
+  --line:#e5e8ec;
 }
-body{font-family:'Inter',sans-serif;background:#eef0f5;color:var(--text);line-height:1.55;font-size:13px}
-.cv{max-width:794px;min-height:1123px;margin:0 auto;background:var(--bg);display:grid;grid-template-columns:34% 66%;box-shadow:0 4px 24px rgba(0,0,0,.08)}
-.sidebar{background:var(--sidebar-bg);color:#fff;padding:36px 26px 30px}
-.content{padding:36px 32px 30px}
+body{font-family:'Inter',sans-serif;background:#dde1e8;color:var(--ink);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased}
+.cv{max-width:794px;min-height:1123px;margin:0 auto;background:var(--paper);display:grid;grid-template-columns:36% 64%;box-shadow:0 12px 50px rgba(0,0,0,.12);position:relative;overflow:hidden}
+.cv::before{content:'';position:absolute;top:0;left:0;right:0;height:6px;background:linear-gradient(90deg,var(--primary) 0%,var(--primary-d) 100%);z-index:10}
 
-/* Photo */
-.photo-wrap{display:flex;justify-content:center;margin-bottom:24px}
-.photo{width:130px;height:130px;border-radius:50%;border:4px solid rgba(255,255,255,.25);overflow:hidden;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;color:#fff;font-size:38px;font-weight:700}
+/* ── SIDEBAR ──────────────────────────────────────────────────────────────── */
+.sidebar{background:linear-gradient(165deg,var(--primary) 0%,var(--primary-d) 100%);color:#fff;padding:48px 28px 32px;position:relative;overflow:hidden}
+.sidebar::before{content:'';position:absolute;top:-80px;right:-80px;width:240px;height:240px;border-radius:50%;background:rgba(255,255,255,.08);pointer-events:none}
+.sidebar::after{content:'';position:absolute;bottom:60px;left:-100px;width:200px;height:200px;border-radius:50%;background:rgba(0,0,0,.08);pointer-events:none}
+
+.photo-wrap{position:relative;z-index:1;display:flex;justify-content:center;margin-bottom:30px}
+.photo{width:140px;height:140px;border-radius:50%;border:4px solid rgba(255,255,255,.35);overflow:hidden;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Space Grotesk',sans-serif;font-size:42px;font-weight:700;box-shadow:0 8px 24px rgba(0,0,0,.18);position:relative}
+.photo::after{content:'';position:absolute;inset:-4px;border-radius:50%;border:1px dashed rgba(255,255,255,.3)}
 .photo img{width:100%;height:100%;object-fit:cover;display:block}
 
-/* Sidebar sections */
-.s-title{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:24px 0 10px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,.25)}
-.s-title:first-child{margin-top:0}
-.contact-item{display:flex;align-items:flex-start;gap:8px;margin-bottom:8px;font-size:12.5px;line-height:1.5;word-break:break-word}
-.contact-item .ico{flex-shrink:0;width:14px;text-align:center;opacity:.85}
+.s-title{font-family:'Space Grotesk',sans-serif;font-size:11px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;margin:30px 0 14px;display:flex;align-items:center;gap:10px;position:relative;z-index:1}
+.s-title::before{content:'';width:18px;height:2px;background:#fff;border-radius:99px;flex-shrink:0}
+.s-title:first-of-type{margin-top:0}
 
-.skill{margin-bottom:10px}
-.skill-name{font-size:12px;font-weight:500;margin-bottom:4px;display:flex;justify-content:space-between}
-.skill-bar{height:5px;background:rgba(255,255,255,.18);border-radius:99px;overflow:hidden}
-.skill-bar-fill{height:100%;background:#fff;border-radius:99px}
+.contact-item{display:flex;align-items:flex-start;gap:10px;margin-bottom:9px;font-size:12.5px;line-height:1.45;word-break:break-word;position:relative;z-index:1}
+.contact-item .ico{flex-shrink:0;width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.15);display:inline-flex;align-items:center;justify-content:center;font-size:11px}
 
-.lang{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px;padding:3px 0}
-.lang-level{opacity:.75;font-size:11px}
+.skill{margin-bottom:11px;position:relative;z-index:1}
+.skill-name{font-size:12.5px;font-weight:500;margin-bottom:5px;display:flex;justify-content:space-between;align-items:center}
+.skill-dots{display:flex;gap:3px}
+.skill-dot{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25)}
+.skill-dot.on{background:#fff}
+.skill-bar{height:4px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden}
+.skill-bar-fill{height:100%;background:linear-gradient(90deg,#fff 0%,rgba(255,255,255,.7) 100%);border-radius:99px;box-shadow:0 0 10px rgba(255,255,255,.4)}
 
-.interest{display:inline-block;background:rgba(255,255,255,.15);padding:3px 9px;border-radius:99px;font-size:11px;margin:0 4px 4px 0}
+.lang{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;margin-bottom:8px;padding:6px 10px;background:rgba(255,255,255,.08);border-radius:8px;position:relative;z-index:1;backdrop-filter:blur(10px)}
+.lang-name{font-weight:600}
+.lang-level{font-size:10.5px;font-weight:600;background:rgba(255,255,255,.18);padding:2px 8px;border-radius:99px;letter-spacing:.05em}
 
-/* Content */
-.header{margin-bottom:22px}
-.name{font-size:30px;font-weight:800;color:var(--text);line-height:1.05;margin-bottom:4px;letter-spacing:-.02em}
-.title{font-size:15px;color:var(--primary);font-weight:600;margin-bottom:10px}
-.summary{font-size:13px;color:var(--text2);line-height:1.65;border-left:3px solid var(--primary);padding-left:12px;margin-top:8px}
+.interest{display:inline-block;background:rgba(255,255,255,.13);padding:5px 11px;border-radius:99px;font-size:11px;font-weight:500;margin:0 5px 5px 0;border:1px solid rgba(255,255,255,.18);position:relative;z-index:1}
 
-.section{margin-top:22px}
-.section-title{font-size:13px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.1em;padding-bottom:4px;border-bottom:2px solid var(--primary);margin-bottom:14px;display:inline-block}
+/* ── CONTENT ─────────────────────────────────────────────────────────────── */
+.content{padding:48px 36px 36px;background:var(--paper);position:relative}
+.header{margin-bottom:28px;padding-bottom:22px;border-bottom:1px solid var(--line);position:relative}
+.header::after{content:'';position:absolute;bottom:-1px;left:0;width:60px;height:3px;background:var(--primary);border-radius:99px}
+.name{font-family:'Space Grotesk',sans-serif;font-size:38px;font-weight:700;line-height:1.02;margin-bottom:6px;letter-spacing:-.025em;color:var(--ink)}
+.title{font-size:14.5px;color:var(--primary);font-weight:600;letter-spacing:.02em}
+.title::before{content:'▸ ';color:var(--primary);margin-right:2px}
+.summary{margin-top:16px;font-size:13px;color:var(--ink2);line-height:1.7}
+.summary::first-letter{font-size:36px;font-family:'Space Grotesk',sans-serif;font-weight:700;color:var(--primary);float:left;line-height:.95;margin-right:6px;margin-top:2px}
 
-.exp{position:relative;padding-left:20px;border-left:2px solid var(--primary-l);margin-left:6px;padding-bottom:14px}
-.exp:last-child{padding-bottom:4px}
-.exp::before{content:'';position:absolute;left:-7px;top:2px;width:12px;height:12px;border-radius:50%;background:var(--primary);border:3px solid #fff;box-shadow:0 0 0 2px var(--primary-l)}
-.exp-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:3px}
-.exp-role{font-size:14px;font-weight:700;color:var(--text)}
-.exp-date{font-size:11.5px;color:var(--text3);font-weight:500;background:var(--primary-l);padding:2px 8px;border-radius:99px;color:var(--primary-d)}
-.exp-co{font-size:12.5px;color:var(--text2);font-weight:500;margin-bottom:5px}
-.exp-co::before{content:'•';margin-right:6px;color:var(--primary)}
-.exp-desc{font-size:12px;color:var(--text2);line-height:1.55;list-style:none;margin-top:4px}
-.exp-desc li{padding-left:14px;position:relative;margin-bottom:3px}
-.exp-desc li::before{content:'▸';position:absolute;left:0;color:var(--primary);font-size:10px;top:1px}
+.section{margin-top:28px}
+.section-title{font-family:'Space Grotesk',sans-serif;font-size:11.5px;font-weight:700;color:var(--ink);text-transform:uppercase;letter-spacing:.18em;margin-bottom:18px;display:flex;align-items:center;gap:12px}
+.section-title::before{content:'';width:32px;height:3px;background:linear-gradient(90deg,var(--primary),var(--primary-d));border-radius:99px;flex-shrink:0}
+.section-title::after{content:'';flex:1;height:1px;background:var(--line)}
 
-.edu-item{margin-bottom:10px}
-.edu-deg{font-size:13.5px;font-weight:700;color:var(--text)}
-.edu-school{font-size:12.5px;color:var(--text2)}
-.edu-date{font-size:11.5px;color:var(--text3);margin-top:1px}
+/* Experience timeline */
+.exp{position:relative;padding-left:24px;margin-bottom:18px;padding-bottom:18px;border-left:2px solid var(--primary-l)}
+.exp:last-child{border-left:2px solid transparent;padding-bottom:6px}
+.exp::before{content:'';position:absolute;left:-9px;top:2px;width:16px;height:16px;border-radius:50%;background:var(--primary);border:3px solid var(--paper);box-shadow:0 0 0 2px var(--primary),0 0 12px rgba(0,0,0,.15)}
+.exp-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:5px}
+.exp-role{font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--ink)}
+.exp-date{font-size:11px;color:var(--primary-d);font-weight:600;background:var(--primary-l);padding:3px 10px;border-radius:99px;letter-spacing:.04em;flex-shrink:0;text-transform:uppercase}
+.exp-co{font-size:13px;color:var(--ink2);font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.exp-co::before{content:'◆';color:var(--primary);font-size:10px}
+.exp-desc{list-style:none;margin-top:6px}
+.exp-desc li{padding-left:18px;position:relative;font-size:12.5px;color:var(--ink2);line-height:1.55;margin-bottom:4px}
+.exp-desc li::before{content:'';position:absolute;left:0;top:8px;width:8px;height:2px;background:var(--primary);border-radius:99px}
 
-.cert-item{font-size:12.5px;color:var(--text2);margin-bottom:5px;padding-left:16px;position:relative}
-.cert-item::before{content:'✓';position:absolute;left:0;color:var(--primary);font-weight:700}
+/* Education */
+.edu-item{padding:12px 14px;background:linear-gradient(135deg,#fff 0%,var(--primary-l) 100%);border-radius:10px;margin-bottom:8px;border:1px solid var(--line);position:relative;overflow:hidden}
+.edu-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--primary)}
+.edu-deg{font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:700;color:var(--ink);margin-left:6px}
+.edu-school{font-size:12.5px;color:var(--ink2);margin-top:1px;margin-left:6px}
+.edu-date{font-size:11px;color:var(--ink3);margin-top:2px;margin-left:6px;font-weight:500}
+
+/* Certifications */
+.cert-item{font-size:12.5px;color:var(--ink2);margin-bottom:6px;padding-left:22px;position:relative}
+.cert-item::before{content:'✓';position:absolute;left:0;top:0;width:16px;height:16px;background:var(--primary);color:#fff;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center}
 
 @media print{
   body{background:#fff}
@@ -88,15 +107,15 @@ body{font-family:'Inter',sans-serif;background:#eef0f5;color:var(--text);line-he
     <div class="s-title">Contact</div>
     {{#contact.email}}<div class="contact-item"><span class="ico">✉</span><span>{{contact.email}}</span></div>{{/contact.email}}
     {{#contact.phone}}<div class="contact-item"><span class="ico">☎</span><span>{{contact.phone}}</span></div>{{/contact.phone}}
-    {{#contact.location}}<div class="contact-item"><span class="ico">📍</span><span>{{contact.location}}</span></div>{{/contact.location}}
+    {{#contact.location}}<div class="contact-item"><span class="ico">⌘</span><span>{{contact.location}}</span></div>{{/contact.location}}
     {{#contact.linkedin}}<div class="contact-item"><span class="ico">in</span><span>{{contact.linkedin}}</span></div>{{/contact.linkedin}}
-    {{#contact.website}}<div class="contact-item"><span class="ico">🌐</span><span>{{contact.website}}</span></div>{{/contact.website}}
+    {{#contact.website}}<div class="contact-item"><span class="ico">⟷</span><span>{{contact.website}}</span></div>{{/contact.website}}
 
     {{#has_skills}}
     <div class="s-title">Compétences</div>
     {{#skills}}
     <div class="skill">
-      <div class="skill-name"><span>{{name}}</span><span style="opacity:.7">{{level}}/5</span></div>
+      <div class="skill-name"><span>{{name}}</span></div>
       <div class="skill-bar"><div class="skill-bar-fill" style="width:{{level_pct}}%"></div></div>
     </div>
     {{/skills}}
@@ -105,12 +124,12 @@ body{font-family:'Inter',sans-serif;background:#eef0f5;color:var(--text);line-he
     {{#has_languages}}
     <div class="s-title">Langues</div>
     {{#languages}}
-    <div class="lang"><span>{{name}}</span><span class="lang-level">{{level}}</span></div>
+    <div class="lang"><span class="lang-name">{{name}}</span><span class="lang-level">{{level}}</span></div>
     {{/languages}}
     {{/has_languages}}
 
     {{#has_interests}}
-    <div class="s-title">Centres d'intérêt</div>
+    <div class="s-title">Intérêts</div>
     <div>{{#interests}}<span class="interest">{{.}}</span>{{/interests}}</div>
     {{/has_interests}}
   </aside>
@@ -131,10 +150,8 @@ body{font-family:'Inter',sans-serif;background:#eef0f5;color:var(--text);line-he
           <div class="exp-role">{{role}}</div>
           <div class="exp-date">{{date}}</div>
         </div>
-        <div class="exp-co">{{company}}{{#location}} — {{location}}{{/location}}</div>
-        {{#has_bullets}}
-        <ul class="exp-desc">{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
-        {{/has_bullets}}
+        <div class="exp-co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+        {{#has_bullets}}<ul class="exp-desc">{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>{{/has_bullets}}
       </div>
       {{/experience}}
     </section>
@@ -156,7 +173,7 @@ body{font-family:'Inter',sans-serif;background:#eef0f5;color:var(--text);line-he
     {{#has_certifications}}
     <section class="section">
       <div class="section-title">Certifications</div>
-      {{#certifications}}<div class="cert-item">{{name}}{{#date}} <span style="color:var(--text3);font-size:11.5px">({{date}})</span>{{/date}}</div>{{/certifications}}
+      {{#certifications}}<div class="cert-item">{{name}}{{#date}} <span style="color:var(--ink3);font-size:11.5px">· {{date}}</span>{{/date}}</div>{{/certifications}}
     </section>
     {{/has_certifications}}
   </main>

@@ -2439,9 +2439,12 @@ def route_adapt_cv_pdf():
 CV_TEMPLATES_DIR = os.path.join(BASE_DIR, "cv_templates_lib")
 
 CV_TEMPLATES = {
-    "modern":   {"name": "Moderne",  "file": "modern.html",   "preview": "Sidebar colorée, photo ronde, timeline expérience"},
-    "premium":  {"name": "Premium",  "file": "premium.html",  "preview": "Élégant, typographie serif, raffiné"},
-    "creative": {"name": "Créatif",  "file": "creative.html", "preview": "Header coloré, formes géométriques, tags"},
+    "modern":    {"name": "Moderne",   "file": "modern.html",    "preview": "Sidebar gradient, photo, timeline avec dropcap"},
+    "editorial": {"name": "Éditorial", "file": "editorial.html", "preview": "Magazine luxe, typo Fraunces, dropcap, lead citation"},
+    "bold":      {"name": "Bold",      "file": "bold.html",      "preview": "Hero asymétrique, typo Archivo Black, cards stack"},
+    "tech":      {"name": "Tech",      "file": "tech.html",      "preview": "Dark mode, terminal-style, JetBrains Mono"},
+    "premium":   {"name": "Premium",   "file": "premium.html",   "preview": "Serif élégant, raffiné, dates en colonne"},
+    "creative":  {"name": "Créatif",   "file": "creative.html",  "preview": "Header gradient, formes géométriques, tags"},
 }
 
 def _hex_to_rgb(h):
@@ -2494,26 +2497,31 @@ def _is_truthy(v):
     return True
 
 def _render_template(tpl, ctx):
-    """Mini moteur :
+    """Mini moteur Mustache-like :
     - {{path}}            → valeur escapée
-    - {{#path}}...{{/path}}: section. Si liste → boucle (chaque item devient ctx local).
-                              Si truthy → render une fois. Si falsy → skip.
-    - {{.}}               → valeur courante (dans une boucle de strings)
-    Pas d'inversion {{^}}, pas de partials. Suffit pour notre cas.
+    - {{#path}}...{{/path}}: section truthy ou boucle si liste
+    - {{^path}}...{{/path}}: section INVERSÉE (rendue si falsy/vide)
+    - {{.}}               → valeur courante dans une boucle de strings
     """
-    # Pattern qui matche les sections (gère 1 niveau d'imbrication minimal via récursion)
     section_re = re.compile(
-        r"\{\{#([\w\.]+)\}\}([\s\S]*?)\{\{/\1\}\}", re.MULTILINE
+        r"\{\{([#^])([\w\.]+)\}\}([\s\S]*?)\{\{/\2\}\}", re.MULTILINE
     )
 
     def render_sections(text, local_ctx):
-        # Boucle jusqu'à ce qu'il n'y ait plus de section
         while True:
             m = section_re.search(text)
             if not m:
                 break
-            path, inner = m.group(1), m.group(2)
+            kind, path, inner = m.group(1), m.group(2), m.group(3)
             val = _get_path(local_ctx, path)
+            if kind == "^":
+                # Inversée : render uniquement si val est falsy
+                if not _is_truthy(val):
+                    text = text[:m.start()] + render_sections(inner, local_ctx) + text[m.end():]
+                else:
+                    text = text[:m.start()] + text[m.end():]
+                continue
+            # kind == "#" — section normale
             if isinstance(val, list):
                 rendered = ""
                 for item in val:
@@ -2527,7 +2535,6 @@ def _render_template(tpl, ctx):
                 text = text[:m.start()] + render_sections(inner, local_ctx) + text[m.end():]
             else:
                 text = text[:m.start()] + text[m.end():]
-        # Variables
         def var_sub(mv):
             p = mv.group(1)
             v = _get_path(local_ctx, p)
