@@ -134,12 +134,28 @@ def _client_ip():
     return request.remote_addr or "unknown"
 
 # ── Headers de sécurité ─────────────────────────────────────────────────────────
+# CSP: pas d'inline script désactivé (l'UI a du JS inline historique) —
+# on durcit le reste. À durcir davantage quand le JS sera externalisé.
+CSP_POLICY = (
+    "default-src 'self'; "
+    "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://hcaptcha.com https://*.hcaptcha.com; "
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://hcaptcha.com https://*.hcaptcha.com; "
+    "font-src 'self' data: https://fonts.gstatic.com; "
+    "img-src 'self' data: blob: https:; "
+    "frame-src 'self' blob: https://hcaptcha.com https://*.hcaptcha.com; "
+    "connect-src 'self' https://hcaptcha.com https://*.hcaptcha.com; "
+    "object-src 'none'; "
+    "base-uri 'self'; "
+    "form-action 'self';"
+)
+
 @app.after_request
 def _security_headers(resp):
     resp.headers.setdefault("X-Content-Type-Options", "nosniff")
     resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
     resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
     resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+    resp.headers.setdefault("Content-Security-Policy", CSP_POLICY)
     if IS_PROD:
         resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
     return resp
@@ -148,6 +164,213 @@ def _security_headers(resp):
 @app.route("/healthz")
 def healthz():
     return jsonify({"ok": True, "ts": int(time.time())})
+
+# ── Sentry (monitoring d'erreurs, no-op si SENTRY_DSN absent) ───────────────────
+SENTRY_DSN = os.environ.get("SENTRY_DSN", "").strip()
+if SENTRY_DSN:
+    try:
+        import sentry_sdk
+        from sentry_sdk.integrations.flask import FlaskIntegration
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[FlaskIntegration()],
+            traces_sample_rate=0.1,
+            send_default_pii=False,
+            environment="production" if IS_PROD else "dev",
+        )
+        log.info("Sentry initialisé.")
+    except Exception as e:
+        log.warning(f"Sentry init failed: {e}")
+
+# ── Chiffrement des clés API stockées en DB (Fernet) ────────────────────────────
+FERNET_KEY = os.environ.get("FERNET_KEY", "").strip()
+_fernet = None
+if FERNET_KEY:
+    try:
+        from cryptography.fernet import Fernet, InvalidToken
+        _fernet = Fernet(FERNET_KEY.encode())
+        log.info("FERNET_KEY actif — clés API chiffrées en DB.")
+    except Exception as e:
+        log.error(f"FERNET_KEY invalide ({e}). Génère-en une avec: "
+                  "python -c \"from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())\"")
+        _fernet = None
+else:
+    if IS_PROD:
+        log.warning("FERNET_KEY non défini — clés API en clair en DB. Recommandé en prod.")
+
+def enc_secret(s):
+    """Chiffre une clé API avant DB. Idempotent (préfixe 'enc:')."""
+    if not s or not _fernet: return s or ""
+    if s.startswith("enc:"):  return s
+    try:
+        return "enc:" + _fernet.encrypt(s.encode()).decode()
+    except Exception:
+        return s
+
+def dec_secret(s):
+    """Déchiffre une clé API depuis DB."""
+    if not s or not _fernet:    return s or ""
+    if not s.startswith("enc:"): return s
+    try:
+        from cryptography.fernet import InvalidToken
+        return _fernet.decrypt(s[4:].encode()).decode()
+    except Exception:
+        log.error("Déchiffrement clé API échoué (FERNET_KEY a changé ?)")
+        return ""
+
+# ── hCaptcha (anti-bot register, no-op si HCAPTCHA_SECRET absent) ──────────────
+HCAPTCHA_SECRET   = os.environ.get("HCAPTCHA_SECRET", "").strip()
+HCAPTCHA_SITE_KEY = os.environ.get("HCAPTCHA_SITE_KEY", "").strip()
+
+def verify_hcaptcha(token, ip):
+    """True si OK, False sinon. True aussi si captcha non configuré (no-op en dev)."""
+    if not HCAPTCHA_SECRET:
+        return True
+    if not token:
+        return False
+    try:
+        r = http_req.post(
+            "https://api.hcaptcha.com/siteverify",
+            data={"secret": HCAPTCHA_SECRET, "response": token, "remoteip": ip},
+            timeout=10,
+        )
+        return bool(r.json().get("success"))
+    except Exception as e:
+        log.warning(f"hCaptcha network error: {e}")
+        # En cas d'échec réseau on accepte (fail-open) pour ne pas bloquer la prod
+        return True
+
+# ── Email (SMTP, no-op si non configuré → log le lien à la place) ─────────────
+SMTP_HOST     = os.environ.get("SMTP_HOST", "").strip()
+SMTP_PORT     = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER     = os.environ.get("SMTP_USER", "").strip()
+SMTP_PASS     = os.environ.get("SMTP_PASS", "")
+SMTP_FROM     = os.environ.get("SMTP_FROM", SMTP_USER).strip()
+APP_URL       = os.environ.get("APP_URL", "").strip().rstrip("/")  # https://jobfinder-...up.railway.app
+
+def app_url():
+    if APP_URL: return APP_URL
+    return request.url_root.rstrip("/") if request else "http://localhost:5151"
+
+def send_email(to, subject, body_text, body_html=None):
+    """Envoie un email. Si SMTP non configuré, log le contenu (mode dev)."""
+    if not SMTP_HOST:
+        log.info(f"[EMAIL DEV] To: {to} | Subject: {subject}\n{body_text}")
+        return True
+    try:
+        import smtplib
+        from email.message import EmailMessage
+        msg = EmailMessage()
+        msg["Subject"] = subject
+        msg["From"]    = SMTP_FROM or SMTP_USER
+        msg["To"]      = to
+        msg.set_content(body_text)
+        if body_html:
+            msg.add_alternative(body_html, subtype="html")
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=15) as s:
+            s.starttls()
+            if SMTP_USER:
+                s.login(SMTP_USER, SMTP_PASS)
+            s.send_message(msg)
+        log.info(f"email sent to {to} subject={subject!r}")
+        return True
+    except Exception as e:
+        log.error(f"send_email failed: {e}")
+        return False
+
+# ── Statuts de candidature (whitelist côté serveur, anti-XSS et data hygiene) ──
+ALLOWED_STATUSES = {
+    "Envoyée", "Refusée", "Entretien", "Proposition", "Acceptée", "Pas de réponse",
+    "En attente", "Annulée"
+}
+ALLOWED_STAGE_RESULTS = {"En attente", "Réussi", "Échoué", "Annulé"}
+
+def sanitize_status(s, default="Envoyée"):
+    return s if s in ALLOWED_STATUSES else default
+
+def sanitize_stage_result(s, default="En attente"):
+    return s if s in ALLOWED_STAGE_RESULTS else default
+
+# ── Quota mensuel par user (compte les appels IA) ───────────────────────────────
+DEFAULT_MONTHLY_AI_QUOTA = int(os.environ.get("MONTHLY_AI_QUOTA", "200"))
+
+def _ym():
+    return datetime.datetime.now().strftime("%Y-%m")
+
+def check_and_increment_quota(user_id):
+    """True si OK + incrémente. False si quota atteint."""
+    ym = _ym()
+    with get_db() as db:
+        row = db.execute(
+            "SELECT count FROM usage_quotas WHERE user_id=? AND ym=?", (user_id, ym)
+        ).fetchone()
+        used = row["count"] if row else 0
+        # Override par user (table users.monthly_quota) si défini
+        u = db.execute("SELECT monthly_quota FROM users WHERE id=?", (user_id,)).fetchone()
+        quota = (u["monthly_quota"] if u and u["monthly_quota"] else DEFAULT_MONTHLY_AI_QUOTA)
+        if used >= quota:
+            return False, used, quota
+        if row:
+            db.execute("UPDATE usage_quotas SET count=count+1 WHERE user_id=? AND ym=?", (user_id, ym))
+        else:
+            db.execute("INSERT INTO usage_quotas(user_id,ym,count) VALUES(?,?,?)", (user_id, ym, 1))
+        db.commit()
+    return True, used + 1, quota
+
+def get_quota_status(user_id):
+    ym = _ym()
+    with get_db() as db:
+        row = db.execute(
+            "SELECT count FROM usage_quotas WHERE user_id=? AND ym=?", (user_id, ym)
+        ).fetchone()
+        u = db.execute("SELECT monthly_quota FROM users WHERE id=?", (user_id,)).fetchone()
+    used  = row["count"] if row else 0
+    quota = (u["monthly_quota"] if u and u["monthly_quota"] else DEFAULT_MONTHLY_AI_QUOTA)
+    return {"used": used, "quota": quota, "remaining": max(0, quota - used), "ym": ym}
+
+def require_quota(f):
+    """Decorator: vérifie + incrémente le quota IA. À mettre APRÈS @require_auth."""
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        u = get_current_user()
+        if not u:
+            return jsonify({"error": "Non authentifié"}), 401
+        ok, used, quota = check_and_increment_quota(u["id"])
+        if not ok:
+            return jsonify({
+                "error": f"Quota mensuel atteint ({used}/{quota}). Recommence le mois prochain.",
+                "quota_exceeded": True, "used": used, "quota": quota
+            }), 429
+        return f(*args, **kwargs)
+    return wrapper
+
+# ── Tokens (email verify + password reset) ──────────────────────────────────────
+def gen_token():
+    return secrets.token_urlsafe(32)
+
+def create_email_token(user_id, kind, ttl_hours=24):
+    """kind ∈ {'verify_email', 'reset_password'}"""
+    token = gen_token()
+    expires = int(time.time()) + ttl_hours * 3600
+    with get_db() as db:
+        db.execute("DELETE FROM email_tokens WHERE user_id=? AND kind=?", (user_id, kind))
+        db.execute("INSERT INTO email_tokens(user_id,kind,token,expires_at) VALUES(?,?,?,?)",
+                   (user_id, kind, token, expires))
+        db.commit()
+    return token
+
+def consume_email_token(token, kind, max_age_hours=24):
+    """Retourne user_id si OK, None sinon. Le token est consommé."""
+    with get_db() as db:
+        row = db.execute(
+            "SELECT user_id, expires_at FROM email_tokens WHERE token=? AND kind=?",
+            (token, kind)
+        ).fetchone()
+        if not row: return None
+        if row["expires_at"] < int(time.time()): return None
+        db.execute("DELETE FROM email_tokens WHERE token=?", (token,))
+        db.commit()
+        return row["user_id"]
 
 # ── Base de données ─────────────────────────────────────────────────────────────
 def get_db():
@@ -222,21 +445,47 @@ def init_db():
             created_at   TEXT DEFAULT (datetime('now')),
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
+
+        CREATE TABLE IF NOT EXISTS email_tokens (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id     INTEGER NOT NULL,
+            kind        TEXT NOT NULL,           -- verify_email | reset_password
+            token       TEXT UNIQUE NOT NULL,
+            expires_at  INTEGER NOT NULL,         -- unix ts
+            created_at  TEXT DEFAULT (datetime('now')),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+        CREATE INDEX IF NOT EXISTS idx_email_tokens_token ON email_tokens(token);
+
+        CREATE TABLE IF NOT EXISTS usage_quotas (
+            user_id   INTEGER NOT NULL,
+            ym        TEXT NOT NULL,              -- "2026-04"
+            count     INTEGER DEFAULT 0,
+            PRIMARY KEY (user_id, ym),
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
         """)
 
 init_db()
 
-# Migration : nouvelles colonnes pour le CV PDF (ajout idempotent)
-def _migrate_user_data_pdf():
+# Migrations idempotentes
+def _migrate_columns():
+    cols = [
+        ("user_data", "cv_pdf_b64",     "TEXT DEFAULT ''"),
+        ("user_data", "cv_pdf_name",    "TEXT DEFAULT ''"),
+        ("user_data", "cv_pdf_path",    "TEXT DEFAULT ''"),    # nouveau : chemin disque (remplace b64)
+        ("users",     "email_verified", "INTEGER DEFAULT 0"),
+        ("users",     "monthly_quota",  "INTEGER DEFAULT 0"),  # 0 = défaut global
+        ("users",     "deleted_at",     "TEXT DEFAULT ''"),
+    ]
     with get_db() as db:
-        for col, ddl in [("cv_pdf_b64",  "TEXT DEFAULT ''"),
-                         ("cv_pdf_name", "TEXT DEFAULT ''")]:
+        for table, col, ddl in cols:
             try:
-                db.execute(f"ALTER TABLE user_data ADD COLUMN {col} {ddl}")
+                db.execute(f"ALTER TABLE {table} ADD COLUMN {col} {ddl}")
             except sqlite3.OperationalError:
-                pass  # colonne déjà présente
+                pass
         db.commit()
-_migrate_user_data_pdf()
+_migrate_columns()
 
 # ── Helpers SQL ─────────────────────────────────────────────────────────────────
 def row_to_dict(row):
@@ -311,7 +560,7 @@ def call_ai(provider, api_key, prompt, max_tokens=8000):
         return msg.content[0].text
 
 def get_ai_keys(user):
-    claude_key = user.get("api_key_claude", "").strip()
+    claude_key = dec_secret((user.get("api_key_claude", "") or "").strip())
     if claude_key:
         return "Claude (Anthropic)", claude_key
     return "OpenAI (ChatGPT)", OPENAI_API_KEY
@@ -378,6 +627,8 @@ def search_indeed(query, location="France", nb=15):
 def index():
     return send_file(os.path.join(BASE_DIR, "ui.html"))
 
+REQUIRE_EMAIL_VERIFICATION = bool(os.environ.get("REQUIRE_EMAIL_VERIFICATION", "1") == "1" and SMTP_HOST)
+
 @app.route("/api/auth/register", methods=["POST"])
 @rate_limit(max_calls=5, window_sec=3600, key_fn=lambda: f"reg:{_client_ip()}")
 def route_register():
@@ -385,16 +636,18 @@ def route_register():
     email = (data.get("email","") or "").strip().lower()
     pwd   = (data.get("password","") or "")
     name  = (data.get("name","") or "").strip()[:80]
+    captcha_token = (data.get("hcaptcha_token","") or "").strip()
     if not valid_email(email):
         return jsonify({"error": "Email invalide"}), 400
     if not valid_password(pwd):
         return jsonify({"error": f"Mot de passe trop faible (min {MIN_PASSWORD_LEN} caractères)"}), 400
+    if not verify_hcaptcha(captcha_token, _client_ip()):
+        return jsonify({"error": "Vérification anti-bot échouée. Réessaye."}), 400
     with get_db() as db:
         existing = db.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
         if existing:
             return jsonify({"error": "Email déjà utilisé"}), 400
-        # Rôle : admin si email correspond à ADMIN_EMAIL, sinon membre.
-        # En dev, le 1er user devient admin par défaut (raccourci local).
+        # Rôle
         if ADMIN_EMAIL and email == ADMIN_EMAIL:
             role = "admin"
         elif not IS_PROD:
@@ -402,16 +655,35 @@ def route_register():
             role  = "admin" if count == 0 else "membre"
         else:
             role = "membre"
+        # Email vérifié auto si admin email ou si verification désactivée
+        verified = 1 if (role == "admin" or not REQUIRE_EMAIL_VERIFICATION) else 0
         db.execute(
-            "INSERT INTO users(email,password_hash,name,role) VALUES(?,?,?,?)",
-            (email, generate_password_hash(pwd), name or email.split("@")[0], role)
+            "INSERT INTO users(email,password_hash,name,role,email_verified) VALUES(?,?,?,?,?)",
+            (email, generate_password_hash(pwd), name or email.split("@")[0], role, verified)
         )
         db.commit()
         user = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+
+    # Email de vérification si requis
+    if REQUIRE_EMAIL_VERIFICATION and not verified:
+        token = create_email_token(user["id"], "verify_email", ttl_hours=48)
+        verify_url = f"{app_url()}/api/auth/verify-email?token={token}"
+        send_email(
+            email,
+            "Vérifie ton email — JobFinder",
+            f"Bienvenue sur JobFinder !\n\nClique sur ce lien pour activer ton compte :\n{verify_url}\n\nLien valide 48h.",
+            f"<p>Bienvenue sur JobFinder !</p><p><a href='{verify_url}'>Activer mon compte</a> (lien valide 48h)</p>",
+        )
+
+    session.regenerate() if hasattr(session, "regenerate") else session.clear()
     session.permanent = True
     session["user_id"] = user["id"]
-    log.info(f"register: id={user['id']} email={email} role={role} ip={_client_ip()}")
-    return jsonify({"ok": True, "user": {"id": user["id"], "email": user["email"], "name": user["name"], "role": user["role"]}})
+    log.info(f"register: id={user['id']} email={email} role={role} verified={verified} ip={_client_ip()}")
+    return jsonify({
+        "ok": True,
+        "needs_verification": bool(REQUIRE_EMAIL_VERIFICATION and not verified),
+        "user": {"id": user["id"], "email": user["email"], "name": user["name"], "role": user["role"]}
+    })
 
 
 # Lockout login : 10 échecs / 15 min par IP+email
@@ -443,13 +715,21 @@ def route_login():
             _rate_buckets[lockout_key].append(time.time())
         log.info(f"login fail: ip={_client_ip()} email={email}")
         return jsonify({"error": "Email ou mot de passe incorrect"}), 401
-    # succès → on purge le bucket
+    # Compte supprimé ?
+    if row["deleted_at"]:
+        return jsonify({"error": "Ce compte a été supprimé."}), 403
+    # succès → on purge le bucket et on régénère la session (anti-fixation)
     with _rl_lock:
         _rate_buckets.pop(lockout_key, None)
+    session.clear()
     session.permanent = True
     session["user_id"] = row["id"]
     log.info(f"login ok: id={row['id']} email={email} ip={_client_ip()}")
-    return jsonify({"ok": True, "user": {"id": row["id"], "email": row["email"], "name": row["name"], "role": row["role"]}})
+    return jsonify({
+        "ok": True,
+        "user": {"id": row["id"], "email": row["email"], "name": row["name"], "role": row["role"]},
+        "email_verified": bool(row["email_verified"]),
+    })
 
 @app.route("/api/auth/logout", methods=["POST"])
 def route_logout():
@@ -460,8 +740,215 @@ def route_logout():
 def route_me():
     u = get_current_user()
     if not u:
-        return jsonify({"user": None})
-    return jsonify({"user": {"id": u["id"], "email": u["email"], "name": u["name"], "role": u["role"]}})
+        return jsonify({"user": None, "hcaptcha_site_key": HCAPTCHA_SITE_KEY})
+    quota = get_quota_status(u["id"])
+    return jsonify({
+        "user": {"id": u["id"], "email": u["email"], "name": u["name"], "role": u["role"]},
+        "email_verified": bool(u.get("email_verified", 0)),
+        "needs_verification": REQUIRE_EMAIL_VERIFICATION and not bool(u.get("email_verified", 0)),
+        "quota": quota,
+        "hcaptcha_site_key": HCAPTCHA_SITE_KEY,
+    })
+
+# ── Email verification ─────────────────────────────────────────────────────────
+@app.route("/api/auth/verify-email")
+def route_verify_email():
+    token = (request.args.get("token") or "").strip()
+    uid = consume_email_token(token, "verify_email", max_age_hours=48)
+    if not uid:
+        return Response("<h1>Lien invalide ou expiré</h1>", mimetype="text/html"), 400
+    with get_db() as db:
+        db.execute("UPDATE users SET email_verified=1 WHERE id=?", (uid,))
+        db.commit()
+    log.info(f"email verified: user_id={uid}")
+    # redirect vers l'app
+    return Response(
+        f"<h1>✅ Email vérifié !</h1><p><a href='{app_url()}'>Retour à l'app</a></p>",
+        mimetype="text/html",
+    )
+
+@app.route("/api/auth/resend-verification", methods=["POST"])
+@require_auth
+@rate_limit(max_calls=3, window_sec=600, key_fn=lambda: f"resend:{session.get('user_id','?')}")
+def route_resend_verification():
+    u = get_current_user()
+    if u.get("email_verified"):
+        return jsonify({"ok": True, "already_verified": True})
+    token = create_email_token(u["id"], "verify_email", ttl_hours=48)
+    verify_url = f"{app_url()}/api/auth/verify-email?token={token}"
+    send_email(
+        u["email"], "Vérifie ton email — JobFinder",
+        f"Lien d'activation (valide 48h) :\n{verify_url}",
+        f"<p><a href='{verify_url}'>Activer mon compte</a> (valide 48h)</p>",
+    )
+    return jsonify({"ok": True})
+
+# ── Password reset ─────────────────────────────────────────────────────────────
+@app.route("/api/auth/forgot-password", methods=["POST"])
+@rate_limit(max_calls=5, window_sec=3600, key_fn=lambda: f"forgot:{_client_ip()}")
+def route_forgot_password():
+    data  = request.json or {}
+    email = (data.get("email","") or "").strip().lower()
+    if not valid_email(email):
+        return jsonify({"error": "Email invalide"}), 400
+    with get_db() as db:
+        row = db.execute("SELECT id FROM users WHERE email=? AND (deleted_at='' OR deleted_at IS NULL)", (email,)).fetchone()
+    # Réponse identique que l'email existe ou non (anti-énumération)
+    if row:
+        token = create_email_token(row["id"], "reset_password", ttl_hours=2)
+        reset_url = f"{app_url()}/?reset_token={token}"
+        send_email(
+            email, "Réinitialisation de mot de passe — JobFinder",
+            f"Tu as demandé une réinitialisation. Clique ici (valide 2h) :\n{reset_url}\n\n"
+            f"Si ce n'était pas toi, ignore cet email.",
+            f"<p><a href='{reset_url}'>Réinitialiser mon mot de passe</a> (valide 2h)</p>"
+            f"<p>Si ce n'était pas toi, ignore cet email.</p>",
+        )
+        log.info(f"forgot-password: id={row['id']} email={email} ip={_client_ip()}")
+    return jsonify({"ok": True, "message": "Si l'email existe, un lien de réinitialisation a été envoyé."})
+
+@app.route("/api/auth/reset-password", methods=["POST"])
+@rate_limit(max_calls=10, window_sec=3600, key_fn=lambda: f"reset:{_client_ip()}")
+def route_reset_password():
+    data  = request.json or {}
+    token = (data.get("token","") or "").strip()
+    pwd   = (data.get("password","") or "")
+    if not valid_password(pwd):
+        return jsonify({"error": f"Mot de passe trop faible (min {MIN_PASSWORD_LEN} caractères)"}), 400
+    uid = consume_email_token(token, "reset_password", max_age_hours=2)
+    if not uid:
+        return jsonify({"error": "Lien invalide ou expiré."}), 400
+    with get_db() as db:
+        db.execute("UPDATE users SET password_hash=? WHERE id=?", (generate_password_hash(pwd), uid))
+        # invalide les sessions existantes de fait via password change (cookies ne portent que user_id)
+        db.commit()
+    log.info(f"password reset: user_id={uid} ip={_client_ip()}")
+    return jsonify({"ok": True})
+
+# ── Suppression de compte (RGPD : droit à l'effacement) ─────────────────────────
+@app.route("/api/auth/delete-account", methods=["POST"])
+@require_auth
+def route_delete_account():
+    u = get_current_user()
+    data = request.json or {}
+    pwd  = (data.get("password","") or "")
+    if not pwd or not check_password_hash(u["password_hash"], pwd):
+        return jsonify({"error": "Mot de passe requis pour confirmer"}), 401
+    uid = u["id"]
+    # Soft-delete : email anonymisé + flag deleted_at, pour préserver la cohérence
+    # des candidatures liées (non, on hard-delete car ON DELETE CASCADE est défini).
+    # Choix : hard-delete pour respecter pleinement le droit à l'effacement.
+    with get_db() as db:
+        db.execute("DELETE FROM users WHERE id=?", (uid,))
+        db.commit()
+    # Supprime les fichiers CV
+    user_dir = os.path.join(CV_DIR, str(uid))
+    if os.path.isdir(user_dir):
+        try:
+            import shutil; shutil.rmtree(user_dir)
+        except Exception as e:
+            log.warning(f"cleanup user_dir failed: {e}")
+    session.clear()
+    log.info(f"account deleted: user_id={uid}")
+    return jsonify({"ok": True})
+
+# ── Export RGPD (droit d'accès) ────────────────────────────────────────────────
+@app.route("/api/auth/export-data", methods=["GET"])
+@require_auth
+@rate_limit(max_calls=3, window_sec=3600, key_fn=lambda: f"export:{session.get('user_id','?')}")
+def route_export_data():
+    u = get_current_user()
+    uid = u["id"]
+    with get_db() as db:
+        user        = dict(db.execute("SELECT id,email,name,role,created_at,email_verified FROM users WHERE id=?", (uid,)).fetchone())
+        apps        = [dict(r) for r in db.execute("SELECT * FROM applications WHERE user_id=?", (uid,))]
+        stages      = [dict(r) for r in db.execute("SELECT * FROM interview_stages WHERE user_id=?", (uid,))]
+        ud_row      = db.execute("SELECT * FROM user_data WHERE user_id=?", (uid,)).fetchone()
+        user_data   = dict(ud_row) if ud_row else {}
+        templates   = [dict(r) for r in db.execute("SELECT id,name,style,color,created_at FROM cv_templates WHERE user_id=?", (uid,))]
+    # On exclut les blobs lourds de l'export JSON (CV PDF binaire en base64)
+    user_data.pop("cv_pdf_b64", None)
+    payload = {
+        "exported_at": datetime.datetime.now().isoformat(),
+        "user": user,
+        "applications": apps,
+        "interview_stages": stages,
+        "user_data": user_data,
+        "cv_templates": templates,
+    }
+    body = json.dumps(payload, ensure_ascii=False, indent=2)
+    return Response(
+        body, mimetype="application/json",
+        headers={"Content-Disposition": f'attachment; filename="jobfinder_export_{uid}.json"'}
+    )
+
+# ── Pages légales statiques (CGU + Privacy) ─────────────────────────────────────
+LEGAL_HTML = """<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8">
+<title>{title} — JobFinder</title>
+<style>body{{font-family:system-ui;max-width:780px;margin:40px auto;padding:0 24px;color:#1E3A5F;line-height:1.7}}
+h1{{color:#2F5DA8}} h2{{margin-top:28px;color:#1E3A5F}} a{{color:#2F5DA8}} code{{background:#EEF3FB;padding:2px 6px;border-radius:4px}}
+.foot{{margin-top:40px;padding-top:20px;border-top:1px solid #E2EAF4;font-size:13px;color:#6B7280}}</style></head>
+<body>{body}<div class="foot"><a href="/">← Retour à JobFinder</a></div></body></html>"""
+
+@app.route("/cgu")
+def route_cgu():
+    body = """<h1>Conditions Générales d'Utilisation</h1>
+    <p><strong>Dernière mise à jour :</strong> 2026-04-27</p>
+    <h2>1. Service</h2>
+    <p>JobFinder est un assistant de recherche d'emploi qui utilise des modèles d'IA pour adapter des CV
+    et préparer des entretiens. Le service est fourni « tel quel », sans garantie de résultat.</p>
+    <h2>2. Compte</h2>
+    <p>Tu es responsable de la confidentialité de ton mot de passe. Un compte = une personne physique.</p>
+    <h2>3. Usage</h2>
+    <p>Interdit : automatiser des requêtes massives, contourner les quotas, uploader du contenu illégal,
+    usurper l'identité d'un tiers, faire de l'ingénierie inverse du service.</p>
+    <h2>4. Propriété intellectuelle</h2>
+    <p>Tu conserves la propriété des contenus que tu importes (CV, documents). Tu nous accordes une licence
+    technique pour les traiter (envoi à l'IA, stockage, génération de fichiers dérivés).</p>
+    <h2>5. IA et exactitude</h2>
+    <p>L'IA peut faire des erreurs. Tu es responsable de relire et corriger tout contenu généré avant usage.</p>
+    <h2>6. Suspension / résiliation</h2>
+    <p>Tu peux supprimer ton compte à tout moment via Paramètres → Supprimer mon compte. Nous pouvons suspendre
+    un compte en cas de violation des présentes CGU.</p>
+    <h2>7. Limitation de responsabilité</h2>
+    <p>Notre responsabilité ne saurait excéder le montant payé pour le service sur les 12 derniers mois.</p>
+    <h2>8. Droit applicable</h2>
+    <p>Droit français. Tribunaux compétents : ceux du ressort du siège de l'éditeur.</p>"""
+    return Response(LEGAL_HTML.format(title="CGU", body=body), mimetype="text/html")
+
+@app.route("/privacy")
+def route_privacy():
+    body = """<h1>Politique de confidentialité</h1>
+    <p><strong>Dernière mise à jour :</strong> 2026-04-27</p>
+    <h2>Données collectées</h2>
+    <ul>
+      <li>Email, nom, mot de passe (hashé) — pour ton compte</li>
+      <li>Tes CV, documents et candidatures — pour le service</li>
+      <li>Logs techniques (IP, user-agent) — sécurité, conservés 30 jours</li>
+    </ul>
+    <h2>Finalités</h2>
+    <p>Uniquement la fourniture du service. Pas de revente. Pas de profilage publicitaire.</p>
+    <h2>Sous-traitants</h2>
+    <ul>
+      <li><strong>OpenAI / Anthropic</strong> — traitement IA. Données envoyées : extraits de CV + offre. Non stockées par défaut.</li>
+      <li><strong>Hébergeur</strong> (Railway) — UE/US selon région</li>
+      <li><strong>SMTP</strong> (si configuré) — envoi d'emails de vérification / reset</li>
+    </ul>
+    <h2>Tes droits (RGPD)</h2>
+    <ul>
+      <li><strong>Accès</strong> : Paramètres → <code>Exporter mes données</code> (JSON)</li>
+      <li><strong>Effacement</strong> : Paramètres → <code>Supprimer mon compte</code></li>
+      <li><strong>Rectification</strong> : modifier directement dans l'app</li>
+      <li><strong>Réclamation</strong> : <a href='https://www.cnil.fr'>CNIL</a></li>
+    </ul>
+    <h2>Conservation</h2>
+    <p>Tes données sont conservées tant que ton compte existe, supprimées définitivement à la suppression du compte.</p>
+    <h2>Cookies</h2>
+    <p>Un seul cookie : <code>session</code> (HttpOnly, Secure en prod, SameSite=Strict) pour te garder connecté.
+    Pas de cookie tiers, pas de tracking publicitaire.</p>
+    <h2>Contact</h2>
+    <p>Pour toute question : <a href='mailto:contact@jobfinder.app'>contact@jobfinder.app</a> (à adapter)</p>"""
+    return Response(LEGAL_HTML.format(title="Confidentialité", body=body), mimetype="text/html")
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ROUTES CONFIG (par utilisateur)
@@ -483,9 +970,12 @@ def route_config():
         })
     data = request.json or {}
     sets = {}
-    if "provider" in data:       sets["ai_provider"]    = data["provider"]
-    if data.get("api_key"):      sets["api_key_claude"] = data["api_key"]
-    if data.get("api_key_openai"): sets["api_key_openai"] = data["api_key_openai"]
+    if "provider" in data:
+        sets["ai_provider"] = data["provider"]
+    if data.get("api_key"):
+        sets["api_key_claude"] = enc_secret(data["api_key"].strip())
+    if data.get("api_key_openai"):
+        sets["api_key_openai"] = enc_secret(data["api_key_openai"].strip())
     if sets:
         cols = ", ".join(f"{k}=?" for k in sets)
         with get_db() as db:
@@ -505,6 +995,9 @@ def route_get_apps():
         rows = db.execute("SELECT * FROM applications WHERE user_id=? ORDER BY created_at DESC", (u["id"],)).fetchall()
     return jsonify([app_row_to_dict(r) for r in rows])
 
+def _trim(s, n):
+    return (s or "")[:n] if isinstance(s, str) else ""
+
 @app.route("/api/applications", methods=["POST"])
 @require_auth
 def route_add_app():
@@ -515,10 +1008,15 @@ def route_add_app():
         cur = db.execute(
             """INSERT INTO applications(user_id,company,role_name,job_desc,status,cv_filename,notes,url,applied_date)
                VALUES(?,?,?,?,?,?,?,?,?)""",
-            (u["id"], data.get("company",""), data.get("role",""),
-             data.get("job_desc",""), data.get("status","Envoyée"),
-             data.get("cv_filename",""), data.get("notes",""),
-             data.get("url",""), applied)
+            (u["id"],
+             _trim(data.get("company"), 200),
+             _trim(data.get("role"),    200),
+             _trim(data.get("job_desc"), 12000),
+             sanitize_status(data.get("status")),
+             _trim(data.get("cv_filename"), 200),
+             _trim(data.get("notes"), 12000),
+             _trim(data.get("url"), 2048),
+             _trim(applied, 20))
         )
         app_id = cur.lastrowid
         # Crée automatiquement un stage "Candidature envoyée" dans le planning
@@ -547,10 +1045,19 @@ def route_update_app(app_id):
         mapping = {"company":"company","role":"role_name","job_desc":"job_desc",
                    "status":"status","cv_filename":"cv_filename","notes":"notes",
                    "url":"url","date":"applied_date","interview_prep":"interview_prep"}
+        # Bornes par champ (anti-bloat)
+        limits = {"company":200,"role":200,"job_desc":12000,"status":50,
+                  "cv_filename":200,"notes":12000,"url":2048,"date":20,
+                  "interview_prep":50000}
         for k, col in mapping.items():
             if k in data:
+                v = data[k]
+                if k == "status":
+                    v = sanitize_status(v)
+                elif isinstance(v, str):
+                    v = v[:limits[k]]
                 sets.append(f"{col}=?")
-                vals.append(data[k])
+                vals.append(v)
         if sets:
             db.execute(f"UPDATE applications SET {','.join(sets)} WHERE id=?", (*vals, app_id))
             db.commit()
@@ -679,6 +1186,7 @@ def route_serve_cv(filename):
 @app.route("/api/adapt-cv", methods=["POST"])
 @require_auth
 @rate_limit(max_calls=20, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
+@require_quota
 def route_adapt_cv():
     u    = get_current_user()
     data = request.json or {}
@@ -733,6 +1241,7 @@ Modified HTML:"""
 @app.route("/api/adapt-cv-template", methods=["POST"])
 @require_auth
 @rate_limit(max_calls=20, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
+@require_quota
 def route_adapt_cv_template():
     u    = get_current_user()
     data = request.json or {}
@@ -876,6 +1385,7 @@ def route_search():
 @app.route("/api/fetch-url", methods=["POST"])
 @require_auth
 @rate_limit(max_calls=20, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
+@require_quota
 def route_fetch_url():
     u   = get_current_user()
     data = request.json or {}
@@ -918,6 +1428,7 @@ def route_fetch_url():
 @app.route("/api/interview-prep", methods=["POST"])
 @require_auth
 @rate_limit(max_calls=20, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
+@require_quota
 def route_interview_prep():
     u    = get_current_user()
     data = request.json or {}
@@ -1102,6 +1613,7 @@ def route_template(tpl_id):
 @app.route("/api/generate-template", methods=["POST"])
 @require_auth
 @rate_limit(max_calls=10, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
+@require_quota
 def route_generate_template():
     data = request.json or {}
     u    = get_current_user()
@@ -1548,6 +2060,26 @@ def adapt_pdf_cv(input_pdf_path, job_offer_text, output_pdf_path,
 
 
 # ── Routes : upload du CV PDF (Paramètres) + adaptation ────────────────────────
+def _cv_pdf_disk_path(user_id):
+    """Chemin disque du CV PDF source (1 par user)."""
+    return os.path.join(user_cv_dir(user_id), "_source_cv.pdf")
+
+def _user_has_pdf(ud, user_id):
+    """True si un PDF source existe (disque OU legacy b64)."""
+    return bool(ud.get("cv_pdf_path") and os.path.isfile(ud["cv_pdf_path"])) \
+           or bool(ud.get("cv_pdf_b64", "")) \
+           or os.path.isfile(_cv_pdf_disk_path(user_id))
+
+def _read_user_pdf_bytes(ud, user_id):
+    """Lit le PDF source (priorité disque, fallback b64). Retourne bytes ou None."""
+    p = ud.get("cv_pdf_path") or _cv_pdf_disk_path(user_id)
+    if os.path.isfile(p):
+        with open(p, "rb") as f: return f.read()
+    if ud.get("cv_pdf_b64"):
+        try: return base64.b64decode(ud["cv_pdf_b64"])
+        except Exception: return None
+    return None
+
 @app.route("/api/cv-pdf", methods=["GET", "POST", "DELETE"])
 @require_auth
 def route_cv_pdf():
@@ -1555,29 +2087,45 @@ def route_cv_pdf():
     ud = get_user_data(u["id"])
     if request.method == "GET":
         return jsonify({
-            "has_pdf": bool(ud.get("cv_pdf_b64", "")),
+            "has_pdf": _user_has_pdf(ud, u["id"]),
             "name":    ud.get("cv_pdf_name", ""),
         })
-    with get_db() as db:
-        if request.method == "DELETE":
-            db.execute("UPDATE user_data SET cv_pdf_b64='', cv_pdf_name='' WHERE user_id=?", (u["id"],))
+    if request.method == "DELETE":
+        # Suppression DB + disque
+        with get_db() as db:
+            db.execute(
+                "UPDATE user_data SET cv_pdf_b64='', cv_pdf_name='', cv_pdf_path='' WHERE user_id=?",
+                (u["id"],)
+            )
             db.commit()
-            return jsonify({"ok": True})
-        data = request.json or {}
-        b64  = (data.get("b64") or "").strip()
-        name = (data.get("name") or "cv.pdf").strip()
-        if not b64:
-            return jsonify({"error": "PDF manquant"}), 400
-        # Sanity : taille brute (octets décodés)
-        try:
-            raw_size = (len(b64) * 3) // 4
-        except Exception:
-            raw_size = 0
-        if raw_size > MAX_PDF_SIZE_MB * 1024 * 1024:
-            return jsonify({"error": f"PDF trop volumineux (>{MAX_PDF_SIZE_MB} Mo)"}), 400
+        p = _cv_pdf_disk_path(u["id"])
+        if os.path.isfile(p):
+            try: os.unlink(p)
+            except Exception as e: log.warning(f"unlink {p}: {e}")
+        return jsonify({"ok": True})
+    # POST : nouvelle source PDF → écrit sur disque (pas de b64 en DB)
+    data = request.json or {}
+    b64  = (data.get("b64") or "").strip()
+    name = (data.get("name") or "cv.pdf").strip()[:200]
+    if not b64:
+        return jsonify({"error": "PDF manquant"}), 400
+    try:
+        raw = base64.b64decode(b64, validate=True)
+    except Exception:
+        return jsonify({"error": "Base64 invalide"}), 400
+    if len(raw) > MAX_PDF_SIZE_MB * 1024 * 1024:
+        return jsonify({"error": f"PDF trop volumineux (>{MAX_PDF_SIZE_MB} Mo)"}), 400
+    if not raw.startswith(b"%PDF"):
+        return jsonify({"error": "Le fichier ne semble pas être un PDF valide"}), 400
+    disk = _cv_pdf_disk_path(u["id"])
+    with open(disk, "wb") as f: f.write(raw)
+    with get_db() as db:
         db.execute("INSERT OR IGNORE INTO user_data(user_id) VALUES(?)", (u["id"],))
-        db.execute("UPDATE user_data SET cv_pdf_b64=?, cv_pdf_name=? WHERE user_id=?",
-                   (b64, name, u["id"]))
+        # On vide cv_pdf_b64 si présent (migration progressive vers disque)
+        db.execute(
+            "UPDATE user_data SET cv_pdf_b64='', cv_pdf_path=?, cv_pdf_name=? WHERE user_id=?",
+            (disk, name, u["id"])
+        )
         db.commit()
     return jsonify({"ok": True, "name": name})
 
@@ -1585,6 +2133,7 @@ def route_cv_pdf():
 @app.route("/api/adapt-cv-pdf", methods=["POST"])
 @require_auth
 @rate_limit(max_calls=20, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
+@require_quota
 def route_adapt_cv_pdf():
     """Adapte le CV PDF stocké en paramètres. Renvoie directement le PDF adapté."""
     u = get_current_user()
@@ -1592,13 +2141,15 @@ def route_adapt_cv_pdf():
     if not api_key:
         return jsonify({"error": "Clé API manquante. Configurez-la dans Paramètres."}), 400
     ud = get_user_data(u["id"])
-    pdf_b64 = ud.get("cv_pdf_b64", "")
-    if not pdf_b64:
+    if not _user_has_pdf(ud, u["id"]):
         return jsonify({"error": "Aucun CV PDF dans vos paramètres. Importez-le d'abord."}), 400
+    pdf_bytes = _read_user_pdf_bytes(ud, u["id"])
+    if not pdf_bytes:
+        return jsonify({"error": "PDF stocké illisible. Réimporte-le."}), 400
     data = request.json or {}
-    job_desc = (data.get("job_desc", "") or "").strip()
-    company  = (data.get("company", "")  or "").strip()
-    role     = (data.get("role", "")     or "").strip()
+    job_desc = (data.get("job_desc", "") or "").strip()[:8000]
+    company  = (data.get("company", "")  or "").strip()[:200]
+    role     = (data.get("role", "")     or "").strip()[:200]
     if len(job_desc) < 30:
         return jsonify({"error": "Collez la description complète du poste"}), 400
     job_offer = f"Poste : {role}\nEntreprise : {company}\n\n{job_desc}"
@@ -1611,9 +2162,10 @@ def route_adapt_cv_pdf():
     out_path = os.path.join(user_dir, out_name)
     try:
         with open(in_path, "wb") as f:
-            f.write(base64.b64decode(pdf_b64))
+            f.write(pdf_bytes)
     except Exception as e:
-        return jsonify({"error": f"PDF stocké invalide : {e}"}), 400
+        log.exception("write input pdf")
+        return jsonify({"error": f"Impossible de préparer le PDF : {e}"}), 500
 
     try:
         result = adapt_pdf_cv(in_path, job_offer, out_path,
