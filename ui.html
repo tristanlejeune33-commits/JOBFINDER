@@ -1234,6 +1234,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
 }
 
+/* Drop zone documentation */
+#s-doc-drop:hover{border-color:var(--accent) !important;background:var(--accent-light) !important}
+.doc-line:hover{border-color:var(--border2) !important}
+
 /* ══ CV STUDIO ══════════════════════════════════════════════════════════════ */
 .cvs-layout{
   display:grid;grid-template-columns:1fr 380px;gap:18px;
@@ -1797,29 +1801,6 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
     </div>
   </div>
   <div class="settings-grid">
-    <div class="card">
-      <div class="card-title">📄 CV de base</div>
-      <div class="fg">
-        <label>Importer votre CV (.html)</label>
-        <div class="flex gap-2 items-c">
-          <input id="s-cv-name" placeholder="Aucun CV importé" readonly style="flex:1">
-          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('s-cv-inp').click()">📂 Choisir</button>
-          <input type="file" id="s-cv-inp" accept=".html,.htm" style="display:none" onchange="importCV(event)">
-        </div>
-      </div>
-      <div id="s-cv-status" class="tx-sm mt2" style="color:var(--green)"></div>
-
-      <div class="fg" style="margin-top:14px">
-        <label>📄 Importer votre CV PDF <span class="tx-sm tx-m" style="font-weight:400">— sera adapté en gardant le design original</span></label>
-        <div class="flex gap-2 items-c">
-          <input id="s-cv-pdf-name" placeholder="Aucun CV PDF importé" readonly style="flex:1">
-          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('s-cv-pdf-inp').click()">📂 Choisir</button>
-          <input type="file" id="s-cv-pdf-inp" accept="application/pdf,.pdf" style="display:none" onchange="importCVPdf(event)">
-          <button class="btn btn-red btn-sm" id="s-cv-pdf-del" onclick="removeCVPdf()" style="display:none">🗑</button>
-        </div>
-        <div id="s-cv-pdf-status" class="tx-sm mt2" style="color:var(--green)"></div>
-      </div>
-    </div>
     <div class="card" style="grid-column:1/-1">
       <div class="card-title">✍️ Mon résumé personnel</div>
       <div class="tx-sm tx-m" style="margin-bottom:12px;line-height:1.6">
@@ -1831,16 +1812,36 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       </div>
       <div id="s-summary-status" class="tx-sm mt1" style="color:var(--green);text-align:right"></div>
     </div>
-    <div class="card">
+    <div class="card" style="grid-column:1/-1">
       <div class="card-title">📎 Ma documentation</div>
-      <div class="tx-sm tx-m" style="margin-bottom:12px;line-height:1.6">Importez vos anciens CV, lettres de motivation, profils LinkedIn (PDF ou HTML) — ils serviront de base pour rédiger votre CV et préparer vos entretiens <strong style="color:var(--text)">sans rien inventer</strong>.</div>
-      <div class="flex gap-2 items-c" style="margin-bottom:10px">
-        <input id="s-doc-names" placeholder="Aucun document importé" readonly style="flex:1;font-size:12px">
-        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('s-doc-inp').click()">📂 Ajouter</button>
-        <input type="file" id="s-doc-inp" accept=".html,.htm,.txt,.pdf" multiple style="display:none" onchange="loadSettingsDocs(event)">
-        <button class="btn btn-red btn-sm" onclick="clearSettingsDocs()">✕</button>
+      <div class="tx-sm tx-m" style="margin-bottom:12px;line-height:1.6">
+        Importez vos anciens CV, lettres de motivation, profils LinkedIn (<strong>PDF, HTML, TXT</strong>) — ils serviront de base pour rédiger votre CV et préparer vos entretiens <strong style="color:var(--text)">sans rien inventer</strong>.
       </div>
-      <div id="s-doc-status" class="tx-sm" style="color:var(--green)"></div>
+
+      <!-- Zone drag & drop -->
+      <div id="s-doc-drop"
+           ondragover="docDrop.over(event)"
+           ondragleave="docDrop.leave(event)"
+           ondrop="docDrop.drop(event)"
+           onclick="document.getElementById('s-doc-inp').click()"
+           style="border:2px dashed var(--border2);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:.2s;background:var(--card2)">
+        <div style="font-size:32px;margin-bottom:6px">📂</div>
+        <div style="font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:4px">Glisse-dépose tes fichiers ici</div>
+        <div style="font-size:11.5px;color:var(--text3)">ou clique pour choisir — PDF, HTML, TXT acceptés (max 12 Mo / fichier)</div>
+        <input type="file" id="s-doc-inp" accept=".html,.htm,.txt,.pdf,application/pdf"
+               multiple style="display:none" onchange="docDrop.handleFiles(this.files); this.value=''">
+      </div>
+
+      <!-- Liste des fichiers ligne par ligne -->
+      <div id="s-doc-list" style="margin-top:14px"></div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:8px">
+        <div id="s-doc-status" class="tx-sm" style="color:var(--text3)"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-red btn-sm" onclick="docDrop.clearAll()">🗑️ Tout supprimer</button>
+          <button class="btn btn-green btn-sm" onclick="docDrop.save()">💾 Enregistrer</button>
+        </div>
+      </div>
     </div>
     <div class="card">
       <div class="card-title">📸 Photo de profil</div>
@@ -2870,7 +2871,6 @@ async function initApp(){
   await loadApps();
   await loadPhotoState();
   await loadDocsState();
-  await loadCvPdfState();
   await loadStages();
   render();
 }
@@ -3093,44 +3093,153 @@ function loadCVFile(e){
   reader.readAsText(file);
 }
 
-// ── Documentation (Settings) ───────────────────────────────────────────────────
+// ── Documentation (Settings) — drag & drop, liste fichier par fichier ─────────
 async function loadDocsState(){
   const d=await api('/api/docs');
   docsLoaded=!!(d.text&&d.text.length>10)||(d.summary&&d.summary.length>10);
 }
 
-async function loadSettingsDocs(ev){
-  const files=[...ev.target.files]; if(!files.length) return;
-  const st=document.getElementById('s-doc-status');
-  st.style.color='var(--yellow)'; st.textContent=`Extraction de ${files.length} fichier(s)...`;
-  let allText=''; const names=[];
-  // Charger docs existants
-  const existing=await api('/api/docs');
-  if(existing.text) allText=existing.text;
-  const existingNames=existing.names||[];
-  for(const file of files){
-    const b64=await fileToB64(file);
-    const res=await post('/api/extract-doc',{b64,mime:file.type,name:file.name});
-    allText+=`\n\n--- ${file.name} ---\n`+(res.text||'');
-    names.push(file.name);
-  }
-  const allNames=[...existingNames,...names];
-  await post('/api/docs',{text:allText,names:allNames});
-  document.getElementById('s-doc-names').value=allNames.join(', ');
-  st.style.color='var(--green)'; st.textContent=`✅ ${allNames.length} document(s) sauvegardé(s) — ${allText.length} caractères`;
-  docsLoaded=true;
-  toast(`${names.length} document(s) ajouté(s) !`,'success');
-  ev.target.value='';
-}
+const docDrop = {
+  // state : liste des "items" {name, text, size}
+  items: [],
+  loaded: false,
 
-async function clearSettingsDocs(){
-  if(!confirm('Supprimer toute la documentation ?')) return;
-  await post('/api/docs',{text:'',names:[]});
-  document.getElementById('s-doc-names').value='';
-  document.getElementById('s-doc-status').textContent='';
-  docsLoaded=false;
-  toast('Documentation effacée','info');
-}
+  async load(){
+    const d = await api('/api/docs');
+    const names = d.names || [];
+    const fullText = d.text || '';
+    // Découpe par marqueur '--- filename ---' pour reconstituer l'état
+    this.items = [];
+    if(fullText){
+      const parts = fullText.split(/\n*--- ([^\n]+?) ---\n/);
+      // parts = ["", "name1", "text1", "name2", "text2", ...]
+      // Si le format ne correspond pas, on stocke en bloc unique
+      if(parts.length > 1){
+        for(let i=1;i<parts.length;i+=2){
+          this.items.push({name: parts[i], text: parts[i+1] || ''});
+        }
+      } else {
+        // Compat ancien format : 1 item bloc
+        names.forEach((n,i)=>{
+          this.items.push({name: n, text: i===0 ? fullText : ''});
+        });
+      }
+    }
+    this.loaded = true;
+    this.render();
+  },
+
+  render(){
+    const list = document.getElementById('s-doc-list');
+    const st   = document.getElementById('s-doc-status');
+    if(!list) return;
+    if(this.items.length === 0){
+      list.innerHTML = '<div style="text-align:center;padding:14px;color:var(--text3);font-size:12.5px;font-style:italic">Aucun document importé</div>';
+      st.textContent = 'Aucun document';
+      return;
+    }
+    list.innerHTML = this.items.map((it,i)=>{
+      const ext = (it.name||'').split('.').pop().toLowerCase();
+      const ico = ext==='pdf'?'📄':ext==='html'||ext==='htm'?'🌐':ext==='txt'?'📝':'📎';
+      const chars = (it.text||'').length;
+      return `
+        <div class="doc-line" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px">
+          <span style="font-size:18px;flex-shrink:0">${ico}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.name)}</div>
+            <div style="font-size:11px;color:var(--text3)">${chars.toLocaleString('fr-FR')} caractères extraits</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="docDrop.remove(${i})" title="Retirer ce fichier"
+            style="color:var(--red);padding:4px 8px;flex-shrink:0">🗑</button>
+        </div>`;
+    }).join('');
+    const totalChars = this.items.reduce((s,i)=>s+(i.text||'').length, 0);
+    st.style.color = 'var(--green)';
+    st.textContent = `${this.items.length} fichier(s) — ${totalChars.toLocaleString('fr-FR')} caractères`;
+  },
+
+  // ── Drag & drop ─────────────────────────────────────────────────────────
+  over(e){
+    e.preventDefault(); e.stopPropagation();
+    const z = document.getElementById('s-doc-drop');
+    if(z){ z.style.borderColor='var(--accent)'; z.style.background='var(--accent-light)'; }
+  },
+  leave(e){
+    const z = document.getElementById('s-doc-drop');
+    if(z){ z.style.borderColor='var(--border2)'; z.style.background='var(--card2)'; }
+  },
+  drop(e){
+    e.preventDefault(); e.stopPropagation();
+    this.leave(e);
+    const files = [...(e.dataTransfer?.files || [])];
+    if(files.length) this.handleFiles(files);
+  },
+
+  async handleFiles(files){
+    files = [...files];
+    if(!files.length) return;
+    const allowed = ['pdf','html','htm','txt'];
+    const valid = files.filter(f=>{
+      const ext = f.name.split('.').pop().toLowerCase();
+      return allowed.includes(ext);
+    });
+    const skipped = files.length - valid.length;
+    if(skipped) toast(`${skipped} fichier(s) ignoré(s) (format non supporté)`,'info');
+    if(!valid.length) return;
+    const st = document.getElementById('s-doc-status');
+    st.style.color='var(--yellow)';
+    for(let i=0;i<valid.length;i++){
+      const file = valid[i];
+      st.textContent = `Extraction ${i+1}/${valid.length} : ${file.name}...`;
+      try{
+        const b64 = await fileToB64(file);
+        const res = await post('/api/extract-doc', {b64, mime:file.type, name:file.name});
+        if(res.error){ toast(`${file.name} : ${res.error}`,'error'); continue; }
+        // Évite les doublons
+        const idx = this.items.findIndex(x=>x.name===file.name);
+        if(idx>=0) this.items[idx] = {name: file.name, text: res.text||''};
+        else this.items.push({name: file.name, text: res.text||''});
+      }catch(err){
+        toast(`${file.name} : ${err.message||err}`, 'error');
+      }
+    }
+    this.render();
+    toast(`${valid.length} fichier(s) ajouté(s) — clique 💾 Enregistrer pour sauvegarder`, 'success');
+  },
+
+  remove(idx){
+    if(idx<0 || idx>=this.items.length) return;
+    const name = this.items[idx].name;
+    this.items.splice(idx, 1);
+    this.render();
+    toast(`Retiré : ${name} (n'oublie pas d'enregistrer)`, 'info');
+  },
+
+  async clearAll(){
+    if(!confirm('Supprimer tous les documents importés ?')) return;
+    this.items = [];
+    await post('/api/docs', {text:'', names:[]});
+    this.render();
+    docsLoaded = false;
+    toast('Documents effacés', 'info');
+  },
+
+  async save(){
+    // Reconstitue le grand bloc texte avec marqueurs séparateurs
+    const text = this.items
+      .map(it => `--- ${it.name} ---\n${it.text||''}`)
+      .join('\n\n');
+    const names = this.items.map(it=>it.name);
+    const r = await post('/api/docs', {text, names});
+    if(r && r.error){ toast(r.error, 'error'); return; }
+    docsLoaded = this.items.length > 0;
+    const st = document.getElementById('s-doc-status');
+    st.style.color = 'var(--green)';
+    st.textContent = `✅ Enregistré : ${this.items.length} fichier(s) — ${text.length.toLocaleString('fr-FR')} caractères`;
+    toast('💾 Documentation sauvegardée', 'success');
+  },
+};
+
 
 // ── Télécharger CV en PDF ──────────────────────────────────────────────────────
 async function downloadPDF(){
@@ -3834,17 +3943,11 @@ const cvStudio = {
 
 // ── Settings ───────────────────────────────────────────────────────────────────
 async function loadSettings(){
-  const cv=await api('/api/cv-base');
-  if(cv.name){document.getElementById('s-cv-name').value=cv.name;document.getElementById('s-cv-status').textContent='✅ '+cv.name;}
-  // Résumé + Docs
+  // Résumé
   const d=await api('/api/docs');
   if(d.summary) document.getElementById('s-summary').value=d.summary;
-  if(d.names&&d.names.length){
-    document.getElementById('s-doc-names').value=d.names.join(', ');
-    document.getElementById('s-doc-status').textContent=`✅ ${d.names.length} document(s) — ${(d.text||'').length} caractères`;
-  }
-  // CV PDF
-  await loadCvPdfState();
+  // Documentation (drag & drop, fichier par fichier)
+  await docDrop.load();
   // Photo
   renderPhotoCard();
   // Compte / RGPD (quota, vérif email)
