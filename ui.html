@@ -1171,6 +1171,69 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   .cal-day-col{min-width:88px}
 }
 
+/* ── Mobile responsive — passe complète ────────────────────────────────────── */
+@media(max-width:768px){
+  /* Header & navigation */
+  .ph{flex-direction:column;align-items:stretch;gap:12px;padding-bottom:14px}
+  .ph-text h2{font-size:20px}
+  .ph-text p{font-size:12.5px}
+  .ph .flex{flex-wrap:wrap}
+  .ph .btn{flex:1;min-width:140px}
+
+  /* Adapter mon CV — colonne unique */
+  .layout{grid-template-columns:1fr !important;gap:14px}
+  .adapter-out{height:480px;min-height:480px}
+  #cv-preview, #wiz-preview-frame{min-height:420px}
+
+  /* Settings — colonne unique */
+  .settings-grid{grid-template-columns:1fr !important;gap:14px}
+
+  /* Tables → cards (les desktop tables disparaissent au profit de m-card-list) */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .admin-table{font-size:13px}
+  .admin-table th, .admin-table td{padding:8px 10px !important}
+
+  /* Boutons : taille tactile minimale (44px Apple guideline) */
+  .btn{min-height:40px}
+  .btn-sm{min-height:36px;font-size:13px}
+
+  /* Inputs plus larges */
+  input, textarea, select{font-size:16px !important} /* évite zoom auto iOS */
+
+  /* Modal plein écran sur mobile */
+  .modal{width:100%;height:100%;max-height:100%;border-radius:0;max-width:100%}
+  .modal-bg{padding:0}
+
+  /* Auth modal centrée */
+  #auth-overlay .auth-card{max-width:100%;margin:20px;padding:24px 20px}
+
+  /* Bottom nav assez haute */
+  .bn{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+
+  /* Kanban : scroll horizontal sur mobile */
+  #kanban{display:flex;overflow-x:auto;gap:10px;padding-bottom:14px;scroll-snap-type:x mandatory}
+  #kanban .kcol{min-width:280px;scroll-snap-align:start;flex-shrink:0}
+
+  /* Cartes RGPD admin/settings : grid → 1 colonne */
+  .settings-grid .card[style*="grid-column:1/-1"] > div[style*="grid-template-columns"]{
+    grid-template-columns:1fr !important;
+  }
+
+  /* Toast un peu plus haut pour pas être caché par bottom-nav */
+  #toasts{bottom:80px}
+
+  /* Calendar : scroll horizontal */
+  .cal-grid{overflow-x:auto}
+  .cal-30-cell{min-height:60px;padding:4px}
+  .cal-30-num{font-size:11px}
+  .cal-30-ev{font-size:10px;padding:2px 4px}
+}
+
+/* iPhone notch & encoches — safe areas */
+@supports(padding:max(0px)){
+  body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+}
+
 /* ══════════════════════════════════════════════════════════
    GLOBAL PREMIUM POLISH
 ══════════════════════════════════════════════════════════ */
@@ -1810,12 +1873,20 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <!-- Admin -->
 <div id="page-admin" class="page">
   <div class="ph">
-    <div class="ph-text"><h2>🛡️ Administration</h2><p>Gestion des utilisateurs</p></div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="btn btn-secondary btn-sm" style="background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;border:none;" onclick="startTutorial()">▶ Aperçu didacticiel</button>
-      <button class="btn btn-secondary btn-sm" onclick="loadAdminUsers()">🔄 Actualiser</button>
+    <div class="ph-text"><h2>🛡️ Administration</h2><p>Gestion des utilisateurs &amp; opérations</p></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-secondary btn-sm" onclick="downloadDbBackup()">💾 Backup DB</button>
+      <button class="btn btn-secondary btn-sm" onclick="runReminders()">📧 Tester rappels</button>
+      <button class="btn btn-secondary btn-sm" onclick="loadAdminAll()">🔄 Actualiser</button>
     </div>
   </div>
+
+  <!-- Stats globales -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">📊 Stats globales</div>
+    <div id="admin-stats" class="tx-sm tx-m">Chargement...</div>
+  </div>
+
   <div class="card">
     <div class="card-title">👥 Utilisateurs</div>
     <div class="tx-sm tx-m" style="margin-bottom:14px;line-height:1.6">
@@ -1994,6 +2065,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <div id="auth-login-form">
         <div class="fg"><label>Email</label><input type="email" id="a-email" placeholder="vous@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
         <div class="fg"><label>Mot de passe</label><input type="password" id="a-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);margin-top:6px;cursor:pointer">
+          <input type="checkbox" id="a-remember" checked style="accent-color:var(--accent);width:14px;height:14px">
+          Se souvenir de moi <span style="color:var(--text3);font-size:11px">(décoche sur PC public)</span>
+        </label>
         <div class="auth-error" id="login-err"></div>
         <button class="btn btn-primary" style="width:100%;margin-top:16px;padding:13px;font-size:14px" onclick="doLogin()">→ Se connecter</button>
         <div style="text-align:center;margin-top:12px;font-size:12px">
@@ -2119,9 +2194,10 @@ function switchAuthTab(tab){
 async function doLogin(){
   const email=document.getElementById('a-email').value.trim();
   const pwd=document.getElementById('a-pwd').value;
+  const remember=document.getElementById('a-remember')?.checked ?? true;
   const err=document.getElementById('login-err');
   err.style.display='none';
-  const data=await post('/api/auth/login',{email,password:pwd});
+  const data=await post('/api/auth/login',{email,password:pwd,remember});
   if(data.error){err.textContent=data.error;err.style.display='';return;}
   onLogin(data.user);
 }
@@ -2364,9 +2440,9 @@ function _renderCal7(stages, todayISO){
       const c=_planStageColor(s);
       const time=(s.scheduled_date||'').length>10?s.scheduled_date.slice(11,16):'';
       html+=`<div class="cal-ev" style="background:${c}18;border-left-color:${c};border-left-width:3px" onclick="openModal('${s.application_id}')">
-        ${time?`<div class="cal-ev-time" style="color:${c};font-weight:800">${time}</div>`:''}
-        <div class="cal-ev-co">${s.company||'?'}</div>
-        <div class="cal-ev-type" style="color:${c};opacity:.85">${s.stage_type||'Entretien'}</div>
+        ${time?`<div class="cal-ev-time" style="color:${c};font-weight:800">${esc(time)}</div>`:''}
+        <div class="cal-ev-co">${esc(s.company||'?')}</div>
+        <div class="cal-ev-type" style="color:${c};opacity:.85">${esc(s.stage_type||'Entretien')}</div>
       </div>`;
     });
     html+=`</div></div>`;
@@ -2401,7 +2477,7 @@ function _renderCal30(stages, todayISO){
       <div class="cal-30-num">${day}</div>`;
     evs.slice(0,3).forEach(s=>{
       const c=_planStageColor(s);
-      html+=`<div class="cal-30-ev" style="background:${c}18;border-left-color:${c};color:var(--text);border-left-width:3px" onclick="openModal('${s.application_id}')">${s.company||'?'}</div>`;
+      html+=`<div class="cal-30-ev" style="background:${c}18;border-left-color:${c};color:var(--text);border-left-width:3px" onclick="openModal('${esc(s.application_id)}')">${esc(s.company||'?')}</div>`;
     });
     if(evs.length>3) html+=`<div class="cal-30-more">+${evs.length-3} autres</div>`;
     html+=`</div>`;
@@ -2412,7 +2488,7 @@ function _renderCal30(stages, todayISO){
 
 async function openAddStageModal(){
   // Ouvre modal candidature en mode ajout stage
-  const appList=apps.map(a=>`<option value="${a.id}">${a.company} — ${a.role||''}</option>`).join('');
+  const appList=apps.map(a=>`<option value="${esc(a.id)}">${esc(a.company)} — ${esc(a.role||'')}</option>`).join('');
   if(!appList){toast('Ajoutez d\'abord une candidature','error');return;}
   const html=`
     <div class="fg"><label>Candidature</label><select id="asm-app">${appList}</select></div>
@@ -2536,6 +2612,68 @@ async function resetUserUsage(uid){
   loadAdminUsers();
 }
 
+async function loadAdminStats(){
+  const s = await api('/api/admin/stats');
+  const el = document.getElementById('admin-stats');
+  if(!el) return;
+  if(s.error){ el.textContent = '❌ '+s.error; return; }
+  const top = (s.top_users_by_usage||[])
+    .map(u=>`<li>${esc(u.email)} — <strong>${u.used}</strong> appels</li>`).join('');
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px">
+      <div style="padding:14px;background:var(--card2);border-radius:10px">
+        <div style="font-size:24px;font-weight:800;color:var(--accent)">${s.users.total}</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase">Utilisateurs</div>
+        <div style="font-size:11px;color:var(--green);margin-top:4px">+${s.users.new_7d} cette semaine</div>
+      </div>
+      <div style="padding:14px;background:var(--card2);border-radius:10px">
+        <div style="font-size:24px;font-weight:800;color:var(--green)">${s.users.verified}</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase">Vérifiés</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">${Math.round(s.users.verified/Math.max(1,s.users.total)*100)}% du total</div>
+      </div>
+      <div style="padding:14px;background:var(--card2);border-radius:10px">
+        <div style="font-size:24px;font-weight:800;color:var(--text)">${s.applications}</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase">Candidatures</div>
+      </div>
+      <div style="padding:14px;background:var(--card2);border-radius:10px">
+        <div style="font-size:24px;font-weight:800;color:var(--text)">${s.interview_stages}</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase">Étapes planning</div>
+      </div>
+      <div style="padding:14px;background:var(--card2);border-radius:10px">
+        <div style="font-size:24px;font-weight:800;color:var(--purple)">${s.ai_calls_this_month}</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase">Appels IA (${esc(s.ym)})</div>
+      </div>
+    </div>
+    ${top ? `<div><strong>Top consommateurs ce mois :</strong><ul style="margin:6px 0 0 18px;line-height:1.7">${top}</ul></div>` : ''}
+  `;
+}
+
+async function loadAdminAll(){
+  await Promise.all([loadAdminStats(), loadAdminUsers()]);
+}
+
+async function downloadDbBackup(){
+  try{
+    const resp = await fetch('/api/admin/backup-db', {credentials:'same-origin'});
+    if(!resp.ok){ toast('Backup impossible','error'); return; }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `jobfinder_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.db`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    toast('💾 Backup téléchargé','success');
+  }catch(e){ toast('Erreur : '+e.message,'error'); }
+}
+
+async function runReminders(){
+  if(!confirm('Envoyer maintenant les rappels d\'entretiens prévus DEMAIN ?')) return;
+  const r = await post('/api/admin/run-reminders', {});
+  if(r.error){ toast(r.error,'error'); return; }
+  toast(`📧 ${r.sent} envoyé(s), ${r.skipped} skipped, ${r.candidates} candidat(s)`,'success');
+}
+
 async function deleteUser(uid){
   if(!confirm('Supprimer définitivement cet utilisateur et toutes ses données ?')) return;
   const data=await fetch('/api/admin/users/'+uid,{method:'DELETE'});
@@ -2588,7 +2726,7 @@ function nav(id){
   if(id==='settings')     loadSettings();
   if(id==='planning'){loadStages().then(renderPlanning);}
   if(id==='templates')    loadTemplates();
-  if(id==='admin')        loadAdminUsers();
+  if(id==='admin')        loadAdminAll();
   if(id==='adapter')      updateAdapterTemplateLabel();
   // Close sidebar on mobile when navigating
   if(window.innerWidth<=768) closeSidebar();
@@ -3447,9 +3585,9 @@ function openModal(id){
       ${stagesForApp.length?stagesForApp.map(s=>`
         <div class="stage-item" data-sid="${s.id}">
           <div>
-            <div style="font-size:12px;font-weight:600;color:var(--text)">${s.stage_type}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text)">${esc(s.stage_type)}</div>
             <div style="font-size:11px;color:var(--text3)">${s.scheduled_date?new Date(s.scheduled_date).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div>
-            ${s.notes?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${s.notes}</div>`:''}
+            ${s.notes?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(s.notes)}</div>`:''}
           </div>
           <select class="role-select" onchange="updateStageResult(${s.id},this.value)">
             ${['En attente','Positif','Négatif','Annulé'].map(r=>`<option ${s.result===r?'selected':''}>${r}</option>`).join('')}

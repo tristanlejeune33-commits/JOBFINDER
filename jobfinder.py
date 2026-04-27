@@ -436,12 +436,13 @@ init_db()
 # Migrations idempotentes
 def _migrate_columns():
     cols = [
-        ("user_data", "cv_pdf_b64",     "TEXT DEFAULT ''"),
-        ("user_data", "cv_pdf_name",    "TEXT DEFAULT ''"),
-        ("user_data", "cv_pdf_path",    "TEXT DEFAULT ''"),    # nouveau : chemin disque (remplace b64)
-        ("users",     "email_verified", "INTEGER DEFAULT 0"),
-        ("users",     "monthly_quota",  "INTEGER DEFAULT 0"),  # 0 = défaut global
-        ("users",     "deleted_at",     "TEXT DEFAULT ''"),
+        ("user_data",        "cv_pdf_b64",     "TEXT DEFAULT ''"),
+        ("user_data",        "cv_pdf_name",    "TEXT DEFAULT ''"),
+        ("user_data",        "cv_pdf_path",    "TEXT DEFAULT ''"),    # disque (remplace b64)
+        ("users",            "email_verified", "INTEGER DEFAULT 0"),
+        ("users",            "monthly_quota",  "INTEGER DEFAULT 0"),
+        ("users",            "deleted_at",     "TEXT DEFAULT ''"),
+        ("interview_stages", "reminder_sent",  "INTEGER DEFAULT 0"),
     ]
     with get_db() as db:
         for table, col, ddl in cols:
@@ -553,6 +554,8 @@ def safe_name(s):
     return re.sub(r"[^\w\-_]", "_", s or "unknown")
 
 def search_indeed(query, location="France", nb=15):
+    """Scraping Indeed (fragile : leur HTML change tous les 6 mois,
+    ils blacklistent les IPs scraper). Fallback uniquement."""
     url = f"https://fr.indeed.com/jobs?q={http_req.utils.quote(query)}&l={http_req.utils.quote(location)}&lang=fr"
     try:
         sess = web_session()
@@ -584,6 +587,53 @@ def search_indeed(query, location="France", nb=15):
         return jobs, None
     except Exception as e:
         return [], str(e)
+
+# ── Adzuna API (fiable, gratuit jusqu'à 250 req/mois) ──────────────────────────
+ADZUNA_APP_ID  = os.environ.get("ADZUNA_APP_ID", "").strip()
+ADZUNA_APP_KEY = os.environ.get("ADZUNA_APP_KEY", "").strip()
+
+def search_adzuna(query, location="France", nb=15):
+    """Cherche via l'API Adzuna. Retourne (jobs, error)."""
+    if not (ADZUNA_APP_ID and ADZUNA_APP_KEY):
+        return None, "Adzuna non configuré"
+    # Mapping pays→code Adzuna (ISO alpha-2 lowercase)
+    country = "fr"  # JobFinder = focus FR par défaut
+    url = f"https://api.adzuna.com/v1/api/jobs/{country}/search/1"
+    try:
+        r = http_req.get(url, params={
+            "app_id":  ADZUNA_APP_ID,
+            "app_key": ADZUNA_APP_KEY,
+            "what":    query,
+            "where":   location,
+            "results_per_page": min(nb, 50),
+            "content-type": "application/json",
+        }, timeout=15)
+        if r.status_code != 200:
+            return None, f"Adzuna {r.status_code}"
+        data = r.json()
+        jobs = []
+        for item in data.get("results", [])[:nb]:
+            jobs.append({
+                "title":       (item.get("title") or "")[:200],
+                "company":     (item.get("company") or {}).get("display_name", "N/A"),
+                "location":    (item.get("location") or {}).get("display_name", "N/A"),
+                "url":         item.get("redirect_url") or "",
+                "date":        (item.get("created") or "")[:10],
+                "description": (item.get("description") or "")[:1000],
+            })
+        return jobs, None
+    except Exception as e:
+        return None, str(e)
+
+def search_jobs(query, location="France", nb=15):
+    """Stratégie : Adzuna en priorité (API stable), Indeed en fallback (scraping fragile)."""
+    if ADZUNA_APP_ID and ADZUNA_APP_KEY:
+        jobs, err = search_adzuna(query, location, nb)
+        if jobs is not None:
+            return jobs, None, "adzuna"
+        log.warning(f"Adzuna failed: {err} — fallback Indeed")
+    jobs, err = search_indeed(query, location, nb)
+    return jobs, err, "indeed"
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ROUTES AUTH
@@ -688,7 +738,9 @@ def route_login():
     with _rl_lock:
         _rate_buckets.pop(lockout_key, None)
     session.clear()
-    session.permanent = True
+    # "Remember me" : si False, cookie de session (efface à la fermeture du navigateur)
+    remember = bool(data.get("remember", True))
+    session.permanent = remember
     session["user_id"] = row["id"]
     log.info(f"login ok: id={row['id']} email={email} ip={_client_ip()}")
     return jsonify({
@@ -1334,8 +1386,18 @@ def route_docs():
 @rate_limit(max_calls=30, window_sec=3600, key_fn=lambda: f"search:{session.get('user_id','?')}")
 def route_search():
     data = request.json or {}
-    jobs, err = search_indeed(data.get("query",""), data.get("location","France"))
-    return jsonify({"jobs": jobs, "error": err})
+    query = (data.get("query","") or "").strip()
+    location = (data.get("location","France") or "").strip() or "France"
+    if not query:
+        return jsonify({"jobs": [], "error": "Saisis un mot-clé"}), 400
+    jobs, err, source = search_jobs(query, location)
+    if not jobs and not err:
+        # Pas de résultats mais pas d'erreur → message UX clair
+        return jsonify({
+            "jobs": [], "error": None, "source": source,
+            "hint": "Aucun résultat. Essaie d'autres mots-clés ou une autre localisation."
+        })
+    return jsonify({"jobs": jobs or [], "error": err, "source": source})
 
 @app.route("/api/fetch-url", methods=["POST"])
 @require_auth
@@ -2145,6 +2207,144 @@ def route_adapt_cv_pdf():
 # ═══════════════════════════════════════════════════════════════════════════════
 # ROUTES ADMIN
 # ═══════════════════════════════════════════════════════════════════════════════
+
+# ── Rappels d'entretien (cron externe → /api/cron/run-reminders) ───────────────
+CRON_TOKEN = os.environ.get("CRON_TOKEN", "").strip()
+
+def _send_interview_reminders():
+    """Scanne les stages prévus pour DEMAIN, envoie un mail si pas déjà fait.
+    Returns dict {sent: N, skipped: N, errors: [...]}"""
+    tomorrow = (datetime.datetime.now() + datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+    sent, skipped, errors = 0, 0, []
+    with get_db() as db:
+        rows = db.execute(
+            """SELECT s.id, s.stage_type, s.scheduled_date, s.notes,
+                      s.application_id, s.user_id,
+                      u.email, u.name,
+                      a.company, a.role_name, a.url
+               FROM interview_stages s
+               JOIN users u ON u.id = s.user_id
+               JOIN applications a ON a.id = s.application_id
+               WHERE s.scheduled_date = ?
+                 AND (s.reminder_sent = 0 OR s.reminder_sent IS NULL)
+                 AND (s.result = 'En attente' OR s.result IS NULL OR s.result = '')
+                 AND s.stage_type != 'Candidature envoyée'
+                 AND (u.deleted_at = '' OR u.deleted_at IS NULL)""",
+            (tomorrow,)
+        ).fetchall()
+        for r in rows:
+            if not r["email"]:
+                skipped += 1; continue
+            stage = r["stage_type"] or "Entretien"
+            company = r["company"] or "l'entreprise"
+            role = r["role_name"] or "le poste"
+            notes = (r["notes"] or "").strip()
+            url = r["url"] or ""
+            subj = f"📅 Rappel : {stage} demain — {company}"
+            text = (
+                f"Salut {r['name'] or ''},\n\n"
+                f"Petit rappel : tu as un {stage.lower()} demain pour {role} chez {company}.\n\n"
+                + (f"📌 Tes notes :\n{notes}\n\n" if notes else "")
+                + (f"🔗 Offre : {url}\n\n" if url else "")
+                + "Bonne chance !\n— JobFinder"
+            )
+            html = (
+                f"<p>Salut <strong>{r['name'] or ''}</strong>,</p>"
+                f"<p>Petit rappel : tu as un <strong>{stage.lower()}</strong> demain "
+                f"pour <strong>{role}</strong> chez <strong>{company}</strong>.</p>"
+                + (f"<p><strong>📌 Tes notes :</strong><br>{notes.replace(chr(10), '<br>')}</p>" if notes else "")
+                + (f"<p>🔗 <a href='{url}'>Voir l'offre</a></p>" if url else "")
+                + "<p>Bonne chance !<br>— JobFinder</p>"
+            )
+            ok = send_email(r["email"], subj, text, html)
+            if ok:
+                db.execute("UPDATE interview_stages SET reminder_sent=1 WHERE id=?", (r["id"],))
+                sent += 1
+            else:
+                errors.append({"stage_id": r["id"], "email": r["email"]})
+        db.commit()
+    return {"sent": sent, "skipped": skipped, "errors": errors,
+            "tomorrow": tomorrow, "candidates": len(rows)}
+
+@app.route("/api/cron/run-reminders", methods=["POST", "GET"])
+def route_cron_reminders():
+    """À hitter quotidiennement (matin) par un service de cron externe.
+    Sécurité par token : Authorization: Bearer <CRON_TOKEN> ou ?token=<...>."""
+    token = (
+        request.headers.get("Authorization", "").replace("Bearer ", "").strip()
+        or request.args.get("token", "").strip()
+    )
+    if not CRON_TOKEN or token != CRON_TOKEN:
+        return jsonify({"error": "Token cron invalide"}), 401
+    result = _send_interview_reminders()
+    log.info(f"cron reminders: {result}")
+    return jsonify(result)
+
+@app.route("/api/admin/run-reminders", methods=["POST"])
+@require_role("admin")
+def route_admin_run_reminders():
+    """Trigger manuel pour l'admin (debug / test)."""
+    result = _send_interview_reminders()
+    log.info(f"admin run-reminders: {result} by={get_current_user()['id']}")
+    return jsonify(result)
+
+@app.route("/api/admin/backup-db", methods=["GET"])
+@require_role("admin")
+def route_admin_backup_db():
+    """Téléchargement de la DB SQLite (snapshot cohérent via VACUUM INTO).
+    À hitter quotidiennement par un cron externe pour backup automatique."""
+    import tempfile
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".db")
+    tmp.close()
+    try:
+        os.unlink(tmp.name)  # VACUUM INTO refuse un fichier qui existe
+    except Exception: pass
+    try:
+        with get_db() as db:
+            db.execute(f"VACUUM INTO ?", (tmp.name,))
+        ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+        log.info(f"backup-db: by={get_current_user()['id']}")
+        return send_file(
+            tmp.name, mimetype="application/x-sqlite3",
+            as_attachment=True, download_name=f"jobfinder_{ts}.db"
+        )
+    except Exception as e:
+        log.exception("backup-db failed")
+        try: os.unlink(tmp.name)
+        except Exception: pass
+        return jsonify({"error": f"Backup failed: {e}"}), 500
+
+@app.route("/api/admin/stats", methods=["GET"])
+@require_role("admin")
+def route_admin_stats():
+    """Stats globales pour le dashboard admin."""
+    ym = _ym()
+    with get_db() as db:
+        total_users     = db.execute("SELECT COUNT(*) c FROM users").fetchone()["c"]
+        verified_users  = db.execute("SELECT COUNT(*) c FROM users WHERE email_verified=1").fetchone()["c"]
+        new_users_week  = db.execute(
+            "SELECT COUNT(*) c FROM users WHERE created_at >= datetime('now','-7 days')"
+        ).fetchone()["c"]
+        total_apps      = db.execute("SELECT COUNT(*) c FROM applications").fetchone()["c"]
+        total_stages    = db.execute("SELECT COUNT(*) c FROM interview_stages").fetchone()["c"]
+        ai_calls_month  = db.execute(
+            "SELECT COALESCE(SUM(count),0) s FROM usage_quotas WHERE ym=?", (ym,)
+        ).fetchone()["s"]
+        top_users = db.execute(
+            """SELECT u.id, u.email, COALESCE(q.count,0) AS used
+               FROM users u
+               LEFT JOIN usage_quotas q ON q.user_id=u.id AND q.ym=?
+               ORDER BY used DESC LIMIT 5""",
+            (ym,)
+        ).fetchall()
+    return jsonify({
+        "users": {"total": total_users, "verified": verified_users, "new_7d": new_users_week},
+        "applications": total_apps,
+        "interview_stages": total_stages,
+        "ai_calls_this_month": ai_calls_month,
+        "top_users_by_usage": [dict(r) for r in top_users],
+        "ym": ym,
+    })
 
 @app.route("/api/admin/users", methods=["GET"])
 @require_role("admin")
