@@ -2337,9 +2337,20 @@ async function doLogin(){
   const remember=document.getElementById('a-remember')?.checked ?? true;
   const err=document.getElementById('login-err');
   err.style.display='none';
-  const data=await post('/api/auth/login',{email,password:pwd,remember});
-  if(data.error){err.textContent=data.error;err.style.display='';return;}
-  onLogin(data.user);
+  if(!email || !pwd){
+    err.textContent='Email et mot de passe requis'; err.style.display='block'; return;
+  }
+  try{
+    const data=await post('/api/auth/login',{email,password:pwd,remember});
+    if(!data){ err.textContent='Pas de réponse du serveur'; err.style.display='block'; return; }
+    if(data.error){err.textContent=data.error;err.style.display='block';return;}
+    if(!data.user){ err.textContent='Réponse serveur incomplète'; err.style.display='block'; return; }
+    onLogin(data.user);
+  }catch(e){
+    console.error('login error', e);
+    err.textContent='Erreur réseau : '+(e.message||e);
+    err.style.display='block';
+  }
 }
 
 async function doRegister(){
@@ -2348,20 +2359,34 @@ async function doRegister(){
   const pwd=document.getElementById('r-pwd').value;
   const err=document.getElementById('register-err');
   err.style.display='none';
+  if(!email || !pwd){
+    err.textContent='Email et mot de passe requis'; err.style.display='block'; return;
+  }
+  if(pwd.length < 8){
+    err.textContent='Mot de passe trop court (min 8 caractères)'; err.style.display='block'; return;
+  }
   let captcha_token = '';
   if(window.hcaptcha && window._hcaptcha_widget_id !== undefined){
     captcha_token = window.hcaptcha.getResponse(window._hcaptcha_widget_id) || '';
   }
-  const data=await post('/api/auth/register',{name,email,password:pwd,hcaptcha_token:captcha_token});
-  if(data.error){
-    err.textContent=data.error;err.style.display='';
-    if(window.hcaptcha) try{window.hcaptcha.reset(window._hcaptcha_widget_id);}catch(e){}
-    return;
+  try{
+    const data=await post('/api/auth/register',{name,email,password:pwd,hcaptcha_token:captcha_token});
+    if(!data){ err.textContent='Pas de réponse du serveur'; err.style.display='block'; return; }
+    if(data.error){
+      err.textContent=data.error;err.style.display='block';
+      if(window.hcaptcha) try{window.hcaptcha.reset(window._hcaptcha_widget_id);}catch(e){}
+      return;
+    }
+    if(!data.user){ err.textContent='Réponse serveur incomplète : '+JSON.stringify(data).slice(0,200); err.style.display='block'; return; }
+    if(data.needs_verification){
+      toast('📧 Compte créé ! Vérifie ton email pour activer.','success');
+    }
+    onLogin(data.user);
+  }catch(e){
+    console.error('register error', e);
+    err.textContent='Erreur réseau : '+(e.message||e);
+    err.style.display='block';
   }
-  if(data.needs_verification){
-    toast('📧 Compte créé ! Vérifie ton email pour activer.','success');
-  }
-  onLogin(data.user);
 }
 
 async function forgotPasswordPrompt(){
@@ -2406,10 +2431,10 @@ async function doResetPassword(){
   const err = document.getElementById('reset-err');
   err.style.display='none';
   if(!pwd || pwd.length < 8){
-    err.textContent='Mot de passe trop court (min 8)'; err.style.display=''; return;
+    err.textContent='Mot de passe trop court (min 8)'; err.style.display='block'; return;
   }
   const r = await post('/api/auth/reset-password',{token: window._reset_token, password: pwd});
-  if(r.error){ err.textContent = r.error; err.style.display=''; return; }
+  if(r.error){ err.textContent = r.error; err.style.display='block'; return; }
   toast('✅ Mot de passe mis à jour. Connecte-toi.','success');
   // Cleanup URL
   history.replaceState({},'',window.location.pathname);
