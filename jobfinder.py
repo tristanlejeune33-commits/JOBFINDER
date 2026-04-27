@@ -166,6 +166,39 @@ def _security_headers(resp):
 def healthz():
     return jsonify({"ok": True, "ts": int(time.time())})
 
+# ── Diagnostic (debug, accès libre — utilisé pour debug prod) ──────────────────
+@app.route("/api/_diag")
+def route_diag():
+    """Diagnostic public : check DB connection + tables. Utilisé pour debug."""
+    out = {
+        "db_backend": "postgres" if USE_POSTGRES else "sqlite",
+        "is_prod":    IS_PROD,
+        "smtp":       bool(SMTP_HOST),
+        "hcaptcha":   bool(HCAPTCHA_SECRET),
+        "openai":     bool(OPENAI_API_KEY),
+        "anthropic":  bool(ANTHROPIC_API_KEY),
+        "tables":     None,
+        "user_count": None,
+        "error":      None,
+    }
+    try:
+        with get_db() as db:
+            if USE_POSTGRES:
+                rows = db.execute(
+                    "SELECT table_name FROM information_schema.tables WHERE table_schema='public' ORDER BY table_name"
+                ).fetchall()
+                out["tables"] = [r["table_name"] for r in rows]
+            else:
+                rows = db.execute(
+                    "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name"
+                ).fetchall()
+                out["tables"] = [r["name"] for r in rows]
+            row = db.execute("SELECT COUNT(*) AS c FROM users").fetchone()
+            out["user_count"] = (row.get("c") if isinstance(row, dict) else row["c"]) if row else 0
+    except Exception as e:
+        out["error"] = f"{type(e).__name__}: {str(e)[:300]}"
+    return jsonify(out)
+
 # ── Sentry (monitoring d'erreurs, no-op si SENTRY_DSN absent) ───────────────────
 SENTRY_DSN = os.environ.get("SENTRY_DSN", "").strip()
 if SENTRY_DSN:
@@ -774,58 +807,87 @@ REQUIRE_EMAIL_VERIFICATION = bool(os.environ.get("REQUIRE_EMAIL_VERIFICATION", "
 @app.route("/api/auth/register", methods=["POST"])
 @rate_limit(max_calls=5, window_sec=3600, key_fn=lambda: f"reg:{_client_ip()}")
 def route_register():
-    data  = request.json or {}
-    email = (data.get("email","") or "").strip().lower()
-    pwd   = (data.get("password","") or "")
-    name  = (data.get("name","") or "").strip()[:80]
-    captcha_token = (data.get("hcaptcha_token","") or "").strip()
-    if not valid_email(email):
-        return jsonify({"error": "Email invalide"}), 400
-    if not valid_password(pwd):
-        return jsonify({"error": f"Mot de passe trop faible (min {MIN_PASSWORD_LEN} caractères)"}), 400
-    if not verify_hcaptcha(captcha_token, _client_ip()):
-        return jsonify({"error": "Vérification anti-bot échouée. Réessaye."}), 400
-    with get_db() as db:
-        existing = db.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
-        if existing:
-            return jsonify({"error": "Email déjà utilisé"}), 400
-        # Rôle
-        if ADMIN_EMAIL and email == ADMIN_EMAIL:
-            role = "admin"
-        elif not IS_PROD:
-            count = db.execute("SELECT COUNT(*) as c FROM users").fetchone()["c"]
-            role  = "admin" if count == 0 else "membre"
-        else:
-            role = "membre"
-        # Email vérifié auto si admin email ou si verification désactivée
-        verified = 1 if (role == "admin" or not REQUIRE_EMAIL_VERIFICATION) else 0
-        db.execute(
-            "INSERT INTO users(email,password_hash,name,role,email_verified) VALUES(?,?,?,?,?)",
-            (email, generate_password_hash(pwd), name or email.split("@")[0], role, verified)
-        )
-        db.commit()
-        user = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+    try:
+        data  = request.json or {}
+        email = (data.get("email","") or "").strip().lower()
+        pwd   = (data.get("password","") or "")
+        name  = (data.get("name","") or "").strip()[:80]
+        captcha_token = (data.get("hcaptcha_token","") or "").strip()
+        if not valid_email(email):
+            return jsonify({"error": "Email invalide"}), 400
+        if not valid_password(pwd):
+            return jsonify({"error": f"Mot de passe trop faible (min {MIN_PASSWORD_LEN} caractères)"}), 400
+        if not verify_hcaptcha(captcha_token, _client_ip()):
+            return jsonify({"error": "Vérification anti-bot échouée. Réessaye."}), 400
 
-    # Email de vérification si requis
-    if REQUIRE_EMAIL_VERIFICATION and not verified:
-        token = create_email_token(user["id"], "verify_email", ttl_hours=48)
-        verify_url = f"{app_url()}/api/auth/verify-email?token={token}"
-        send_email(
-            email,
-            "Vérifie ton email — JobFinder",
-            f"Bienvenue sur JobFinder !\n\nClique sur ce lien pour activer ton compte :\n{verify_url}\n\nLien valide 48h.",
-            f"<p>Bienvenue sur JobFinder !</p><p><a href='{verify_url}'>Activer mon compte</a> (lien valide 48h)</p>",
-        )
+        with get_db() as db:
+            existing = db.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
+            if existing:
+                return jsonify({"error": "Email déjà utilisé"}), 400
+            # Rôle
+            if ADMIN_EMAIL and email == ADMIN_EMAIL:
+                role = "admin"
+            elif not IS_PROD:
+                row = db.execute("SELECT COUNT(*) AS c FROM users").fetchone()
+                # Postgres minuscule + RealDict → "c"; SQLite → row["c"]
+                count = (row.get("c") if isinstance(row, dict) else row["c"]) if row else 0
+                role  = "admin" if count == 0 else "membre"
+            else:
+                role = "membre"
+            verified = 1 if (role == "admin" or not REQUIRE_EMAIL_VERIFICATION) else 0
+            cur = db.execute(
+                "INSERT INTO users(email,password_hash,name,role,email_verified) VALUES(?,?,?,?,?)",
+                (email, generate_password_hash(pwd), name or email.split("@")[0], role, verified)
+            )
+            new_user_id = cur.lastrowid
+            db.commit()
+            user = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
 
-    session.regenerate() if hasattr(session, "regenerate") else session.clear()
-    session.permanent = True
-    session["user_id"] = user["id"]
-    log.info(f"register: id={user['id']} email={email} role={role} verified={verified} ip={_client_ip()}")
-    return jsonify({
-        "ok": True,
-        "needs_verification": bool(REQUIRE_EMAIL_VERIFICATION and not verified),
-        "user": {"id": user["id"], "email": user["email"], "name": user["name"], "role": user["role"]}
-    })
+        if not user:
+            log.error(f"register: user not found after insert for email={email}")
+            return jsonify({"error": "Erreur serveur après création (DB ?)"}), 500
+
+        # Helper d'accès tolérant dict/Row
+        def g(r, k, default=""):
+            try:
+                v = r[k] if not isinstance(r, dict) else r.get(k, default)
+                return v if v is not None else default
+            except Exception:
+                return default
+
+        user_id = g(user, "id") or new_user_id
+
+        # Email de vérification
+        if REQUIRE_EMAIL_VERIFICATION and not verified:
+            try:
+                token = create_email_token(user_id, "verify_email", ttl_hours=48)
+                verify_url = f"{app_url()}/api/auth/verify-email?token={token}"
+                send_email(
+                    email,
+                    "Vérifie ton email — JobFinder",
+                    f"Bienvenue sur JobFinder !\n\nClique sur ce lien pour activer ton compte :\n{verify_url}\n\nLien valide 48h.",
+                    f"<p>Bienvenue sur JobFinder !</p><p><a href='{verify_url}'>Activer mon compte</a> (lien valide 48h)</p>",
+                )
+            except Exception as e:
+                log.warning(f"register: send verification email failed: {e}")
+
+        session.clear()
+        session.permanent = True
+        session["user_id"] = user_id
+        log.info(f"register OK: id={user_id} email={email} role={role} verified={verified} ip={_client_ip()}")
+        return jsonify({
+            "ok": True,
+            "needs_verification": bool(REQUIRE_EMAIL_VERIFICATION and not verified),
+            "user": {
+                "id":    user_id,
+                "email": g(user, "email", email),
+                "name":  g(user, "name", name),
+                "role":  g(user, "role", role),
+            }
+        })
+    except Exception as e:
+        log.exception(f"register FAILED: {e}")
+        return jsonify({"error": f"Erreur serveur : {type(e).__name__}: {str(e)[:200]}"}), 500
 
 
 # Lockout login : 10 échecs / 15 min par IP+email
@@ -835,45 +897,47 @@ LOGIN_WINDOW   = 15 * 60
 @app.route("/api/auth/login", methods=["POST"])
 @rate_limit(max_calls=20, window_sec=300, key_fn=lambda: f"login-ip:{_client_ip()}")
 def route_login():
-    data  = request.json or {}
-    email = (data.get("email","") or "").strip().lower()
-    pwd   = (data.get("password","") or "")
-    if not email or not pwd:
-        return jsonify({"error": "Email et mot de passe requis"}), 400
-    lockout_key = f"login-fail:{_client_ip()}:{email}"
-    # check si trop d'échecs récents (inspect sans consommer le bucket)
-    with _rl_lock:
-        bucket = _rate_buckets[lockout_key]
-        cutoff = time.time() - LOGIN_WINDOW
-        bucket[:] = [t for t in bucket if t >= cutoff]
-        if len(bucket) >= LOGIN_MAX_FAILS:
-            log.warning(f"login locked: ip={_client_ip()} email={email}")
-            return jsonify({"error": "Trop de tentatives. Réessaye dans 15 minutes."}), 429
-    with get_db() as db:
-        row = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
-    ok = bool(row and check_password_hash(row["password_hash"], pwd))
-    if not ok:
+    try:
+        data  = request.json or {}
+        email = (data.get("email","") or "").strip().lower()
+        pwd   = (data.get("password","") or "")
+        if not email or not pwd:
+            return jsonify({"error": "Email et mot de passe requis"}), 400
+        lockout_key = f"login-fail:{_client_ip()}:{email}"
         with _rl_lock:
-            _rate_buckets[lockout_key].append(time.time())
-        log.info(f"login fail: ip={_client_ip()} email={email}")
-        return jsonify({"error": "Email ou mot de passe incorrect"}), 401
-    # Compte supprimé ?
-    if row["deleted_at"]:
-        return jsonify({"error": "Ce compte a été supprimé."}), 403
-    # succès → on purge le bucket et on régénère la session (anti-fixation)
-    with _rl_lock:
-        _rate_buckets.pop(lockout_key, None)
-    session.clear()
-    # "Remember me" : si False, cookie de session (efface à la fermeture du navigateur)
-    remember = bool(data.get("remember", True))
-    session.permanent = remember
-    session["user_id"] = row["id"]
-    log.info(f"login ok: id={row['id']} email={email} ip={_client_ip()}")
-    return jsonify({
-        "ok": True,
-        "user": {"id": row["id"], "email": row["email"], "name": row["name"], "role": row["role"]},
-        "email_verified": bool(row["email_verified"]),
-    })
+            bucket = _rate_buckets[lockout_key]
+            cutoff = time.time() - LOGIN_WINDOW
+            bucket[:] = [t for t in bucket if t >= cutoff]
+            if len(bucket) >= LOGIN_MAX_FAILS:
+                log.warning(f"login locked: ip={_client_ip()} email={email}")
+                return jsonify({"error": "Trop de tentatives. Réessaye dans 15 minutes."}), 429
+        with get_db() as db:
+            row = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+        ok = bool(row and check_password_hash(row["password_hash"], pwd))
+        if not ok:
+            with _rl_lock:
+                _rate_buckets[lockout_key].append(time.time())
+            log.info(f"login fail: ip={_client_ip()} email={email}")
+            return jsonify({"error": "Email ou mot de passe incorrect"}), 401
+        # Compte supprimé ? (peut être absent si vieille DB)
+        deleted_at = row.get("deleted_at") if isinstance(row, dict) else (row["deleted_at"] if "deleted_at" in row.keys() else "")
+        if deleted_at:
+            return jsonify({"error": "Ce compte a été supprimé."}), 403
+        with _rl_lock:
+            _rate_buckets.pop(lockout_key, None)
+        session.clear()
+        remember = bool(data.get("remember", True))
+        session.permanent = remember
+        session["user_id"] = row["id"]
+        log.info(f"login ok: id={row['id']} email={email} ip={_client_ip()}")
+        return jsonify({
+            "ok": True,
+            "user": {"id": row["id"], "email": row["email"], "name": row["name"], "role": row["role"]},
+            "email_verified": bool(row.get("email_verified", 0) if isinstance(row, dict) else (row["email_verified"] if "email_verified" in row.keys() else 0)),
+        })
+    except Exception as e:
+        log.exception(f"login FAILED: {e}")
+        return jsonify({"error": f"Erreur serveur : {type(e).__name__}: {str(e)[:200]}"}), 500
 
 @app.route("/api/auth/logout", methods=["POST"])
 def route_logout():
