@@ -5,9 +5,24 @@
 from flask import Flask, jsonify, request, send_file, Response, session
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-import sqlite3, json, os, re, datetime, threading, webbrowser, base64, secrets
+from collections import defaultdict
+import sqlite3, json, os, re, datetime, threading, base64, secrets, logging, time
 import requests as http_req
 from bs4 import BeautifulSoup
+
+# ── Logging ─────────────────────────────────────────────────────────────────────
+logging.basicConfig(
+    level=os.environ.get("LOG_LEVEL", "INFO"),
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+)
+log = logging.getLogger("jobfinder")
+
+# ── Environnement ───────────────────────────────────────────────────────────────
+IS_PROD = bool(
+    os.environ.get("RAILWAY_ENVIRONMENT")
+    or os.environ.get("DYNO")
+    or os.environ.get("FLASK_ENV") == "production"
+)
 
 # ── Cloudscraper ────────────────────────────────────────────────────────────────
 try:
@@ -20,24 +35,119 @@ except ImportError:
     def web_get(url, **kwargs): return http_req.get(url, **kwargs)
     def web_session(): return http_req.Session()
 
-# ── Clé OpenAI (variable d'env en prod, fallback hardcodé en local) ────────────
-OPENAI_API_KEY = os.environ.get(
-    "OPENAI_API_KEY",
-    ""
-)
+# ── Secrets / clés API ──────────────────────────────────────────────────────────
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "").strip()
+if IS_PROD and not OPENAI_API_KEY:
+    log.warning("OPENAI_API_KEY non défini — les endpoints IA partagés ne fonctionneront pas.")
+
+SECRET_KEY = os.environ.get("SECRET_KEY", "").strip()
+if IS_PROD and not SECRET_KEY:
+    raise RuntimeError(
+        "SECRET_KEY est obligatoire en production. "
+        "Génère-en une avec: python -c \"import secrets; print(secrets.token_hex(32))\""
+    )
+if not SECRET_KEY:
+    SECRET_KEY = secrets.token_hex(32)
+    log.warning("SECRET_KEY auto-généré (dev only) — sessions invalidées au redémarrage.")
+
+ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "").strip().lower()  # auto-promu admin si défini
 
 # ── Chemins ─────────────────────────────────────────────────────────────────────
 BASE_DIR    = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR    = os.path.join(BASE_DIR, "data")
 CV_DIR      = os.path.join(BASE_DIR, "cv_adaptes")
 DB_PATH     = os.path.join(DATA_DIR, "jobfinder.db")
-TEMPLATE_CV = os.path.join(BASE_DIR, "cv_vibe_modern_html (3).html")
+TEMPLATE_CV = os.path.join(BASE_DIR, "cv_vibe_modern.html")
 for d in [DATA_DIR, CV_DIR]:
     os.makedirs(d, exist_ok=True)
 
+def user_cv_dir(user_id):
+    """Dossier CV par utilisateur (évite collisions et fuites entre comptes)."""
+    p = os.path.join(CV_DIR, str(int(user_id)))
+    os.makedirs(p, exist_ok=True)
+    return p
+
+# ── Flask app + durcissement session ────────────────────────────────────────────
 app = Flask(__name__, static_folder=BASE_DIR, static_url_path="")
-app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(32))
-app.config["SESSION_COOKIE_SAMESITE"] = "Lax"
+app.secret_key = SECRET_KEY
+app.config.update(
+    MAX_CONTENT_LENGTH=12 * 1024 * 1024,            # 12 Mo max par requête
+    SESSION_COOKIE_HTTPONLY=True,
+    SESSION_COOKIE_SAMESITE="Strict" if IS_PROD else "Lax",
+    SESSION_COOKIE_SECURE=IS_PROD,                  # HTTPS only en prod
+    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=30),
+    JSON_SORT_KEYS=False,
+)
+
+# ── Validations ─────────────────────────────────────────────────────────────────
+EMAIL_RE = re.compile(r"^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$")
+MIN_PASSWORD_LEN = 8
+
+def valid_email(s):
+    return bool(s) and len(s) <= 254 and bool(EMAIL_RE.match(s))
+
+def valid_password(s):
+    return isinstance(s, str) and MIN_PASSWORD_LEN <= len(s) <= 256
+
+# ── Rate limiting (in-memory ; OK pour single-worker Railway) ───────────────────
+_rate_buckets = defaultdict(list)   # key -> [timestamps]
+_rl_lock      = threading.Lock()
+
+def _rate_check(key, max_calls, window_sec):
+    """True si OK, False si dépassé. Nettoie les anciens timestamps."""
+    now = time.time()
+    with _rl_lock:
+        bucket = _rate_buckets[key]
+        cutoff = now - window_sec
+        # purge les vieux
+        i = 0
+        for i, t in enumerate(bucket):
+            if t >= cutoff:
+                break
+        else:
+            i = len(bucket)
+        if i:
+            del bucket[:i]
+        if len(bucket) >= max_calls:
+            return False
+        bucket.append(now)
+        return True
+
+def rate_limit(max_calls, window_sec, key_fn):
+    """Décorateur générique. key_fn(request) -> str."""
+    def deco(f):
+        @wraps(f)
+        def wrapper(*args, **kwargs):
+            key = key_fn()
+            if not _rate_check(key, max_calls, window_sec):
+                log.warning(f"rate-limit hit: {key}")
+                return jsonify({"error": "Trop de requêtes — réessaye plus tard."}), 429
+            return f(*args, **kwargs)
+        return wrapper
+    return deco
+
+def _client_ip():
+    # Railway / proxies → X-Forwarded-For (premier IP)
+    xff = request.headers.get("X-Forwarded-For", "")
+    if xff:
+        return xff.split(",")[0].strip()
+    return request.remote_addr or "unknown"
+
+# ── Headers de sécurité ─────────────────────────────────────────────────────────
+@app.after_request
+def _security_headers(resp):
+    resp.headers.setdefault("X-Content-Type-Options", "nosniff")
+    resp.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    resp.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    resp.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=(), camera=()")
+    if IS_PROD:
+        resp.headers.setdefault("Strict-Transport-Security", "max-age=31536000; includeSubDomains")
+    return resp
+
+# ── Health check (Railway / monitoring) ─────────────────────────────────────────
+@app.route("/healthz")
+def healthz():
+    return jsonify({"ok": True, "ts": int(time.time())})
 
 # ── Base de données ─────────────────────────────────────────────────────────────
 def get_db():
@@ -269,40 +379,76 @@ def index():
     return send_file(os.path.join(BASE_DIR, "ui.html"))
 
 @app.route("/api/auth/register", methods=["POST"])
+@rate_limit(max_calls=5, window_sec=3600, key_fn=lambda: f"reg:{_client_ip()}")
 def route_register():
     data  = request.json or {}
-    email = data.get("email","").strip().lower()
-    pwd   = data.get("password","").strip()
-    name  = data.get("name","").strip()
-    if not email or not pwd:
-        return jsonify({"error": "Email et mot de passe requis"}), 400
-    if len(pwd) < 6:
-        return jsonify({"error": "Mot de passe trop court (min 6 caractères)"}), 400
+    email = (data.get("email","") or "").strip().lower()
+    pwd   = (data.get("password","") or "")
+    name  = (data.get("name","") or "").strip()[:80]
+    if not valid_email(email):
+        return jsonify({"error": "Email invalide"}), 400
+    if not valid_password(pwd):
+        return jsonify({"error": f"Mot de passe trop faible (min {MIN_PASSWORD_LEN} caractères)"}), 400
     with get_db() as db:
         existing = db.execute("SELECT id FROM users WHERE email=?", (email,)).fetchone()
         if existing:
             return jsonify({"error": "Email déjà utilisé"}), 400
-        count = db.execute("SELECT COUNT(*) as c FROM users").fetchone()["c"]
-        role  = "admin" if count == 0 else "membre"
+        # Rôle : admin si email correspond à ADMIN_EMAIL, sinon membre.
+        # En dev, le 1er user devient admin par défaut (raccourci local).
+        if ADMIN_EMAIL and email == ADMIN_EMAIL:
+            role = "admin"
+        elif not IS_PROD:
+            count = db.execute("SELECT COUNT(*) as c FROM users").fetchone()["c"]
+            role  = "admin" if count == 0 else "membre"
+        else:
+            role = "membre"
         db.execute(
             "INSERT INTO users(email,password_hash,name,role) VALUES(?,?,?,?)",
             (email, generate_password_hash(pwd), name or email.split("@")[0], role)
         )
         db.commit()
         user = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
+    session.permanent = True
     session["user_id"] = user["id"]
+    log.info(f"register: id={user['id']} email={email} role={role} ip={_client_ip()}")
     return jsonify({"ok": True, "user": {"id": user["id"], "email": user["email"], "name": user["name"], "role": user["role"]}})
 
+
+# Lockout login : 10 échecs / 15 min par IP+email
+LOGIN_MAX_FAILS = 10
+LOGIN_WINDOW   = 15 * 60
+
 @app.route("/api/auth/login", methods=["POST"])
+@rate_limit(max_calls=20, window_sec=300, key_fn=lambda: f"login-ip:{_client_ip()}")
 def route_login():
     data  = request.json or {}
-    email = data.get("email","").strip().lower()
-    pwd   = data.get("password","").strip()
+    email = (data.get("email","") or "").strip().lower()
+    pwd   = (data.get("password","") or "")
+    if not email or not pwd:
+        return jsonify({"error": "Email et mot de passe requis"}), 400
+    lockout_key = f"login-fail:{_client_ip()}:{email}"
+    # check si trop d'échecs récents (inspect sans consommer le bucket)
+    with _rl_lock:
+        bucket = _rate_buckets[lockout_key]
+        cutoff = time.time() - LOGIN_WINDOW
+        bucket[:] = [t for t in bucket if t >= cutoff]
+        if len(bucket) >= LOGIN_MAX_FAILS:
+            log.warning(f"login locked: ip={_client_ip()} email={email}")
+            return jsonify({"error": "Trop de tentatives. Réessaye dans 15 minutes."}), 429
     with get_db() as db:
         row = db.execute("SELECT * FROM users WHERE email=?", (email,)).fetchone()
-    if not row or not check_password_hash(row["password_hash"], pwd):
+    ok = bool(row and check_password_hash(row["password_hash"], pwd))
+    if not ok:
+        with _rl_lock:
+            _rate_buckets[lockout_key].append(time.time())
+        log.info(f"login fail: ip={_client_ip()} email={email}")
         return jsonify({"error": "Email ou mot de passe incorrect"}), 401
+    # succès → on purge le bucket
+    with _rl_lock:
+        _rate_buckets.pop(lockout_key, None)
+    session.permanent = True
     session["user_id"] = row["id"]
+    log.info(f"login ok: id={row['id']} email={email} ip={_client_ip()}")
     return jsonify({"ok": True, "user": {"id": row["id"], "email": row["email"], "name": row["name"], "role": row["role"]}})
 
 @app.route("/api/auth/logout", methods=["POST"])
@@ -502,15 +648,37 @@ def route_upload_cv():
     return jsonify({"ok": True})
 
 @app.route("/api/cv-file/<filename>")
+@require_auth
 def route_serve_cv(filename):
+    """Sert UNIQUEMENT les CV du user connecté (dossier dédié par user_id).
+    Fallback sur l'ancien dossier global pour compat avec les CV historiques."""
+    u = get_current_user()
     safe = os.path.basename(filename)
-    path = os.path.join(CV_DIR, safe)
-    if not os.path.exists(path):
+    if not safe or safe.startswith("."):
         return "CV introuvable", 404
-    return send_file(path, mimetype="text/html")
+    user_path   = os.path.join(user_cv_dir(u["id"]), safe)
+    legacy_path = os.path.join(CV_DIR, safe)
+    if os.path.isfile(user_path):
+        path = user_path
+    elif os.path.isfile(legacy_path):
+        # Compat ascendante : on n'expose que les fichiers liés à une candidature du user
+        with get_db() as db:
+            owned = db.execute(
+                "SELECT 1 FROM applications WHERE user_id=? AND cv_filename=? LIMIT 1",
+                (u["id"], safe)
+            ).fetchone()
+        if not owned:
+            log.warning(f"cv-file forbidden: user={u['id']} file={safe}")
+            return "Accès refusé", 403
+        path = legacy_path
+    else:
+        return "CV introuvable", 404
+    mtype = "application/pdf" if safe.lower().endswith(".pdf") else "text/html"
+    return send_file(path, mimetype=mtype)
 
 @app.route("/api/adapt-cv", methods=["POST"])
 @require_auth
+@rate_limit(max_calls=20, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
 def route_adapt_cv():
     u    = get_current_user()
     data = request.json or {}
@@ -555,14 +723,16 @@ Modified HTML:"""
     try:
         result = call_ai(provider, api_key, prompt, max_tokens=8192)
         fname  = f"CV_{safe_name(company)}_{safe_name(role)}_{today()}.html"
-        with open(os.path.join(CV_DIR, fname), "w", encoding="utf-8") as f:
+        with open(os.path.join(user_cv_dir(u["id"]), fname), "w", encoding="utf-8") as f:
             f.write(result)
         return jsonify({"html": result, "filename": fname})
     except Exception as e:
+        log.exception("adapt-cv failed")
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/adapt-cv-template", methods=["POST"])
 @require_auth
+@rate_limit(max_calls=20, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
 def route_adapt_cv_template():
     u    = get_current_user()
     data = request.json or {}
@@ -646,10 +816,11 @@ Rewritten HTML body:"""
         else:
             result = result.replace(PHOTO_MARKER, "")
         fname = f"CV_{safe_name(company)}_{safe_name(role)}_{today()}.html"
-        with open(os.path.join(CV_DIR, fname), "w", encoding="utf-8") as f:
+        with open(os.path.join(user_cv_dir(u["id"]), fname), "w", encoding="utf-8") as f:
             f.write(result)
         return jsonify({"html": result, "filename": fname})
     except Exception as e:
+        log.exception("adapt-cv-template failed")
         return jsonify({"error": str(e)}), 500
 
 # ═══════════════════════════════════════════════════════════════════════════════
@@ -696,6 +867,7 @@ def route_docs():
 
 @app.route("/api/search", methods=["POST"])
 @require_auth
+@rate_limit(max_calls=30, window_sec=3600, key_fn=lambda: f"search:{session.get('user_id','?')}")
 def route_search():
     data = request.json or {}
     jobs, err = search_indeed(data.get("query",""), data.get("location","France"))
@@ -703,13 +875,16 @@ def route_search():
 
 @app.route("/api/fetch-url", methods=["POST"])
 @require_auth
+@rate_limit(max_calls=20, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
 def route_fetch_url():
     u   = get_current_user()
     data = request.json or {}
-    url  = data.get("url","").strip()
-    if not url:
-        return jsonify({"error": "URL manquante"}), 400
+    url  = (data.get("url","") or "").strip()
+    if not url or not re.match(r"^https?://", url, re.I):
+        return jsonify({"error": "URL invalide (http/https requis)"}), 400
     openai_key = OPENAI_API_KEY
+    if not openai_key:
+        return jsonify({"error": "Service indisponible (clé OpenAI non configurée)"}), 503
     try:
         from openai import OpenAI as _OAI
         _client = _OAI(api_key=openai_key)
@@ -742,6 +917,7 @@ def route_fetch_url():
 
 @app.route("/api/interview-prep", methods=["POST"])
 @require_auth
+@rate_limit(max_calls=20, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
 def route_interview_prep():
     u    = get_current_user()
     data = request.json or {}
@@ -791,6 +967,7 @@ Ton d'écriture — essentiel :
 
 @app.route("/api/extract-doc", methods=["POST"])
 @require_auth
+@rate_limit(max_calls=30, window_sec=3600, key_fn=lambda: f"extract:{session.get('user_id','?')}")
 def route_extract_doc():
     data  = request.json or {}
     b64   = data.get("b64",""); mime = data.get("mime",""); fname = data.get("name","")
@@ -812,13 +989,30 @@ def route_extract_doc():
 
 @app.route("/api/download-pdf", methods=["POST"])
 @require_auth
+@rate_limit(max_calls=30, window_sec=3600, key_fn=lambda: f"pdf:{session.get('user_id','?')}")
 def route_download_pdf():
+    u        = get_current_user()
     data     = request.json or {}
-    filename = data.get("filename","").strip()
+    filename = (data.get("filename","") or "").strip()
     if not filename: return jsonify({"error": "Nom de fichier manquant"}), 400
     safe = os.path.basename(filename)
-    path = os.path.join(CV_DIR, safe)
-    if not os.path.exists(path): return jsonify({"error": "CV introuvable"}), 404
+    if not safe or safe.startswith("."): return jsonify({"error": "Nom invalide"}), 400
+    # Prio dossier user, fallback legacy avec check ownership via DB
+    user_path   = os.path.join(user_cv_dir(u["id"]), safe)
+    legacy_path = os.path.join(CV_DIR, safe)
+    if os.path.isfile(user_path):
+        path = user_path
+    elif os.path.isfile(legacy_path):
+        with get_db() as db:
+            owned = db.execute(
+                "SELECT 1 FROM applications WHERE user_id=? AND cv_filename=? LIMIT 1",
+                (u["id"], safe)
+            ).fetchone()
+        if not owned:
+            return jsonify({"error": "Accès refusé"}), 403
+        path = legacy_path
+    else:
+        return jsonify({"error": "CV introuvable"}), 404
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
@@ -907,6 +1101,7 @@ def route_template(tpl_id):
 
 @app.route("/api/generate-template", methods=["POST"])
 @require_auth
+@rate_limit(max_calls=10, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
 def route_generate_template():
     data = request.json or {}
     u    = get_current_user()
@@ -1315,7 +1510,7 @@ def adapt_pdf_cv(input_pdf_path, job_offer_text, output_pdf_path,
             adapted = _ai_adapt_pdf_blocks(provider, api_key, blocks,
                                            job_offer_text, docs_text=docs_text)
         except Exception as e:
-            print(f"[adapt_pdf_cv] IA échouée → fallback original : {e}")
+            log.warning(f"adapt_pdf_cv: IA échouée, fallback original — {e}")
             doc.save(output_pdf_path)
             return {"error": f"Adaptation IA échouée : {e}",
                     "fallback": output_pdf_path}
@@ -1389,6 +1584,7 @@ def route_cv_pdf():
 
 @app.route("/api/adapt-cv-pdf", methods=["POST"])
 @require_auth
+@rate_limit(max_calls=20, window_sec=3600, key_fn=lambda: f"ai:{session.get('user_id','?')}")
 def route_adapt_cv_pdf():
     """Adapte le CV PDF stocké en paramètres. Renvoie directement le PDF adapté."""
     u = get_current_user()
@@ -1408,10 +1604,11 @@ def route_adapt_cv_pdf():
     job_offer = f"Poste : {role}\nEntreprise : {company}\n\n{job_desc}"
     docs_text = get_docs_context(u["id"])
 
+    user_dir = user_cv_dir(u["id"])
     in_name  = f"_in_{secrets.token_hex(8)}.pdf"
     out_name = f"CV_{safe_name(company)}_{safe_name(role)}_{today()}.pdf"
-    in_path  = os.path.join(CV_DIR, in_name)
-    out_path = os.path.join(CV_DIR, out_name)
+    in_path  = os.path.join(user_dir, in_name)
+    out_path = os.path.join(user_dir, out_name)
     try:
         with open(in_path, "wb") as f:
             f.write(base64.b64decode(pdf_b64))
@@ -1473,11 +1670,13 @@ def route_admin_user(uid):
 
 if __name__ == "__main__":
     PORT = int(os.environ.get("PORT", 5151))
-    # N'ouvre le navigateur que si on tourne en local (pas en prod)
-    if not os.environ.get("RAILWAY_ENVIRONMENT") and not os.environ.get("DYNO"):
-        def open_browser():
-            import time; time.sleep(1.2)
-            webbrowser.open(f"http://localhost:{PORT}")
-        threading.Thread(target=open_browser, daemon=True).start()
-    print(f"\n  ⚡ JobFinder demarré  →  http://localhost:{PORT}\n")
+    # Auto-ouverture navigateur en local uniquement (pas en prod)
+    if not IS_PROD:
+        import webbrowser
+        def _open_browser():
+            time.sleep(1.2)
+            try: webbrowser.open(f"http://localhost:{PORT}")
+            except Exception: pass
+        threading.Thread(target=_open_browser, daemon=True).start()
+    log.info(f"JobFinder démarré → http://localhost:{PORT} (prod={IS_PROD})")
     app.run(host="0.0.0.0", port=PORT, debug=False, use_reloader=False)

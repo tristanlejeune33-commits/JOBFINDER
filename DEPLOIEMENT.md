@@ -1,135 +1,126 @@
 # 🚀 Guide de Déploiement — JobFinder
 
-## Option recommandée : Railway (~5$/mois)
+## Option recommandée : Railway (~5 $/mois)
 
-Railway est la solution la plus simple pour héberger une appli Python/Flask avec une vraie base de données persistante.
+Railway est la solution la plus simple pour héberger une app Python/Flask avec une base persistante.
 
 ---
 
 ## Étape 1 — Préparer GitHub
 
-1. Va sur [github.com](https://github.com) et crée un compte si besoin
-2. Crée un **nouveau dépôt privé** (ex: `jobfinder`)
-3. Dans ton dossier JOBFINDER, ouvre un terminal et tape :
+1. Crée un dépôt **privé** sur [github.com](https://github.com) (ex : `jobfinder`)
+2. Pousse le code :
 
 ```bash
 git init
 git add .
-git commit -m "premier commit"
+git commit -m "initial commit"
 git branch -M main
 git remote add origin https://github.com/TON_USERNAME/jobfinder.git
 git push -u origin main
 ```
 
-> ⚠️ Avant de pusher, crée un fichier `.gitignore` (voir Étape 1b)
-
----
-
-## Étape 1b — Créer .gitignore (IMPORTANT)
-
-Crée un fichier `.gitignore` dans le dossier JOBFINDER avec ce contenu :
-
-```
-data/
-cv_adaptes/
-__pycache__/
-*.pyc
-.env
-*.db
-*.sqlite
-```
-
-Cela évite d'envoyer ta base de données et tes CVs sur GitHub.
+> ⚠️ Le `.gitignore` est déjà configuré — il exclut `data/`, `cv_adaptes/`, `.env`, `*.db`, `.claude/settings.local.json` etc.
 
 ---
 
 ## Étape 2 — Déployer sur Railway
 
-1. Va sur [railway.app](https://railway.app) et connecte-toi avec GitHub
-2. Clique sur **"New Project"** → **"Deploy from GitHub repo"**
-3. Sélectionne ton dépôt `jobfinder`
-4. Railway détecte automatiquement Python et lance le build
+1. [railway.app](https://railway.app) → connecte-toi avec GitHub
+2. **New Project** → **Deploy from GitHub repo** → sélectionne ton repo
+3. Railway détecte Python et lance le build (3-5 min, Playwright est long à installer)
 
 ---
 
-## Étape 3 — Variables d'environnement (OBLIGATOIRE)
+## Étape 3 — Variables d'environnement (OBLIGATOIRES)
 
-Dans Railway → ton projet → onglet **Variables**, ajoute :
+Dans Railway → projet → **Variables**, ajoute :
 
-| Variable | Valeur |
-|----------|--------|
-| `OPENAI_API_KEY` | `sk-proj-ta-vraie-cle-openai` |
-| `SECRET_KEY` | `ea776f705647254a8bd31990615a69b72a762202a17fba90e3cc95d373c17811` |
+| Variable | Obligatoire | Valeur |
+|----------|-------------|--------|
+| `SECRET_KEY` | ✅ **OUI** | Génère avec : `python -c "import secrets; print(secrets.token_hex(32))"` |
+| `OPENAI_API_KEY` | recommandé | `sk-proj-...` (sinon la récup d'URL d'offre est désactivée) |
+| `ADMIN_EMAIL` | recommandé | Ton email — sera auto-promu admin à l'inscription |
+| `FLASK_ENV` | optionnel | `production` (déjà détecté par `RAILWAY_ENVIRONMENT`) |
+| `LOG_LEVEL` | optionnel | `INFO` (par défaut) — `DEBUG` si tu veux plus de logs |
 
-> 🔑 Le `SECRET_KEY` sert à chiffrer les sessions. Il doit rester **stable et secret**.
-> Tu peux en générer un autre avec : `python -c "import secrets; print(secrets.token_hex(32))"`
+> 🔑 **`SECRET_KEY` doit être stable**. Si tu la changes, toutes les sessions sont invalidées.
+> Le serveur **refuse de démarrer** en prod sans `SECRET_KEY`.
 
 ---
 
-## Étape 4 — Volumes persistants (IMPORTANT pour les données)
+## Étape 4 — Volumes persistants (IMPORTANT)
 
-Sans volume, Railway **efface les données** à chaque redéploiement (CVs, base de données).
+Sans volume, Railway **efface les données** à chaque redéploiement.
 
-Dans Railway → ton projet → onglet **Volumes** → **New Volume** :
+Dans Railway → projet → **Volumes** → **New Volume** :
 
 | Mount Path | Description |
 |-----------|-------------|
 | `/app/data` | Base de données SQLite |
-| `/app/cv_adaptes` | Fichiers CV générés |
+| `/app/cv_adaptes` | CV générés (organisés par user_id) |
 
 ---
 
 ## Étape 5 — Vérifier le déploiement
 
-1. Dans l'onglet **Deployments**, clique sur le build en cours
-2. Attends que ça devienne ✅ (peut prendre 3-5 min, Playwright est long à installer)
-3. Clique sur le lien généré (ex: `jobfinder-production.up.railway.app`)
+1. **Deployments** → attends ✅ (3-5 min)
+2. Ouvre le lien (ex : `jobfinder-production.up.railway.app`)
+3. Test du health check : `https://ton-url/healthz` → doit renvoyer `{"ok":true,...}`
+4. Crée le compte admin avec l'email défini dans `ADMIN_EMAIL`
+
+---
+
+## 🛡️ Sécurité — checklist avant ouverture publique
+
+- [ ] `SECRET_KEY` défini, stable, ≥ 32 caractères
+- [ ] `ADMIN_EMAIL` défini (sinon le 1er user inscrit serait admin par défaut — c'est un raccourci dev, désactivé en prod)
+- [ ] HTTPS actif (Railway le fait automatiquement)
+- [ ] `OPENAI_API_KEY` avec une **limite de dépenses** sur https://platform.openai.com/account/billing/limits (le rate limit applicatif protège, mais ceinture + bretelles)
+- [ ] Volumes montés sur `/app/data` et `/app/cv_adaptes`
+- [ ] Backup de la DB SQLite (Railway propose des snapshots de volume)
+
+### Protections en place côté code
+- Rate limiting : login (20/5min/IP), registration (5/h/IP), endpoints IA (20/h/user), download PDF (30/h/user)
+- Lockout : 10 échecs login en 15 min → 429 pour 15 min
+- Cookies session : `HttpOnly` + `Secure` + `SameSite=Strict` en prod
+- Headers : `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, HSTS en prod
+- Upload max 12 Mo (Flask `MAX_CONTENT_LENGTH`)
+- Stockage CV par user_id (pas de fuite inter-comptes via `/api/cv-file/...`)
+- Validation email regex + password ≥ 8 caractères
 
 ---
 
 ## Problèmes fréquents
 
 **❌ Build échoue sur Playwright**
-→ Le fichier `nixpacks.toml` est déjà créé pour ça. Si ça échoue encore, dans Railway → Settings → Builder → passe à **Dockerfile** et utilise le Dockerfile ci-dessous.
+→ `nixpacks.toml` est déjà configuré. Si ça échoue encore, passe en Dockerfile (voir plus bas).
 
-**❌ "Internal Server Error" au lancement**
-→ Vérifie les logs dans Railway → Deployments → clic sur le déploiement
-→ Vérifie que `OPENAI_API_KEY` et `SECRET_KEY` sont bien définis
+**❌ "RuntimeError: SECRET_KEY est obligatoire en production" au démarrage**
+→ Définis la variable `SECRET_KEY` dans Railway → Variables.
 
-**❌ Les CVs disparaissent après redéploiement**
-→ Les volumes ne sont pas configurés (voir Étape 4)
+**❌ Sessions déconnectées à chaque redéploiement**
+→ `SECRET_KEY` change. Vérifie qu'elle est bien définie en variable d'env (et pas générée à chaque fois).
 
-**❌ Session déconnectée à chaque fois**
-→ `SECRET_KEY` change à chaque restart → bien vérifier qu'il est défini en variable d'environnement
+**❌ CV qui disparaissent**
+→ Volumes pas configurés (Étape 4).
+
+**❌ Trop de "429 Trop de requêtes"**
+→ C'est le rate limiting. Si légitime, augmente les limites dans `jobfinder.py` (constantes en haut).
 
 ---
 
-## Alternative : Dockerfile (si nixpacks.toml ne marche pas)
-
-Crée un fichier `Dockerfile` à la racine :
+## Alternative : Dockerfile (si nixpacks ne marche pas)
 
 ```dockerfile
 FROM mcr.microsoft.com/playwright/python:v1.40.0-jammy
-
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 RUN playwright install chromium
-
 COPY . .
-
 EXPOSE 8080
 CMD gunicorn jobfinder:app --bind 0.0.0.0:$PORT --workers 1 --timeout 120
 ```
 
----
-
-## Récap des fichiers créés
-
-| Fichier | Rôle |
-|---------|------|
-| `Procfile` | Commande de démarrage pour Railway/Heroku |
-| `requirements.txt` | Dépendances Python (avec gunicorn ajouté) |
-| `nixpacks.toml` | Config Railway pour installer Playwright |
-| `.env.example` | Modèle des variables d'environnement |
-| `.gitignore` | Exclut data/, cv_adaptes/, .env du git |
+> ⚠️ Garde `--workers 1`. Le rate limiting est en mémoire — avec plusieurs workers, chaque worker aurait son propre compteur (donc multiplication des limites). Pour passer à 2+ workers, il faut un store partagé (Redis).
