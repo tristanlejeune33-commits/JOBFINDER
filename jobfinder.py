@@ -2550,32 +2550,144 @@ def _empty_cv_data():
         "interests": [],    # [str]
     }
 
+def _strip_md_link(s):
+    """Retire la syntaxe markdown [text](url) qu'l'IA ajoute parfois (email, URLs)."""
+    if not isinstance(s, str): return s
+    # [text](url) -> text  (préserve le 1er groupe)
+    return re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", s).strip()
+
+def _pick(d, *keys, default=""):
+    """Retourne la 1ère valeur non-vide trouvée pour les clés candidates."""
+    for k in keys:
+        if isinstance(d, dict) and d.get(k) not in (None, "", []):
+            return d[k]
+    return default
+
+def _normalize_experience(items):
+    """Normalise les variantes de l'IA → schéma canonique : role, company, location, date, bullets."""
+    out = []
+    for it in (items or []):
+        if not isinstance(it, dict): continue
+        role    = _pick(it, "role", "title", "position", "job_title")
+        company = _pick(it, "company", "employer", "organization", "organisation")
+        loc     = _pick(it, "location", "city", "place")
+        date    = _pick(it, "date", "dates", "period", "duration")
+        bullets = it.get("bullets") or it.get("achievements") or it.get("description") or []
+        if isinstance(bullets, str):
+            bullets = [b.strip() for b in re.split(r"\n+|•|·|-", bullets) if b.strip()]
+        out.append({
+            "role": str(role), "company": str(company), "location": str(loc),
+            "date": str(date), "bullets": bullets,
+        })
+    return out
+
+def _normalize_education(items):
+    """Variantes : degree+school+date OU degree+institution+field+dates → canonique."""
+    out = []
+    for it in (items or []):
+        if not isinstance(it, dict): continue
+        degree = _pick(it, "degree", "diploma")
+        field  = _pick(it, "field", "specialization", "major")
+        if field and field.lower() not in degree.lower():
+            degree = f"{degree} — {field}" if degree else field
+        school = _pick(it, "school", "institution", "university", "establishment")
+        loc    = _pick(it, "location", "city", "place")
+        date   = _pick(it, "date", "dates", "period", "year", "years")
+        out.append({"degree": str(degree), "school": str(school), "location": str(loc), "date": str(date)})
+    return out
+
+def _normalize_skills(items):
+    out = []
+    for it in (items or []):
+        if isinstance(it, str):
+            out.append({"name": it, "level": 4})
+        elif isinstance(it, dict):
+            name = _pick(it, "name", "skill", "label")
+            try: lvl = int(_pick(it, "level", "value", "rating", default=4))
+            except (TypeError, ValueError): lvl = 4
+            out.append({"name": str(name), "level": lvl})
+    return out
+
+def _normalize_languages(items):
+    out = []
+    for it in (items or []):
+        if isinstance(it, str):
+            out.append({"name": it, "level": ""})
+        elif isinstance(it, dict):
+            name  = _pick(it, "name", "language", "lang")
+            level = _pick(it, "level", "proficiency", "fluency", "rating")
+            out.append({"name": str(name), "level": str(level)})
+    return out
+
+def _normalize_certifications(items):
+    out = []
+    for it in (items or []):
+        if isinstance(it, str):
+            out.append({"name": it, "date": ""})
+        elif isinstance(it, dict):
+            name = _pick(it, "name", "certification", "title", "label")
+            date = _pick(it, "date", "year", "issued")
+            out.append({"name": str(name), "date": str(date)})
+    return out
+
 def _normalize_cv_data(d):
-    """Force le schéma + dérive les flags has_X et level_pct."""
+    """Force le schéma + map les variantes de l'IA + dérive les flags has_X et level_pct."""
     base = _empty_cv_data()
     if isinstance(d, dict):
         for k in base:
             if k in d:
                 base[k] = d[k]
-    # contact safe
+
+    # Strings de premier niveau (avec map d'alias)
+    if isinstance(d, dict):
+        if not base.get("title"):
+            base["title"] = _pick(d, "title", "headline", "current_role", "job_title")
+        if not base.get("summary"):
+            base["summary"] = _pick(d, "summary", "about", "bio", "profile", "objective")
+        if not base.get("name"):
+            base["name"] = _pick(d, "name", "full_name", "fullname")
+
+    # contact safe + strip markdown
     contact = base.get("contact") or {}
-    base["contact"] = {**_empty_cv_data()["contact"], **(contact if isinstance(contact, dict) else {})}
-    # listes safe
-    for key in ("experience", "education", "skills", "languages", "certifications", "interests"):
-        if not isinstance(base.get(key), list):
-            base[key] = []
-    # experience: bullets list + has_bullets
+    if isinstance(contact, dict):
+        contact = {
+            "email":    _strip_md_link(_pick(contact, "email", "mail")),
+            "phone":    _pick(contact, "phone", "tel", "mobile"),
+            "location": _pick(contact, "location", "city", "address"),
+            "linkedin": _strip_md_link(_pick(contact, "linkedin", "linkedin_url")),
+            "website":  _strip_md_link(_pick(contact, "website", "site", "portfolio", "url")),
+        }
+    else:
+        contact = _empty_cv_data()["contact"]
+    base["contact"] = contact
+
+    # Strip markdown des champs text de premier niveau
+    base["summary"] = _strip_md_link(base.get("summary", ""))
+
+    # Listes safe + normalisation
+    base["experience"]     = _normalize_experience(base.get("experience"))
+    base["education"]      = _normalize_education(base.get("education"))
+    base["skills"]         = _normalize_skills(base.get("skills"))
+    base["languages"]      = _normalize_languages(base.get("languages"))
+    base["certifications"] = _normalize_certifications(base.get("certifications"))
+    interests = base.get("interests") or []
+    if isinstance(interests, list):
+        base["interests"] = [str(x) for x in interests if x]
+    else:
+        base["interests"] = []
+
+    # Dérivés expérience
     for exp in base["experience"]:
-        if not isinstance(exp.get("bullets"), list):
-            exp["bullets"] = []
-        exp["has_bullets"] = bool(exp["bullets"])
-    # skills: level_pct
+        exp["has_bullets"] = bool(exp.get("bullets"))
+
+    # Dérivés skills (level_pct)
     for s in base["skills"]:
         try: lvl = int(s.get("level", 4))
         except (TypeError, ValueError): lvl = 4
         s["level"] = max(1, min(5, lvl))
         s["level_pct"] = s["level"] * 20
-    # flags has_*
+
+    # Flags has_*
     base["has_experience"]     = bool(base["experience"])
     base["has_education"]      = bool(base["education"])
     base["has_skills"]         = bool(base["skills"])
@@ -2650,8 +2762,37 @@ def route_cv_extract():
     if not summary and not docs:
         return jsonify({"error": "Ajoute d'abord ton résumé personnel ou tes documents dans Paramètres."}), 400
 
-    schema_hint = json.dumps(_empty_cv_data(), ensure_ascii=False, indent=2)
-    prompt = f"""Tu es un expert RH. À partir des informations suivantes sur le candidat, génère un JSON structuré pour son CV.
+    # Exemple concret avec les BONS noms de clés (pas de schéma vide ambigu)
+    example = {
+        "name": "Marie Dupont",
+        "title": "Développeuse Full Stack",
+        "summary": "5 ans en JS/Python. Aime construire des produits qui marchent.",
+        "contact": {
+            "email": "marie@example.com", "phone": "+33 6 12 34 56 78",
+            "location": "Paris", "linkedin": "marie-dupont", "website": ""
+        },
+        "experience": [
+            {"role": "Senior Developer", "company": "Acme", "location": "Paris",
+             "date": "2022 - Présent",
+             "bullets": ["Refonte backend, -40% latence", "Tech lead équipe 4"]}
+        ],
+        "education": [
+            {"degree": "Master Informatique", "school": "Paris-Saclay",
+             "location": "Paris", "date": "2018 - 2020"}
+        ],
+        "skills": [
+            {"name": "Python", "level": 5},
+            {"name": "React", "level": 4}
+        ],
+        "languages": [
+            {"name": "Français", "level": "Natif"},
+            {"name": "Anglais", "level": "C1"}
+        ],
+        "certifications": [{"name": "AWS Solutions Architect", "date": "2023"}],
+        "interests": ["Cyclisme", "Photographie"]
+    }
+    schema_hint = json.dumps(example, ensure_ascii=False, indent=2)
+    prompt = f"""Tu es un expert RH. À partir des informations suivantes, génère un JSON CV.
 
 Nom : {u.get("name","")}
 Email : {u.get("email","")}
@@ -2662,22 +2803,30 @@ Email : {u.get("email","")}
 === DOCUMENTS / CV IMPORTÉS ===
 {docs[:6000]}
 
-=== SCHÉMA JSON ATTENDU ===
+=== STRUCTURE JSON EXACTE À UTILISER (exemple — RESPECTE LES NOMS DE CHAMPS) ===
 {schema_hint}
 
-CONSIGNES :
-- Remplis chaque champ basé UNIQUEMENT sur les informations ci-dessus. N'INVENTE rien.
-- Si une info est manquante, laisse le champ vide ("") ou la liste vide ([]).
-- "title" = titre / poste actuel ou souhaité (ex: "Développeur Full Stack").
-- "summary" = 2 phrases max, accroche professionnelle. Ton naturel, pas de RH-speak.
-- "experience" : tableau d'expériences, ordre antichronologique. "bullets" = 2-4 puces concrètes par poste, max 12 mots, verbe d'action + résultat si possible.
-- "education" : antichronologique aussi.
-- "skills" : 6 à 12 compétences. "level" entre 1 et 5 (auto-évalué : 5 = expert, 3 = bon, 1 = base).
-- "languages" : avec niveau type "Natif", "C2", "B2", "Bonnes notions", etc.
-- "certifications", "interests" : facultatif si pertinent.
-- Tons des descriptions : direct, sans adjectifs creux ("dynamique", "passionné", "motivé" → INTERDIT).
+NOMS DE CHAMPS OBLIGATOIRES (ne les renomme PAS, ne les traduis PAS) :
+- experience : "role" (pas title/position), "company", "location", "date" (pas dates), "bullets"
+- education  : "degree", "school" (pas institution/university), "location", "date"
+- skills     : "name", "level" (entier 1-5)
+- languages  : "name" (pas language), "level" (pas proficiency)
+- certifications : "name", "date"
+- interests  : tableau de strings simples ["Tennis", "Photo"]
 
-Retourne UNIQUEMENT le JSON, pas de markdown, pas de commentaire."""
+CONSIGNES CONTENU :
+- Remplis chaque champ basé UNIQUEMENT sur les informations ci-dessus. N'INVENTE RIEN.
+- Si une info est absente : champ vide "" ou liste vide [].
+- "title" = poste actuel ou souhaité (ex: "Bartender", "Développeur Full Stack").
+- "summary" = 2 phrases max, accroche pro. Naturel, pas de RH-speak.
+- "experience" antichronologique. Pour chaque poste, 2-4 "bullets" : verbe d'action concret, max 12 mots, ajoute un chiffre/résultat si dispo.
+- "skills" : 6 à 12. "level" entier de 1 à 5 (5=expert, 3=bon, 1=base).
+- "languages" : "level" en string lisible ("Natif", "C2", "B2", "Notions").
+- ❌ INTERDITS : "dynamique", "passionné", "motivé", "force de proposition", "orienté résultats", adjectifs creux similaires.
+- ❌ Pas de markdown dans les valeurs (pas de [text](url), pas de **gras**).
+- Email : juste l'adresse en clair, sans crochets ni parenthèses.
+
+Retourne UNIQUEMENT le JSON, sans ```json, sans commentaire."""
 
     try:
         raw = call_ai(provider, api_key, prompt, max_tokens=4000)
