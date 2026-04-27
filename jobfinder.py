@@ -934,16 +934,29 @@ def route_login():
         deleted_at = row.get("deleted_at") if isinstance(row, dict) else (row["deleted_at"] if "deleted_at" in row.keys() else "")
         if deleted_at:
             return jsonify({"error": "Ce compte a été supprimé."}), 403
+
+        # Auto-restore admin si email == ADMIN_EMAIL et le rôle a été changé par accident
+        current_role = row["role"]
+        if ADMIN_EMAIL and email == ADMIN_EMAIL and current_role != "admin":
+            try:
+                with get_db() as db2:
+                    db2.execute("UPDATE users SET role=? WHERE id=?", ("admin", row["id"]))
+                    db2.commit()
+                current_role = "admin"
+                log.info(f"admin auto-restore: id={row['id']} email={email}")
+            except Exception as e:
+                log.warning(f"admin auto-restore failed: {e}")
+
         with _rl_lock:
             _rate_buckets.pop(lockout_key, None)
         session.clear()
         remember = bool(data.get("remember", True))
         session.permanent = remember
         session["user_id"] = row["id"]
-        log.info(f"login ok: id={row['id']} email={email} ip={_client_ip()}")
+        log.info(f"login ok: id={row['id']} email={email} role={current_role} ip={_client_ip()}")
         return jsonify({
             "ok": True,
-            "user": {"id": row["id"], "email": row["email"], "name": row["name"], "role": row["role"]},
+            "user": {"id": row["id"], "email": row["email"], "name": row["name"], "role": current_role},
             "email_verified": bool(row.get("email_verified", 0) if isinstance(row, dict) else (row["email_verified"] if "email_verified" in row.keys() else 0)),
         })
     except Exception as e:
