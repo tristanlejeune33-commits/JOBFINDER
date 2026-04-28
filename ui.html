@@ -4021,27 +4021,54 @@ const cvStudio = {
 
   async downloadPdf(){
     if(!this.state.data){ toast('Génère d\'abord un CV','error'); return; }
-    // On rend d'abord, puis on PDF via /api/preview-pdf qui prend du HTML
-    const r = await post('/api/cv/render', {
-      data: this.state.data, template_id: this.state.template_id, color: this.state.color,
-    });
-    if(!r || !r.html){ toast('Erreur rendu','error'); return; }
     toast('⏳ Génération PDF...','info');
     try{
-      const resp = await fetch('/api/preview-pdf',{
+      // Endpoint dédié /api/cv/pdf : prend data + template + color, renvoie le PDF
+      const resp = await fetch('/api/cv/pdf',{
         method:'POST', headers:{'Content-Type':'application/json'},
         credentials:'same-origin',
-        body: JSON.stringify({html: r.html, name: this.state.name || 'CV'})
+        body: JSON.stringify({
+          data: this.state.data,
+          template_id: this.state.template_id,
+          color: this.state.color,
+          name: this.state.name || 'CV',
+        })
       });
-      if(!resp.ok){ toast('PDF impossible','error'); return; }
+      if(!resp.ok){
+        // Essaie de récupérer l'erreur JSON
+        let msg = 'PDF impossible (' + resp.status + ')';
+        try{
+          const err = await resp.json();
+          if(err.error) msg = err.error;
+        }catch(e){}
+        toast(msg, 'error');
+        console.error('PDF generation failed:', msg);
+        return;
+      }
+      // Vérifie que c'est bien un PDF
+      const ctype = resp.headers.get('content-type') || '';
+      if(!ctype.includes('pdf')){
+        toast('Le serveur n\'a pas renvoyé un PDF', 'error');
+        return;
+      }
       const blob = await resp.blob();
+      if(blob.size < 100){
+        toast('PDF vide ou corrompu', 'error');
+        return;
+      }
       const url = URL.createObjectURL(blob);
-      const a = document.createElement('a'); a.href = url;
+      const a = document.createElement('a');
+      a.href = url;
       a.download = (this.state.name || 'CV').replace(/[^\w\-]/g,'_') + '.pdf';
+      document.body.appendChild(a);
       a.click();
+      document.body.removeChild(a);
       setTimeout(()=>URL.revokeObjectURL(url), 5000);
-      toast('✅ PDF téléchargé','success');
-    }catch(e){ toast('Erreur : '+e.message,'error'); }
+      toast('✅ PDF téléchargé ('+ Math.round(blob.size/1024) +' Ko)','success');
+    }catch(e){
+      console.error('downloadPdf error:', e);
+      toast('Erreur réseau : ' + (e.message || e), 'error');
+    }
   },
 
   // ── Éditeur formulaire ────────────────────────────────────────────────────

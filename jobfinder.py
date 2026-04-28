@@ -2074,40 +2074,96 @@ def route_preview_pdf():
     return _html_to_pdf_response(html, name)
 
 def _html_to_pdf_response(html_content, name):
+    """Convertit du HTML en PDF via Playwright.
+    Optimisé pour nos templates CV qui sont déjà au format A4
+    (max-width: 794px / min-height: 1123px à 96dpi = exactement A4)."""
     import tempfile
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
-        return jsonify({"error":"Playwright non installé"}), 500
+        log.error("Playwright non installé")
+        return jsonify({"error":"Playwright non installé sur le serveur"}), 500
+
+    # Injecte un override CSS pour le print (cache les body bg "écran" décoratifs,
+    # force le contenu à occuper toute la page sans marges Playwright)
+    print_css = """
+<style id="__pdf_override">
+@media print {
+  html, body {
+    background: #fff !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  /* Force tout container max-width à occuper la page A4 sans marge */
+  body > * {
+    box-shadow: none !important;
+    margin: 0 auto !important;
+  }
+  @page { size: A4; margin: 0; }
+}
+</style>
+"""
+    # Injecte avant </head> si possible, sinon en début de body
+    if "</head>" in html_content:
+        html_content = html_content.replace("</head>", print_css + "</head>", 1)
+    elif "<body" in html_content:
+        html_content = re.sub(r"(<body[^>]*>)", r"\1" + print_css, html_content, count=1)
+    else:
+        html_content = print_css + html_content
+
     tmp = None
     try:
         with tempfile.NamedTemporaryFile(mode='w', suffix='.html', delete=False, encoding='utf-8') as f:
-            f.write(html_content); tmp = f.name
+            f.write(html_content)
+            tmp = f.name
         with sync_playwright() as p:
-            browser = p.chromium.launch()
-            page    = browser.new_page(viewport={"width":1280,"height":900})
-            page.goto(f"file:///{tmp.replace(chr(92),'/')}", wait_until="networkidle")
-            page.wait_for_timeout(1500)
-            dims = page.evaluate("""()=>{
-                const children=[...document.body.children];
-                let maxW=0;
-                for(const c of children){const r=c.getBoundingClientRect();if(r.width>maxW)maxW=r.width;}
-                return {w:maxW||document.body.scrollWidth, h:Math.max(document.body.scrollHeight,document.documentElement.scrollHeight)};
-            }""")
-            PAD=8
-            scale=round(min((210-PAD*2)/(dims['w']*0.264583),(297-PAD*2)/(dims['h']*0.264583),1),4)
-            content_w_mm=dims['w']*0.264583*scale
-            hm=round(max(PAD,(210-content_w_mm)/2),2)
-            content_h_mm=dims['h']*0.264583*scale
-            vm=round(max(PAD,(297-content_h_mm)/2),2) if content_h_mm<297-PAD*2 else PAD
-            pdf_bytes=page.pdf(format="A4",print_background=True,
-                margin={"top":f"{vm}mm","right":f"{hm}mm","bottom":f"{vm}mm","left":f"{hm}mm"},scale=scale)
-            browser.close()
-        safe_name = re.sub(r'[^\w\-]','_', name)
-        return Response(pdf_bytes, mimetype="application/pdf",
-            headers={"Content-Disposition":f'attachment; filename="{safe_name}.pdf"'})
+            browser = p.chromium.launch(args=[
+                "--no-sandbox",                    # nécessaire en container Railway
+                "--disable-dev-shm-usage",         # mémoire partagée limitée
+                "--disable-setuid-sandbox",
+            ])
+            try:
+                # Viewport A4 réel : 794x1123 px à 96dpi
+                ctx = browser.new_context(viewport={"width": 794, "height": 1123})
+                page = ctx.new_page()
+                page.goto(
+                    f"file:///{tmp.replace(chr(92),'/')}",
+                    wait_until="domcontentloaded",  # plus rapide que networkidle, qui hang sur les fonts CDN
+                    timeout=15000,
+                )
+                # Attend les fonts (Google Fonts) et le layout
+                try:
+                    page.evaluate("document.fonts && document.fonts.ready")
+                    page.wait_for_load_state("load", timeout=5000)
+                except Exception:
+                    pass
+                page.wait_for_timeout(800)  # petit buffer pour les @import async
+
+                # Rendu PDF en A4 strict, marges gérées par les @page CSS du template
+                pdf_bytes = page.pdf(
+                    format="A4",
+                    print_background=True,
+                    margin={"top":"0","right":"0","bottom":"0","left":"0"},
+                    prefer_css_page_size=True,
+                )
+            finally:
+                try: browser.close()
+                except Exception: pass
+
+        safe_name = re.sub(r'[^\w\-]','_', name or "CV")[:80] or "CV"
+        log.info(f"pdf generated: {safe_name} ({len(pdf_bytes)} bytes)")
+        return Response(
+            pdf_bytes,
+            mimetype="application/pdf",
+            headers={"Content-Disposition": f'attachment; filename="{safe_name}.pdf"'}
+        )
+    except Exception as e:
+        log.exception(f"PDF generation failed: {e}")
+        return jsonify({"error": f"Erreur génération PDF : {type(e).__name__}: {str(e)[:200]}"}), 500
     finally:
-        if tmp and os.path.exists(tmp): os.unlink(tmp)
+        if tmp and os.path.exists(tmp):
+            try: os.unlink(tmp)
+            except Exception: pass
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ADAPTATION CV PDF — direct (sans passer par HTML)
@@ -2960,6 +3016,27 @@ def route_cv_render():
         photo_uri = f"data:{ud.get('photo_mime','image/jpeg')};base64,{ud['photo_b64']}"
     html = _render_cv(cv_data, template_id, color, photo_uri)
     return jsonify({"html": html})
+
+@app.route("/api/cv/pdf", methods=["POST"])
+@require_auth
+@rate_limit(max_calls=30, window_sec=3600, key_fn=lambda: f"pdf:{session.get('user_id','?')}")
+def route_cv_pdf_v2():
+    """Rendu CV → PDF directement (un seul appel pour le frontend).
+    Body: {data, template_id, color, name}"""
+    u    = get_current_user()
+    data = request.json or {}
+    cv_data     = data.get("data") or {}
+    template_id = data.get("template_id", "modern")
+    color       = (data.get("color", "#2F5DA8") or "#2F5DA8").strip()
+    name        = (data.get("name", "CV") or "CV").strip()[:120]
+    if not re.match(r"^#[0-9a-fA-F]{6}$", color):
+        color = "#2F5DA8"
+    ud = get_user_data(u["id"])
+    photo_uri = ""
+    if ud.get("photo_b64"):
+        photo_uri = f"data:{ud.get('photo_mime','image/jpeg')};base64,{ud['photo_b64']}"
+    html = _render_cv(cv_data, template_id, color, photo_uri)
+    return _html_to_pdf_response(html, name)
 
 @app.route("/api/cv/documents", methods=["GET"])
 @require_auth
