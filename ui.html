@@ -1946,6 +1946,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
     <div class="cvs-preview-col">
       <div class="cvs-preview-toolbar">
         <div class="cvs-tpl-tabs" id="cvs-tpl-tabs"></div>
+        <button class="btn btn-secondary btn-sm" onclick="cvStudio.openFullscreen()" style="white-space:nowrap" title="Voir en plein écran (F)">👁️ Plein écran</button>
         <button class="btn btn-secondary btn-sm" onclick="cvLibrary.open()" style="white-space:nowrap" title="Voir tous les templates">📚 Bibliothèque</button>
         <div class="cvs-color-picker">
           <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Couleur</label>
@@ -1978,6 +1979,27 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══ APERÇU CV PLEIN ÉCRAN ══ -->
+<div id="cv-fullscreen-modal" style="display:none;position:fixed;inset:0;background:#1a1d24;z-index:9998;overflow-y:auto;padding:24px">
+  <div style="position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:10000">
+    <button id="cvfs-zoom-out" onclick="cvStudio.fsZoom(-0.1)" title="Réduire" style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;font-size:18px;font-weight:700">−</button>
+    <button id="cvfs-zoom-fit" onclick="cvStudio.fsZoomFit()" title="Ajuster largeur" style="padding:0 14px;height:42px;border-radius:21px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em"><span id="cvfs-zoom-pct">100%</span></button>
+    <button id="cvfs-zoom-in" onclick="cvStudio.fsZoom(0.1)" title="Agrandir" style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;font-size:18px;font-weight:700">+</button>
+    <button onclick="cvStudio.closeFullscreen()" title="Fermer (Échap)" style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;font-size:16px;margin-left:6px">✕</button>
+  </div>
+  <div style="position:fixed;top:16px;left:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:99px;padding:8px 16px;color:#fff;font-size:12px;font-weight:500;z-index:10000;display:flex;align-items:center;gap:10px">
+    <span style="color:#9ca3af">A4</span>
+    <span>·</span>
+    <span id="cvfs-tpl-name">—</span>
+    <span>·</span>
+    <span style="color:#9ca3af">Échap pour fermer</span>
+  </div>
+  <div id="cvfs-stage" style="min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding-top:72px">
+    <iframe id="cvfs-iframe" sandbox="allow-same-origin"
+      style="width:794px;height:1123px;border:none;background:#fff;box-shadow:0 30px 80px rgba(0,0,0,.6);transform-origin:top center;transition:transform .15s ease"></iframe>
   </div>
 </div>
 
@@ -3966,7 +3988,100 @@ const cvStudio = {
     this.renderEditor();
     this.scheduleRender();
   },
+
+  // ── Plein écran ───────────────────────────────────────────────────────────
+  fsZoomLevel: 1,
+
+  async openFullscreen(){
+    const modal = document.getElementById('cv-fullscreen-modal');
+    if(!modal) return;
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    // Récupère le HTML actuellement rendu et l'envoie dans l'iframe fullscreen
+    const srcIframe = document.getElementById('cvs-preview');
+    const fsIframe  = document.getElementById('cvfs-iframe');
+    // Re-render synchrone pour avoir la dernière version
+    if(this.state.data){
+      const r = await post('/api/cv/render', {
+        data: this.state.data, template_id: this.state.template_id, color: this.state.color,
+      });
+      if(r && r.html){
+        fsIframe.removeAttribute('srcdoc');
+        fsIframe.srcdoc = r.html;
+      }
+    } else if(srcIframe.srcdoc){
+      fsIframe.srcdoc = srcIframe.srcdoc;
+    }
+    // Nom du template courant
+    const tplName = (this.templates.find(t => t.id === this.state.template_id) || {}).name || this.state.template_id;
+    document.getElementById('cvfs-tpl-name').textContent = tplName;
+    // Auto-fit en largeur
+    this.fsZoomFit();
+  },
+
+  closeFullscreen(){
+    const modal = document.getElementById('cv-fullscreen-modal');
+    if(modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+  },
+
+  fsZoom(delta){
+    this.fsZoomLevel = Math.max(0.3, Math.min(2, this.fsZoomLevel + delta));
+    this.fsApplyZoom();
+  },
+
+  fsZoomFit(){
+    // Ajuste pour que l'iframe rentre dans la fenêtre avec un peu de marge
+    const stage = document.getElementById('cvfs-stage');
+    if(!stage) return;
+    const availW = stage.clientWidth - 40;
+    const availH = window.innerHeight - 100;
+    const scaleW = availW / 794;
+    const scaleH = availH / 1123;
+    this.fsZoomLevel = Math.min(scaleW, scaleH, 1.6);
+    this.fsApplyZoom();
+  },
+
+  fsApplyZoom(){
+    const f = document.getElementById('cvfs-iframe');
+    const pct = document.getElementById('cvfs-zoom-pct');
+    if(f){
+      f.style.transform = `scale(${this.fsZoomLevel})`;
+      // Ajuste la hauteur du conteneur pour pas avoir de scroll inutile
+      const stage = document.getElementById('cvfs-stage');
+      if(stage){
+        stage.style.minHeight = (1123 * this.fsZoomLevel + 100) + 'px';
+      }
+    }
+    if(pct) pct.textContent = Math.round(this.fsZoomLevel * 100) + '%';
+  },
 };
+
+// Raccourcis clavier : F = fullscreen, ESC = fermer, +/- zoom
+document.addEventListener('keydown', (e) => {
+  // Évite si on tape dans un input/textarea/contenteditable
+  const t = e.target;
+  if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  const fsOpen = document.getElementById('cv-fullscreen-modal')?.style.display === 'block';
+  if(e.key === 'Escape' && fsOpen){ cvStudio.closeFullscreen(); return; }
+  if(fsOpen && (e.key === '+' || e.key === '=')){ cvStudio.fsZoom(0.1); e.preventDefault(); return; }
+  if(fsOpen && (e.key === '-' || e.key === '_')){ cvStudio.fsZoom(-0.1); e.preventDefault(); return; }
+  // F pour ouvrir le fullscreen quand on est sur la page CV Studio
+  if(e.key === 'f' || e.key === 'F'){
+    const onCvStudio = document.getElementById('page-cvstudio')?.classList.contains('active');
+    if(onCvStudio && !fsOpen && cvStudio.state.data){
+      cvStudio.openFullscreen();
+      e.preventDefault();
+    }
+  }
+});
+
+// Re-fit au resize
+window.addEventListener('resize', () => {
+  if(document.getElementById('cv-fullscreen-modal')?.style.display === 'block'){
+    cvStudio.fsZoomFit();
+  }
+});
 
 // ══════════════════════════════════════════════════════════════════════════════
 // CV LIBRARY — galerie modal pour parcourir tous les templates
