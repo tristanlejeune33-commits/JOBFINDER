@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Visual Merchandiser","category":"Créatif","preview":"Couverture magazine avec photo en grand, titre Fraunces serif et accent rose vif."} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#fefce8;font-family:'Space Grotesk',sans-serif;padding:24px;min-height:100vh}
+.cv{max-width:900px;margin:0 auto;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
+
+.cv-vm{
+  --c-ink:#1e293b;--c-pink:{{color}};--c-yellow:#fde68a;--c-cream:#fefce8;--c-muted:#64748b;
+  font-family:'Space Grotesk',sans-serif;color:var(--c-ink);background:#fff;min-height:1180px
+}
+
+.cv-vm .magazine{display:grid;grid-template-columns:1fr 1fr;min-height:300px}
+.cv-vm .mag-photo{position:relative;background:linear-gradient(135deg,#fde68a 0%,{{color}} 100%);overflow:hidden;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Fraunces',serif;font-weight:700;font-size:80px}
+.cv-vm .mag-photo img{width:75%;aspect-ratio:3/4;object-fit:cover;border:4px solid #fff;box-shadow:0 8px 24px rgba(0,0,0,.18);transform:rotate(-3deg)}
+.cv-vm .mag-photo::before{content:"VOL.07";position:absolute;top:24px;left:24px;font-family:'Fraunces',serif;font-style:italic;font-size:14px;color:#fff;letter-spacing:.3em;font-weight:400}
+.cv-vm .mag-text{padding:38px 36px;display:flex;flex-direction:column;justify-content:center;background:var(--c-cream)}
+.cv-vm .mag-text small{font-size:11px;letter-spacing:.3em;color:var(--c-pink);text-transform:uppercase;font-weight:700}
+.cv-vm .mag-text h1{font-family:'Fraunces',serif;font-size:46px;line-height:.95;margin:10px 0;font-weight:600;letter-spacing:-.02em}
+.cv-vm .mag-text .role{font-size:14px;color:#475569;font-weight:500}
+.cv-vm .mag-text .contact{margin-top:14px;font-size:12.5px;color:var(--c-muted);line-height:1.7}
+
+.cv-vm .body{padding:30px 38px}
+
+.cv-vm .accroche{font-family:'Fraunces',serif;font-style:italic;font-size:17px;line-height:1.55;color:#334155;border-top:1px solid #fde68a;border-bottom:1px solid #fde68a;padding:16px 0;margin-bottom:24px;text-align:center}
+
+.cv-vm h2{font-family:'Fraunces',serif;font-size:22px;font-weight:600;margin:24px 0 14px;font-style:italic}
+.cv-vm h2::after{content:"";display:block;width:30px;height:3px;background:var(--c-pink);margin-top:4px}
+.cv-vm h2:first-of-type{margin-top:0}
+
+.cv-vm .xp{margin-bottom:16px;padding-bottom:14px;border-bottom:1px dashed #fde68a}
+.cv-vm .xp:last-child{border:none}
+.cv-vm .xp .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.cv-vm .xp h3{font-size:15px;font-weight:700}
+.cv-vm .xp .when{color:var(--c-pink);font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.cv-vm .xp .meta{color:var(--c-muted);font-size:12.5px;font-weight:500;margin-top:2px}
+.cv-vm .xp ul{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.6;color:#475569}
+.cv-vm .xp ul li{margin-bottom:3px}
+.cv-vm .xp ul li::marker{color:var(--c-pink)}
+
+.cv-vm .form{padding:10px 14px;background:var(--c-cream);border-radius:8px;margin-bottom:6px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:baseline;border:1px solid #fef3c7}
+.cv-vm .form b{font-size:14px;font-weight:700;display:block}
+.cv-vm .form span{display:block;color:var(--c-muted);font-size:12.5px;font-style:italic;font-family:'Fraunces',serif}
+.cv-vm .form .when{font-size:12px;color:var(--c-muted);font-weight:600;white-space:nowrap}
+
+.cv-vm .grid3{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.cv-vm .grid3 h3{font-family:'Fraunces',serif;font-style:italic;font-size:16px;color:var(--c-pink);margin-bottom:8px;font-weight:600}
+.cv-vm .pill{display:inline-block;background:#fef9c3;color:var(--c-ink);padding:5px 11px;border-radius:99px;font-size:12px;font-weight:500;margin:0 4px 5px 0}
+.cv-vm .lang-line{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px dashed #fde68a}
+.cv-vm .lang-line:last-child{border:none}
+.cv-vm .lang-line em{font-style:italic;color:var(--c-pink);font-size:11.5px;font-family:'Fraunces',serif}
+
+.cv-vm .interest{font-family:'Fraunces',serif;font-style:italic;font-size:15px;line-height:1.7;color:#334155;padding:14px 18px;background:linear-gradient(135deg,#fde68a,#fff);border-radius:10px}
+.cv-vm .interest span:not(:last-child)::after{content:" · "}
+
+@media (max-width:720px){body{padding:0}.cv{border-radius:0;box-shadow:none}.cv-vm .magazine{grid-template-columns:1fr}.cv-vm .mag-text{padding:26px 22px}.cv-vm .mag-text h1{font-size:36px}.cv-vm .body{padding:22px 22px}.cv-vm .grid3{grid-template-columns:1fr}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-vm">
+
+<div class="magazine">
+  <div class="mag-photo">{{photo_or_initials}}</div>
+  <div class="mag-text">
+    <small>— Curriculum Vitae —</small>
+    <h1>{{name}}</h1>
+    {{#title}}<div class="role">{{title}}</div>{{/title}}
+    <div class="contact">
+      {{#contact.email}}{{contact.email}}<br>{{/contact.email}}
+      {{#contact.phone}}{{contact.phone}}<br>{{/contact.phone}}
+      {{#contact.location}}{{contact.location}}<br>{{/contact.location}}
+      {{#contact.linkedin}}{{contact.linkedin}}<br>{{/contact.linkedin}}
+      {{#contact.website}}{{contact.website}}{{/contact.website}}
+    </div>
+  </div>
+</div>
+
+<div class="body">
+
+  {{#summary}}<p class="accroche">{{summary}}</p>{{/summary}}
+
+  {{#has_experience}}
+  <h2>Expériences professionnelles</h2>
+  {{#experience}}
+  <div class="xp">
+    <div class="row"><h3>{{role}}</h3><span class="when">{{date}}</span></div>
+    <div class="meta">{{company}}{{#location}} · {{location}}{{/location}}</div>
+    {{#has_bullets}}
+    <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+    {{/has_bullets}}
+  </div>
+  {{/experience}}
+  {{/has_experience}}
+
+  {{#has_education}}
+  <h2>Formation</h2>
+  {{#education}}
+  <div class="form">
+    <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/education}}
+  {{/has_education}}
+
+  {{#has_skills}}
+  <h2>Compétences</h2>
+  <div class="grid3">
+    <div>
+      <h3>Techniques</h3>
+      {{#skills}}<span class="pill">{{name}}</span>{{/skills}}
+    </div>
+    {{#has_languages}}
+    <div>
+      <h3>Langues</h3>
+      {{#languages}}<div class="lang-line"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+    </div>
+    {{/has_languages}}
+  </div>
+  {{/has_skills}}
+
+  {{#has_certifications}}
+  <h2>Certifications</h2>
+  {{#certifications}}<div class="form"><div><b>{{name}}</b></div><span class="when">{{date}}</span></div>{{/certifications}}
+  {{/has_certifications}}
+
+  {{#has_interests}}
+  <h2>Centres d'intérêt</h2>
+  <p class="interest">{{#interests}}<span>{{.}}</span>{{/interests}}</p>
+  {{/has_interests}}
+
+</div>
+
+</div></div>
+</body>
+</html>

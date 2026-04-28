@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Bauhaus Geometric","category":"Créatif","preview":"Couleurs primaires Bauhaus (rouge, jaune, bleu), formes géométriques, Archivo Black bold.","tags":["bauhaus","geometric","bold"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f5f1e8;font-family:'Archivo',sans-serif;color:#0e0e0e;padding:28px;min-height:100vh}
+.cv{max-width:920px;margin:0 auto;background:#fff;box-shadow:0 30px 80px -20px rgba(0,0,0,.18);overflow:hidden}
+
+.cv-bh{
+  --c-ink:#0e0e0e;--c-paper:#fff;--c-cream:#f5f1e8;
+  --c-red:{{color}};--c-yellow:#ffb703;--c-blue:#1d4ed8;
+  font-family:'Archivo',sans-serif;color:var(--c-ink);background:var(--c-paper);min-height:1200px
+}
+
+.bh-hero{display:grid;grid-template-columns:1fr 1fr;border-bottom:6px solid var(--c-ink);min-height:280px}
+.bh-hero .left{padding:38px 36px;background:var(--c-yellow);position:relative;display:flex;flex-direction:column;justify-content:flex-end}
+.bh-hero .left::before{content:"";position:absolute;top:30px;right:30px;width:90px;height:90px;background:var(--c-red);border-radius:50%}
+.bh-hero .left::after{content:"";position:absolute;top:40px;left:30px;width:0;height:0;border-style:solid;border-width:0 0 60px 60px;border-color:transparent transparent var(--c-blue) transparent}
+.bh-hero .left .label{font-family:'Archivo Black',sans-serif;font-size:11px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:14px}
+.bh-hero .left h1{font-family:'Archivo Black',sans-serif;font-size:62px;line-height:.85;letter-spacing:-.04em;text-transform:uppercase}
+.bh-hero .left .role{font-size:14px;font-weight:600;margin-top:10px;max-width:380px;line-height:1.4}
+
+.bh-hero .right{padding:38px 36px;background:var(--c-blue);color:#fff;position:relative;display:flex;flex-direction:column;justify-content:center}
+.bh-hero .right::before{content:"";position:absolute;bottom:30px;right:30px;width:0;height:0;border-style:solid;border-width:60px 0 0 60px;border-color:transparent transparent transparent var(--c-yellow)}
+.bh-hero .right .photo{width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--c-yellow);color:var(--c-blue);font-family:'Archivo Black',sans-serif;font-weight:900;font-size:42px;border:6px solid #fff;margin-bottom:14px;overflow:hidden}
+.bh-hero .right .photo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.bh-hero .right .ct{font-size:13px;line-height:1.85;font-weight:500}
+.bh-hero .right .ct b{display:block;font-family:'Archivo Black',sans-serif;font-size:10.5px;color:var(--c-yellow);text-transform:uppercase;letter-spacing:.12em;margin-top:6px}
+
+.bh-accroche{padding:24px 36px;background:var(--c-red);color:#fff;font-size:20px;line-height:1.4;font-weight:700;border-bottom:6px solid var(--c-ink);position:relative}
+.bh-accroche::before{content:"●";color:var(--c-yellow);font-size:30px;line-height:1;margin-right:10px;vertical-align:middle}
+
+.bh-sec{padding:30px 36px;border-bottom:6px solid var(--c-ink)}
+.bh-sec h2{font-family:'Archivo Black',sans-serif;font-size:32px;letter-spacing:-.02em;text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:14px}
+.bh-sec h2 .num{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;background:var(--c-red);color:#fff;border-radius:50%;font-size:14px}
+
+.bh-xp{padding:14px 0;border-bottom:2px solid var(--c-ink);display:grid;grid-template-columns:140px 1fr;gap:20px}
+.bh-xp:last-child{border:none}
+.bh-xp .when{font-family:'Archivo Black',sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:.06em;background:var(--c-yellow);padding:6px 10px;display:inline-block;height:fit-content}
+.bh-xp h3{font-family:'Archivo Black',sans-serif;font-size:18px;text-transform:uppercase;letter-spacing:-.01em}
+.bh-xp .co{font-weight:700;color:var(--c-blue);font-size:13.5px;margin:2px 0 6px}
+.bh-xp ul{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.6;font-weight:500}
+.bh-xp ul li::marker{color:var(--c-red)}
+
+.bh-form{padding:12px 0;border-bottom:2px solid var(--c-ink);display:grid;grid-template-columns:60px 1fr auto;gap:18px;align-items:center}
+.bh-form:last-child{border:none}
+.bh-form .shape{width:40px;height:40px;background:var(--c-blue)}
+.bh-form b{font-family:'Archivo Black',sans-serif;font-size:16px;text-transform:uppercase;display:block}
+.bh-form span{font-size:13px;font-weight:500;display:block;margin-top:2px}
+.bh-form .when{font-family:'Archivo Black',sans-serif;font-size:12px;background:#000;color:var(--c-yellow);padding:5px 10px;letter-spacing:.06em;white-space:nowrap}
+
+.bh-comp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:2px solid var(--c-ink);background:#fff}
+.bh-comp-grid .panel{padding:18px 20px;border-right:2px solid var(--c-ink)}
+.bh-comp-grid .panel:last-child{border-right:none}
+.bh-comp-grid .panel:nth-child(2){background:var(--c-cream)}
+.bh-comp-grid h3{font-family:'Archivo Black',sans-serif;font-size:13px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.bh-comp-grid h3::before{content:"";width:14px;height:14px;background:var(--c-red);border-radius:50%}
+.bh-pill{display:inline-block;background:var(--c-paper);border:2px solid var(--c-ink);padding:3px 10px;font-size:11.5px;font-weight:700;text-transform:uppercase;margin:0 4px 5px 0}
+.bh-lang{display:flex;justify-content:space-between;font-size:13px;font-weight:600;padding:5px 0;border-bottom:1px solid var(--c-ink)}
+.bh-lang:last-child{border:none}
+.bh-lang em{font-family:'Archivo Black',sans-serif;font-style:normal;font-size:11px;text-transform:uppercase;letter-spacing:.04em}
+
+.bh-int{font-size:14px;line-height:1.7;font-weight:500}
+.bh-int span{display:inline-block;border:2px solid var(--c-ink);padding:4px 11px;font-size:12px;font-weight:700;text-transform:uppercase;margin:3px 5px 3px 0;background:var(--c-cream)}
+
+@media (max-width:760px){body{padding:0}.cv{box-shadow:none}.bh-hero{grid-template-columns:1fr}.bh-hero .left h1{font-size:42px}.bh-sec{padding:22px}.bh-xp,.bh-form,.bh-comp-grid{grid-template-columns:1fr}.bh-comp-grid .panel{border-right:none;border-bottom:2px solid var(--c-ink)}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-bh bh">
+
+<div class="bh-hero">
+  <div class="left">
+    {{#title}}<div class="label">{{title}}</div>{{/title}}
+    <h1>{{name}}</h1>
+    {{#summary}}<div class="role">{{summary}}</div>{{/summary}}
+  </div>
+  <div class="right">
+    <div class="photo">{{photo_or_initials}}</div>
+    <div class="ct">
+      {{#contact.email}}<b>Email</b>{{contact.email}}{{/contact.email}}
+      {{#contact.phone}}<b>Téléphone</b>{{contact.phone}}{{/contact.phone}}
+      {{#contact.location}}<b>Ville</b>{{contact.location}}{{/contact.location}}
+      {{#contact.linkedin}}<b>LinkedIn</b>{{contact.linkedin}}{{/contact.linkedin}}
+      {{#contact.website}}<b>Site web</b>{{contact.website}}{{/contact.website}}
+    </div>
+  </div>
+</div>
+
+{{#summary}}<p class="bh-accroche">{{summary}}</p>{{/summary}}
+
+{{#has_experience}}
+<section class="bh-sec">
+  <h2><span class="num">01</span>Expériences professionnelles</h2>
+  {{#experience}}
+  <div class="bh-xp">
+    <div class="when">{{date}}</div>
+    <div>
+      <h3>{{role}}</h3>
+      <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+      {{#has_bullets}}
+      <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+      {{/has_bullets}}
+    </div>
+  </div>
+  {{/experience}}
+</section>
+{{/has_experience}}
+
+{{#has_education}}
+<section class="bh-sec">
+  <h2><span class="num">02</span>Formation</h2>
+  {{#education}}
+  <div class="bh-form">
+    <div class="shape"></div>
+    <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/education}}
+</section>
+{{/has_education}}
+
+{{#has_skills}}
+<section class="bh-sec">
+  <h2><span class="num">03</span>Compétences</h2>
+  <div class="bh-comp-grid">
+    <div class="panel">
+      <h3>Techniques</h3>
+      {{#skills}}<span class="bh-pill">{{name}}</span>{{/skills}}
+    </div>
+    {{#has_languages}}
+    <div class="panel">
+      <h3>Langues</h3>
+      {{#languages}}<div class="bh-lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+    </div>
+    {{/has_languages}}
+  </div>
+</section>
+{{/has_skills}}
+
+{{#has_certifications}}
+<section class="bh-sec">
+  <h2><span class="num">04</span>Certifications</h2>
+  {{#certifications}}
+  <div class="bh-form">
+    <div class="shape"></div>
+    <div><b>{{name}}</b></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/certifications}}
+</section>
+{{/has_certifications}}
+
+{{#has_interests}}
+<section class="bh-sec">
+  <h2><span class="num">05</span>Centres d'intérêt</h2>
+  <p class="bh-int">
+    {{#interests}}<span>{{.}}</span>{{/interests}}
+  </p>
+</section>
+{{/has_interests}}
+
+</div></div>
+</body>
+</html>

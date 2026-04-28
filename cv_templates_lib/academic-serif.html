@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Academic Serif","category":"Académique","preview":"CV universitaire dense en PT Serif, accent bleu nuit, mise en page sobre HDR / publications.","tags":["academic","research","serif"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9e6dd;font-family:'PT Serif',serif;color:#1c1a14;padding:28px;min-height:100vh}
+.cv{max-width:880px;margin:0 auto;background:#faf6e9;box-shadow:0 18px 50px -16px rgba(40,30,15,.18);overflow:hidden;border:1px solid #d8d2bf}
+
+.cv-ac{
+  --c-ink:#1c1a14;--c-paper:#faf6e9;--c-muted:#5d574b;--c-blue:{{color}};--c-line:#d8d2bf;
+  font-family:'PT Serif',serif;color:var(--c-ink);background:var(--c-paper);min-height:1200px;padding:50px 56px;font-size:13px;line-height:1.5
+}
+
+.ac-hero{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;border-bottom:2px solid var(--c-ink);padding-bottom:18px;margin-bottom:14px}
+.ac-photo{width:100px;height:130px;display:flex;align-items:center;justify-content:center;background:#e9e6dd;color:var(--c-ink);font-family:'PT Serif',serif;font-weight:700;font-size:34px;border:1px solid var(--c-ink);overflow:hidden}
+.ac-photo img{width:100%;height:100%;object-fit:cover;filter:grayscale(.85) contrast(1.05)}
+.ac-id .pre{font-family:'Inter',sans-serif;font-size:10.5px;color:var(--c-blue);text-transform:uppercase;letter-spacing:.18em;font-weight:700;margin-bottom:6px}
+.ac-id h1{font-size:32px;font-weight:700;letter-spacing:-.005em;line-height:1}
+.ac-id .role{font-style:italic;color:var(--c-ink);font-size:14px;margin-top:4px}
+.ac-id .affil{font-family:'Inter',sans-serif;font-size:11px;color:var(--c-blue);font-weight:600;margin-top:6px}
+.ac-id .meta{font-family:'Inter',sans-serif;font-size:11.5px;color:var(--c-muted);margin-top:10px;display:flex;flex-wrap:wrap;gap:14px}
+.ac-id .meta b{color:var(--c-ink);font-weight:600;margin-right:4px}
+
+.ac-accroche{font-style:italic;font-size:14.5px;line-height:1.6;color:var(--c-ink);padding:14px 18px;background:#f0eada;border-left:3px solid var(--c-blue);margin-bottom:18px}
+
+.ac h2{font-family:'PT Serif',serif;font-size:18px;font-weight:700;letter-spacing:.005em;border-bottom:1px solid var(--c-ink);padding-bottom:5px;margin:20px 0 10px;color:var(--c-ink);display:flex;align-items:baseline;gap:10px}
+.ac h2 .nb{font-family:'Inter',sans-serif;font-size:11px;color:var(--c-blue);font-weight:700;letter-spacing:.06em}
+.ac h2:first-of-type{margin-top:0}
+
+.ac-xp{display:grid;grid-template-columns:120px 1fr;gap:18px;padding:8px 0;border-bottom:1px dotted var(--c-line)}
+.ac-xp:last-child{border:none}
+.ac-xp .when{font-family:'Inter',sans-serif;font-size:10.5px;color:var(--c-blue);text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding-top:3px}
+.ac-xp h3{font-size:14.5px;font-weight:700}
+.ac-xp .co{font-style:italic;color:var(--c-muted);font-size:13px;margin:1px 0 4px}
+.ac-xp ul{margin:4px 0 0;padding-left:18px;font-size:13px;line-height:1.6;color:var(--c-ink)}
+
+.ac-form{display:grid;grid-template-columns:120px 1fr;gap:18px;padding:8px 0;border-bottom:1px dotted var(--c-line);align-items:baseline}
+.ac-form:last-child{border:none}
+.ac-form .when{font-family:'Inter',sans-serif;font-size:10.5px;color:var(--c-blue);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.ac-form b{font-size:14px;font-weight:700;display:block}
+.ac-form span{font-style:italic;color:var(--c-muted);font-size:12.5px;display:block;margin-top:1px}
+
+.ac-comp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding-top:6px}
+.ac-comp-grid h3{font-family:'Inter',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--c-blue);margin-bottom:8px;font-weight:700;border-bottom:1px solid var(--c-line);padding-bottom:4px}
+.ac-pill{display:inline-block;background:#f0eada;border:1px solid var(--c-line);color:var(--c-ink);padding:3px 9px;font-size:12px;margin:0 4px 4px 0;font-family:'Inter',sans-serif}
+.ac-lang{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;border-bottom:1px dotted var(--c-line);font-style:italic}
+.ac-lang:last-child{border:none}
+.ac-lang em{font-family:'Inter',sans-serif;color:var(--c-blue);font-style:normal;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+
+.ac-int{font-style:italic;font-size:13px;line-height:1.65;color:var(--c-ink)}
+.ac-int span{margin:0 5px;font-style:normal;font-family:'Inter',sans-serif;background:#f0eada;border:1px solid var(--c-line);padding:2px 9px;font-size:11.5px;display:inline-block}
+
+@media (max-width:760px){body{padding:0}.cv{box-shadow:none;border:none}.cv-ac{padding:32px 22px}.ac-hero{grid-template-columns:1fr;text-align:center}.ac-photo{margin:0 auto}.ac-xp,.ac-form,.ac-comp-grid{grid-template-columns:1fr;gap:6px}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border:none}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-ac ac">
+
+<div class="ac-hero">
+  <div class="ac-photo">{{photo_or_initials}}</div>
+  <div class="ac-id">
+    <div class="pre">Curriculum Vitae · Académique</div>
+    <h1>{{name}}</h1>
+    {{#title}}<p class="role">{{title}}</p>{{/title}}
+    <div class="meta">
+      {{#contact.email}}<span><b>Email</b> {{contact.email}}</span>{{/contact.email}}
+      {{#contact.phone}}<span><b>Téléphone</b> {{contact.phone}}</span>{{/contact.phone}}
+      {{#contact.location}}<span><b>Ville</b> {{contact.location}}</span>{{/contact.location}}
+      {{#contact.website}}<span><b>Site</b> {{contact.website}}</span>{{/contact.website}}
+    </div>
+  </div>
+</div>
+
+{{#summary}}<p class="ac-accroche">{{summary}}</p>{{/summary}}
+
+{{#has_experience}}
+<h2><span class="nb">§ 1.</span>Expériences professionnelles</h2>
+{{#experience}}
+<div class="ac-xp">
+  <div class="when">{{date}}</div>
+  <div>
+    <h3>{{role}}</h3>
+    <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+    {{#has_bullets}}
+    <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+    {{/has_bullets}}
+  </div>
+</div>
+{{/experience}}
+{{/has_experience}}
+
+{{#has_education}}
+<h2><span class="nb">§ 2.</span>Formation</h2>
+{{#education}}
+<div class="ac-form">
+  <div class="when">{{date}}</div>
+  <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+</div>
+{{/education}}
+{{/has_education}}
+
+{{#has_skills}}
+<h2><span class="nb">§ 3.</span>Compétences</h2>
+<div class="ac-comp-grid">
+  <div>
+    <h3>Techniques</h3>
+    {{#skills}}<span class="ac-pill">{{name}}</span>{{/skills}}
+  </div>
+  {{#has_languages}}
+  <div>
+    <h3>Langues</h3>
+    {{#languages}}<div class="ac-lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+  </div>
+  {{/has_languages}}
+</div>
+{{/has_skills}}
+
+{{#has_certifications}}
+<h2><span class="nb">§ 4.</span>Certifications &amp; distinctions</h2>
+{{#certifications}}
+<div class="ac-form">
+  <div class="when">{{date}}</div>
+  <div><b>{{name}}</b></div>
+</div>
+{{/certifications}}
+{{/has_certifications}}
+
+{{#has_interests}}
+<h2><span class="nb">§ 5.</span>Centres d'intérêt</h2>
+<p class="ac-int">{{#interests}}<span>{{.}}</span>{{/interests}}</p>
+{{/has_interests}}
+
+</div></div>
+</body>
+</html>

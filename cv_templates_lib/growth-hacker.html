@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Growth Hacker","category":"Business","preview":"Sidebar dark slate avec accent vert et pourpre, polices Inter + JetBrains Mono."} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;font-family:'Inter',sans-serif;padding:24px;min-height:100vh}
+.cv{max-width:900px;margin:0 auto;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.4);border-radius:8px;overflow:hidden}
+
+.cv-growth{
+  --c-side:#0f172a;--c-side-2:#1e293b;--c-text:#0f172a;--c-muted:#64748b;
+  --c-green:{{color}};--c-purple:{{color_dark}};--c-soft:{{color_light}};
+  font-family:'Inter',sans-serif;color:var(--c-text);
+  display:grid;grid-template-columns:36% 64%;min-height:1180px
+}
+
+.cv-growth aside{background:linear-gradient(180deg,var(--c-side),var(--c-side-2));color:#e2e8f0;padding:38px 28px}
+.cv-growth aside .portrait{width:120px;height:120px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:3px solid var(--c-green);background:#1e293b;color:#fff;font-weight:700;font-size:32px;font-family:'JetBrains Mono',monospace;overflow:hidden}
+.cv-growth aside .portrait img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.cv-growth aside h1{text-align:center;font-size:24px;font-weight:700;color:#fff}
+.cv-growth aside .role{text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c-green);margin-top:4px;letter-spacing:.04em}
+.cv-growth aside h3{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--c-purple);margin:24px 0 10px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.cv-growth aside h3::before{content:"// "}
+.cv-growth aside .contact-line{font-size:12.5px;display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #1e293b;color:#cbd5e1;gap:6px}
+.cv-growth aside .contact-line:last-child{border:none}
+.cv-growth aside .contact-line span:first-child{color:#94a3b8;font-size:10.5px;font-family:'JetBrains Mono',monospace;text-transform:uppercase}
+.cv-growth aside .lang{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px solid #1e293b;color:#cbd5e1}
+.cv-growth aside .lang:last-child{border:none}
+.cv-growth aside .lang em{color:var(--c-green);font-style:normal;font-family:'JetBrains Mono',monospace;font-size:11px}
+
+.cv-growth main{padding:38px 36px;background:#fff}
+.cv-growth main .accroche{font-size:14px;line-height:1.7;color:#334155;border-left:3px solid var(--c-green);padding:6px 0 6px 16px;margin-bottom:24px;font-weight:500}
+.cv-growth main h2{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--c-side);margin:24px 0 14px;font-weight:700;display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace}
+.cv-growth main h2::before{content:">";color:var(--c-green);font-weight:700}
+.cv-growth main h2:first-of-type{margin-top:0}
+
+.cv-growth .xp{margin-bottom:18px;padding-bottom:14px;border-bottom:1px solid #f1f5f9}
+.cv-growth .xp:last-child{border:none}
+.cv-growth .xp .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.cv-growth .xp h3{font-size:15px;font-weight:700}
+.cv-growth .xp .date{font-size:11.5px;color:var(--c-muted);font-family:'JetBrains Mono',monospace}
+.cv-growth .xp .co{color:var(--c-purple);font-weight:600;font-size:13px;margin:2px 0 6px}
+.cv-growth .xp ul{margin:6px 0 0;padding-left:20px;font-size:13px;line-height:1.6;color:#475569}
+.cv-growth .xp ul li{margin-bottom:3px}
+.cv-growth .xp ul li::marker{color:var(--c-green)}
+
+.cv-growth .form{padding:10px 14px;background:#f1f5f9;border-radius:6px;margin-bottom:6px;display:grid;grid-template-columns:1fr auto;gap:14px;font-size:13px}
+.cv-growth .form b{display:block;font-weight:700;color:var(--c-side)}
+.cv-growth .form span{display:block;color:var(--c-muted);font-size:12px;margin-top:1px}
+.cv-growth .form .when{color:var(--c-green);font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap;align-self:center}
+
+.cv-growth .pill{display:inline-block;background:var(--c-soft);border:1px solid var(--c-green);color:var(--c-green);padding:4px 10px;border-radius:5px;font-size:11.5px;font-family:'JetBrains Mono',monospace;margin:0 4px 5px 0}
+
+.cv-growth .interest{font-size:13px;line-height:1.65;color:#475569}
+.cv-growth .interest span{display:inline-block;background:#fef9c3;color:#854d0e;padding:3px 9px;border-radius:5px;margin:3px 4px 3px 0;font-size:11.5px;font-family:'JetBrains Mono',monospace;font-weight:500}
+
+@media (max-width:720px){body{padding:0}.cv{border-radius:0}.cv-growth{grid-template-columns:1fr}.cv-growth aside,.cv-growth main{padding:30px 22px}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-growth">
+
+<aside>
+  <div class="portrait">{{photo_or_initials}}</div>
+  <h1>{{name}}</h1>
+  {{#title}}<div class="role">{{title}}</div>{{/title}}
+
+  <h3>Coordonnées</h3>
+  {{#contact.email}}<div class="contact-line"><span>email</span><span>{{contact.email}}</span></div>{{/contact.email}}
+  {{#contact.phone}}<div class="contact-line"><span>tél</span><span>{{contact.phone}}</span></div>{{/contact.phone}}
+  {{#contact.location}}<div class="contact-line"><span>ville</span><span>{{contact.location}}</span></div>{{/contact.location}}
+  {{#contact.linkedin}}<div class="contact-line"><span>linkedin</span><span>{{contact.linkedin}}</span></div>{{/contact.linkedin}}
+  {{#contact.website}}<div class="contact-line"><span>web</span><span>{{contact.website}}</span></div>{{/contact.website}}
+
+  {{#has_languages}}
+  <h3>Compétences linguistiques</h3>
+  {{#languages}}<div class="lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+  {{/has_languages}}
+</aside>
+
+<main>
+
+  {{#summary}}<p class="accroche">{{summary}}</p>{{/summary}}
+
+  {{#has_experience}}
+  <h2>Expériences professionnelles</h2>
+  {{#experience}}
+  <div class="xp">
+    <div class="row"><h3>{{role}}</h3><span class="date">{{date}}</span></div>
+    <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+    {{#has_bullets}}
+    <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+    {{/has_bullets}}
+  </div>
+  {{/experience}}
+  {{/has_experience}}
+
+  {{#has_education}}
+  <h2>Formation</h2>
+  {{#education}}
+  <div class="form">
+    <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/education}}
+  {{/has_education}}
+
+  {{#has_skills}}
+  <h2>Compétences techniques</h2>
+  <div>
+    {{#skills}}<span class="pill">{{name}}</span>{{/skills}}
+  </div>
+  {{/has_skills}}
+
+  {{#has_certifications}}
+  <h2>Certifications</h2>
+  {{#certifications}}<div class="form"><div><b>{{name}}</b></div><span class="when">{{date}}</span></div>{{/certifications}}
+  {{/has_certifications}}
+
+  {{#has_interests}}
+  <h2>Centres d'intérêt</h2>
+  <p class="interest">
+    {{#interests}}<span>{{.}}</span>{{/interests}}
+  </p>
+  {{/has_interests}}
+</main>
+
+</div></div>
+</body>
+</html>

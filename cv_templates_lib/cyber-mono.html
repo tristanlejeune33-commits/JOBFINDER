@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Cyber Mono","category":"Tech","preview":"Look terminal néon avec barre Chrome, fond carbone, accents vert et cyan, typo monospace."} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:radial-gradient(1200px 800px at 50% -200px, rgba(34,197,94,.07), transparent 60%),#06080a;
+  font-family:'JetBrains Mono',monospace;color:#d4f1de;padding:28px;min-height:100vh
+}
+.cv{max-width:940px;margin:0 auto;background:#0a0d10;border:1px solid #1a2128;border-radius:14px;overflow:hidden;box-shadow:0 0 0 1px rgba(34,197,94,.08), 0 30px 80px rgba(0,0,0,.6)}
+
+.cv-cyber{
+  --c-bg:#0a0d10;--c-panel:#0f1418;--c-line:#1a2128;
+  --c-text:#d4f1de;--c-muted:#5a7866;
+  --c-green:{{color}};--c-cyan:{{color_dark}};--c-amber:#fbbf24;--c-magenta:#ec4899;
+  font-family:'JetBrains Mono',monospace;color:var(--c-text);background:var(--c-bg);min-height:1200px;padding:0;font-size:13px;line-height:1.6
+}
+
+.cy-chrome{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--c-line);background:linear-gradient(180deg,#0d1115,#0a0d10)}
+.cy-chrome .dots{display:flex;gap:7px}
+.cy-chrome .dots i{width:11px;height:11px;border-radius:50%;display:block}
+.cy-chrome .dots i:nth-child(1){background:#ef4444}
+.cy-chrome .dots i:nth-child(2){background:#fbbf24}
+.cy-chrome .dots i:nth-child(3){background:var(--c-green)}
+.cy-chrome .path{font-size:11px;color:var(--c-muted);flex:1;text-align:center}
+.cy-chrome .path b{color:var(--c-cyan)}
+
+.cy-body{padding:32px 36px}
+
+.cy-head{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;margin-bottom:22px;padding-bottom:24px;border-bottom:1px dashed var(--c-line)}
+.cy-photo{position:relative;width:120px;height:120px;display:flex;align-items:center;justify-content:center;border-radius:8px;background:#0f1418;border:1px solid var(--c-green);color:var(--c-green);font-weight:700;font-size:38px;overflow:hidden}
+.cy-photo img{width:100%;height:100%;border-radius:8px;object-fit:cover}
+
+.cy-id .ln{font-size:11px;color:var(--c-muted)}
+.cy-id .ln b{color:var(--c-cyan)}
+.cy-id h1{font-family:'Inter',sans-serif;font-size:32px;font-weight:800;color:#fff;letter-spacing:-.02em;margin:6px 0 4px}
+.cy-id .accroche{font-size:13px;color:var(--c-text);line-height:1.55;margin:6px 0 12px;max-width:520px}
+.cy-id .accroche::before{content:"# ";color:var(--c-green);font-weight:700}
+.cy-id .meta{margin-top:6px;display:flex;flex-wrap:wrap;gap:6px}
+.cy-id .meta span{display:inline-flex;align-items:center;gap:5px;background:#141a20;border:1px solid var(--c-line);padding:4px 9px;border-radius:4px;font-size:11px;color:var(--c-text)}
+.cy-id .meta span b{color:var(--c-green);font-weight:400}
+
+.cy h2{font-size:11px;color:var(--c-cyan);text-transform:uppercase;letter-spacing:.18em;font-weight:700;margin:24px 0 12px;display:flex;align-items:center;gap:10px;font-family:'JetBrains Mono',monospace}
+.cy h2::before{content:"$";color:var(--c-magenta)}
+
+.cy-xp{padding:14px 16px;background:var(--c-panel);border:1px solid var(--c-line);border-radius:6px;margin-bottom:8px}
+.cy-xp .row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.cy-xp h3{font-family:'Inter',sans-serif;font-size:14.5px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.cy-xp .when{color:var(--c-green);font-size:10.5px;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);padding:2px 7px;border-radius:3px;white-space:nowrap}
+.cy-xp .co{color:var(--c-cyan);font-size:12.5px;margin:2px 0 8px}
+.cy-xp .co::before{content:"@ "}
+.cy-xp ul{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:var(--c-text);line-height:1.6}
+.cy-xp ul li::marker{color:var(--c-magenta)}
+.cy-xp ul li{margin-bottom:3px}
+
+.cy-form{padding:12px 16px;background:var(--c-panel);border:1px solid var(--c-line);border-radius:6px;margin-bottom:6px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.cy-form .info b{font-family:'Inter',sans-serif;font-size:13.5px;color:#fff;display:block;font-weight:700}
+.cy-form .info span{color:var(--c-cyan);font-size:12px;display:block;margin-top:1px}
+.cy-form .when{color:var(--c-green);font-size:10.5px;font-family:'JetBrains Mono',monospace;background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.25);padding:3px 7px;border-radius:3px;white-space:nowrap}
+
+.cy-skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cy-skill-grid .panel{padding:14px 16px;background:var(--c-panel);border:1px solid var(--c-line);border-radius:6px}
+.cy-skill-grid .panel h4{font-size:10.5px;color:var(--c-magenta);text-transform:uppercase;letter-spacing:.14em;font-weight:700;margin-bottom:10px}
+.cy-skill-grid .panel h4::before{content:"// "}
+.cy-pill{display:inline-block;background:#0a0d10;border:1px solid rgba(34,197,94,.3);color:var(--c-green);padding:3px 8px;border-radius:3px;font-size:11px;margin:0 3px 4px 0;font-family:'JetBrains Mono',monospace}
+.cy-ln{font-size:12px;padding:4px 0;display:flex;justify-content:space-between;border-bottom:1px dashed var(--c-line);color:var(--c-text)}
+.cy-ln:last-child{border:none}
+.cy-ln span:last-child{color:var(--c-green)}
+
+.cy-int{padding:14px 16px;background:var(--c-panel);border:1px solid var(--c-line);border-radius:6px;font-size:12.5px;color:var(--c-text);line-height:1.7}
+.cy-int span{display:inline-block;background:#0a0d10;border:1px solid rgba(251,191,36,.3);color:var(--c-amber);padding:3px 8px;border-radius:3px;font-size:11px;margin:3px 4px 3px 0;font-family:'JetBrains Mono',monospace}
+
+@media (max-width:760px){body{padding:0}.cv{border-radius:0}.cy-body{padding:24px 20px}.cy-head{grid-template-columns:1fr;text-align:center}.cy-photo{margin:0 auto}.cy-skill-grid{grid-template-columns:1fr}}
+@media print{body{background:#fff;padding:0;color:#000}.cv{max-width:none;border:none;box-shadow:none;background:#fff}.cv-cyber{background:#fff;color:#000}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-cyber cy">
+
+<div class="cy-chrome">
+  <div class="dots"><i></i><i></i><i></i></div>
+  <div class="path">~/curriculum/<b>{{name}}</b>.md</div>
+</div>
+
+<div class="cy-body">
+
+<div class="cy-head">
+  <div class="cy-photo">{{photo_or_initials}}</div>
+  <div class="cy-id">
+    <div class="ln"><b>$</b> whoami</div>
+    <h1>{{name}}</h1>
+    {{#title}}<div class="ln" style="color:var(--c-cyan)">{{title}}</div>{{/title}}
+    {{#summary}}<p class="accroche">{{summary}}</p>{{/summary}}
+    <div class="meta">
+      {{#contact.email}}<span><b>email</b> {{contact.email}}</span>{{/contact.email}}
+      {{#contact.phone}}<span><b>tel</b> {{contact.phone}}</span>{{/contact.phone}}
+      {{#contact.location}}<span><b>loc</b> {{contact.location}}</span>{{/contact.location}}
+      {{#contact.linkedin}}<span><b>in</b> {{contact.linkedin}}</span>{{/contact.linkedin}}
+    </div>
+  </div>
+</div>
+
+{{#has_experience}}
+<h2>Expériences professionnelles</h2>
+{{#experience}}
+<div class="cy-xp">
+  <div class="row"><h3>{{role}}</h3><span class="when">{{date}}</span></div>
+  <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+  {{#has_bullets}}
+  <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+  {{/has_bullets}}
+</div>
+{{/experience}}
+{{/has_experience}}
+
+{{#has_education}}
+<h2>Formation</h2>
+{{#education}}
+<div class="cy-form">
+  <div class="info"><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+  <span class="when">{{date}}</span>
+</div>
+{{/education}}
+{{/has_education}}
+
+{{#has_skills}}
+<h2>Compétences</h2>
+<div class="cy-skill-grid">
+  <div class="panel">
+    <h4>Techniques</h4>
+    {{#skills}}<span class="cy-pill">{{name}}</span>{{/skills}}
+  </div>
+  {{#has_languages}}
+  <div class="panel">
+    <h4>Langues</h4>
+    {{#languages}}<div class="cy-ln"><span>{{name}}</span><span>{{level}}</span></div>{{/languages}}
+  </div>
+  {{/has_languages}}
+</div>
+{{/has_skills}}
+
+{{#has_certifications}}
+<h2>Certifications</h2>
+{{#certifications}}<div class="cy-form"><div class="info"><b>{{name}}</b></div><span class="when">{{date}}</span></div>{{/certifications}}
+{{/has_certifications}}
+
+{{#has_interests}}
+<h2>Centres d'intérêt</h2>
+<p class="cy-int">
+  {{#interests}}<span>{{.}}</span>{{/interests}}
+</p>
+{{/has_interests}}
+
+</div>
+
+</div></div>
+</body>
+</html>

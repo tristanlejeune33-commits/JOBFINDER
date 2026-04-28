@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Luxury Designer","category":"Premium","preview":"CV haut de gamme noir et crème, accents dorés, typo Cormorant Garamond serif italique."} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Karla:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9ecf2;font-family:'Karla',sans-serif;padding:24px;min-height:100vh}
+.cv{max-width:900px;margin:0 auto;background:#1a1a1a;box-shadow:0 10px 30px rgba(0,0,0,.18);border-radius:6px;overflow:hidden}
+
+.cv-lux{
+  --c-ink:#1a1a1a;--c-cream:#f5f3ee;--c-gold:{{color}};--c-muted:#9a9382;
+  font-family:'Karla',sans-serif;color:var(--c-cream);background:var(--c-ink);
+  display:grid;grid-template-columns:38% 62%;min-height:1180px
+}
+
+.cv-lux aside{padding:54px 36px;background:#1a1a1a;text-align:center}
+.cv-lux aside .portrait{width:160px;height:200px;object-fit:cover;display:flex;align-items:center;justify-content:center;margin:0 auto 22px;border:1px solid var(--c-gold);background:#262626;color:var(--c-gold);font-family:'Cormorant Garamond',serif;font-weight:600;font-size:48px;overflow:hidden}
+.cv-lux aside .portrait img{width:100%;height:100%;object-fit:cover;display:block}
+.cv-lux aside h1{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:500;line-height:1.05;letter-spacing:.02em}
+.cv-lux aside .role{font-family:'Cormorant Garamond',serif;font-style:italic;color:var(--c-gold);font-size:14px;margin-top:8px;letter-spacing:.06em}
+.cv-lux aside .ornament{display:flex;align-items:center;justify-content:center;gap:10px;margin:22px 0;color:var(--c-gold);font-size:18px}
+.cv-lux aside .ornament::before,.cv-lux aside .ornament::after{content:"";flex:1;height:1px;background:var(--c-gold);opacity:.4;max-width:60px}
+.cv-lux aside h3{font-family:'Cormorant Garamond',serif;font-size:13px;text-transform:uppercase;letter-spacing:.22em;color:var(--c-gold);margin:24px 0 10px;font-weight:600}
+.cv-lux aside .info{font-size:12px;line-height:1.85;color:var(--c-cream);text-align:left}
+.cv-lux aside .info b{color:var(--c-gold);font-weight:600;display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;margin-top:8px}
+.cv-lux aside .skill-line{font-size:12.5px;padding:5px 0;border-bottom:1px solid #2a2a2a;display:flex;justify-content:space-between;text-align:left}
+.cv-lux aside .skill-line:last-child{border:none}
+.cv-lux aside .skill-line em{font-style:italic;color:var(--c-gold);font-size:11px}
+
+.cv-lux main{background:var(--c-cream);color:var(--c-ink);padding:54px 46px}
+.cv-lux main .accroche{font-family:'Cormorant Garamond',serif;font-size:18px;line-height:1.55;font-style:italic;color:#3a3a36;border-top:1px solid var(--c-gold);border-bottom:1px solid var(--c-gold);padding:18px 0;margin-bottom:26px;text-align:center}
+.cv-lux main h2{font-family:'Cormorant Garamond',serif;font-size:14px;text-transform:uppercase;letter-spacing:.22em;color:var(--c-ink);margin:24px 0 12px;display:flex;align-items:center;gap:12px;font-weight:600}
+.cv-lux main h2::after{content:"";flex:1;height:1px;background:var(--c-gold);opacity:.45}
+.cv-lux main h2:first-of-type{margin-top:0}
+
+.cv-lux main .xp{margin-bottom:18px}
+.cv-lux main .xp .row{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.cv-lux main .xp h3{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600}
+.cv-lux main .xp .date{font-size:11px;color:var(--c-gold);letter-spacing:.15em;text-transform:uppercase;font-weight:600;white-space:nowrap}
+.cv-lux main .xp .co{font-style:italic;color:#5a5851;font-size:13px;font-family:'Cormorant Garamond',serif;margin:2px 0 6px}
+.cv-lux main .xp ul{margin:4px 0 0;padding-left:18px;font-size:13px;line-height:1.65;color:#3a3a36}
+.cv-lux main .xp ul li{margin-bottom:3px}
+.cv-lux main .xp ul li::marker{color:var(--c-gold)}
+
+.cv-lux main .form-row{padding:10px 0;border-bottom:1px dotted #d8d3c5;display:flex;justify-content:space-between;gap:14px;align-items:baseline}
+.cv-lux main .form-row:last-child{border:none}
+.cv-lux main .form-row strong{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;display:block}
+.cv-lux main .form-row span{font-style:italic;color:#7a7770;font-size:12.5px;font-family:'Cormorant Garamond',serif}
+.cv-lux main .form-row .when{font-size:11px;color:var(--c-gold);text-transform:uppercase;letter-spacing:.15em;font-weight:600;white-space:nowrap}
+
+.cv-lux .comp-pill{display:inline-block;background:#fff;border:1px solid var(--c-gold);color:var(--c-ink);padding:4px 11px;font-size:12px;font-weight:500;margin:0 4px 5px 0;letter-spacing:.02em}
+
+.cv-lux .interest{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:15px;line-height:1.7;color:#3a3a36}
+.cv-lux .interest span:not(:last-child)::after{content:" · "}
+
+@media (max-width:720px){body{padding:0}.cv{border-radius:0}.cv-lux{grid-template-columns:1fr}.cv-lux aside{padding:36px 22px}.cv-lux main{padding:36px 22px}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-lux">
+
+<aside>
+  <div class="portrait">{{photo_or_initials}}</div>
+  <h1>{{name}}</h1>
+  {{#title}}<div class="role">{{title}}</div>{{/title}}
+  <div class="ornament">✦</div>
+
+  <h3>Coordonnées</h3>
+  <div class="info">
+    {{#contact.email}}<b>Email</b>{{contact.email}}<br>{{/contact.email}}
+    {{#contact.phone}}<b>Téléphone</b>{{contact.phone}}<br>{{/contact.phone}}
+    {{#contact.location}}<b>Ville</b>{{contact.location}}<br>{{/contact.location}}
+    {{#contact.linkedin}}<b>LinkedIn</b>{{contact.linkedin}}<br>{{/contact.linkedin}}
+    {{#contact.website}}<b>Web</b>{{contact.website}}{{/contact.website}}
+  </div>
+
+  {{#has_languages}}
+  <h3>Compétences linguistiques</h3>
+  {{#languages}}<div class="skill-line"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+  {{/has_languages}}
+</aside>
+
+<main>
+
+  {{#summary}}<p class="accroche">« {{summary}} »</p>{{/summary}}
+
+  {{#has_experience}}
+  <h2>Expériences professionnelles</h2>
+  {{#experience}}
+  <div class="xp">
+    <div class="row"><h3>{{role}}</h3><span class="date">{{date}}</span></div>
+    <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+    {{#has_bullets}}
+    <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+    {{/has_bullets}}
+  </div>
+  {{/experience}}
+  {{/has_experience}}
+
+  {{#has_education}}
+  <h2>Formation</h2>
+  {{#education}}
+  <div class="form-row">
+    <div><strong>{{degree}}</strong><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/education}}
+  {{/has_education}}
+
+  {{#has_skills}}
+  <h2>Compétences techniques</h2>
+  <div>
+    {{#skills}}<span class="comp-pill">{{name}}</span>{{/skills}}
+  </div>
+  {{/has_skills}}
+
+  {{#has_certifications}}
+  <h2>Certifications</h2>
+  {{#certifications}}<div class="form-row"><div><strong>{{name}}</strong></div><span class="when">{{date}}</span></div>{{/certifications}}
+  {{/has_certifications}}
+
+  {{#has_interests}}
+  <h2>Centres d'intérêt</h2>
+  <p class="interest">{{#interests}}<span>{{.}}</span>{{/interests}}</p>
+  {{/has_interests}}
+
+</main>
+
+</div></div>
+</body>
+</html>

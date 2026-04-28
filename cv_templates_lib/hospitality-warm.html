@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Hospitality Warm","category":"Métier","preview":"Mise en page chaleureuse vert sapin et or, typo Cormorant Garamond serif, sidebar à portrait."} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Karla:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9ecf2;font-family:'Karla',sans-serif;padding:24px;min-height:100vh}
+.cv{max-width:900px;margin:0 auto;background:#faf6f0;box-shadow:0 10px 30px rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
+
+.cv-hosp{
+  --c-bg:#faf6f0;--c-ink:#22332f;--c-accent:{{color}};--c-gold:{{color_dark}};--c-muted:#6e7a76;
+  font-family:'Karla',sans-serif;color:var(--c-ink);background:var(--c-bg);
+  min-height:1180px;display:grid;grid-template-columns:36% 64%
+}
+
+.cv-hosp aside{padding:48px 32px;background:#fff;border-right:1px solid #ebe4d6}
+.cv-hosp aside .portrait{width:120px;height:120px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;border:3px solid #fff;box-shadow:0 0 0 1px var(--c-gold);background:{{color_light}};color:var(--c-accent);font-family:'Cormorant Garamond',serif;font-weight:700;font-size:36px;overflow:hidden}
+.cv-hosp aside .portrait img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.cv-hosp aside h1{font-family:'Cormorant Garamond',serif;font-size:30px;line-height:1.05;font-weight:600;letter-spacing:-.005em;text-align:center}
+.cv-hosp aside .role{font-size:13px;color:var(--c-gold);text-transform:uppercase;letter-spacing:.16em;margin-top:8px;font-weight:600;text-align:center}
+.cv-hosp aside .divider{width:40px;height:2px;background:var(--c-gold);margin:18px auto 22px}
+.cv-hosp aside h3{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--c-accent);margin:24px 0 10px}
+.cv-hosp aside .contact-line{font-size:13px;padding:5px 0;display:flex;gap:8px;line-height:1.5}
+.cv-hosp aside .contact-line span:first-child{color:var(--c-gold);font-weight:700;width:65px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;flex-shrink:0;padding-top:2px}
+.cv-hosp aside .lang{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid #f0e9d8}
+.cv-hosp aside .lang:last-child{border:none}
+.cv-hosp aside .lang em{color:var(--c-gold);font-style:normal;font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:700}
+
+.cv-hosp main{padding:48px 44px}
+.cv-hosp main .accroche{font-family:'Cormorant Garamond',serif;font-size:17px;line-height:1.55;color:#2c3e3a;font-style:italic;border-top:1px solid #ebe4d6;border-bottom:1px solid #ebe4d6;padding:18px 0;margin-bottom:26px;text-align:center}
+.cv-hosp main h2{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--c-accent);margin:24px 0 14px;display:flex;align-items:baseline;gap:14px}
+.cv-hosp main h2::after{content:"";flex:1;height:1px;background:#d8c896}
+.cv-hosp main h2:first-of-type{margin-top:0}
+
+.cv-hosp .xp{margin-bottom:18px}
+.cv-hosp .xp h3{font-family:'Cormorant Garamond',serif;font-size:18px;color:var(--c-ink);font-weight:600}
+.cv-hosp .xp .row{display:flex;justify-content:space-between;align-items:baseline;gap:14px}
+.cv-hosp .xp .meta{font-size:11px;color:var(--c-gold);text-transform:uppercase;letter-spacing:.1em;font-weight:700;white-space:nowrap}
+.cv-hosp .xp .co{font-size:13px;color:var(--c-accent);font-weight:600;margin:2px 0 6px}
+.cv-hosp .xp ul{font-size:13px;line-height:1.65;color:#3c4d49;margin:4px 0 0;padding-left:0;list-style:none}
+.cv-hosp .xp ul li{padding-left:14px;position:relative;margin-bottom:3px}
+.cv-hosp .xp ul li::before{content:"•";position:absolute;left:0;color:var(--c-gold)}
+
+.cv-hosp .form-row{display:grid;grid-template-columns:1fr auto;gap:14px;padding:10px 0;border-bottom:1px dotted #ebe4d6;align-items:baseline}
+.cv-hosp .form-row:last-child{border:none}
+.cv-hosp .form-row strong{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600}
+.cv-hosp .form-row span{display:block;font-size:12.5px;color:var(--c-muted);font-style:italic;font-family:'Cormorant Garamond',serif}
+.cv-hosp .form-row .when{font-size:11px;color:var(--c-gold);text-transform:uppercase;letter-spacing:.1em;font-weight:700;white-space:nowrap}
+
+.cv-hosp .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.cv-hosp .comp-grid h3{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--c-accent);margin-bottom:8px;border-bottom:1px solid #d8c896;padding-bottom:4px}
+.cv-hosp .comp-pill{display:inline-block;background:#fff;border:1px solid #ebe4d6;color:var(--c-accent);padding:4px 11px;border-radius:99px;font-size:12px;letter-spacing:.02em;font-weight:600;margin:0 4px 5px 0}
+
+.cv-hosp .interest{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:16px;line-height:1.6;color:#3c4d49}
+.cv-hosp .interest span:not(:last-child)::after{content:" · "}
+
+@media (max-width:720px){body{padding:0}.cv{border-radius:0;box-shadow:none}.cv-hosp{grid-template-columns:1fr}.cv-hosp aside{padding:32px 24px;border-right:none;border-bottom:1px solid #ebe4d6}.cv-hosp main{padding:32px 24px}.cv-hosp .comp-grid{grid-template-columns:1fr}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+
+<div class="cv">
+  <div class="cv-hosp">
+
+    <aside>
+      <div class="portrait">{{photo_or_initials}}</div>
+      <h1>{{name}}</h1>
+      {{#title}}<div class="role">{{title}}</div>{{/title}}
+      <div class="divider"></div>
+
+      <h3>Coordonnées</h3>
+      {{#contact.email}}<div class="contact-line"><span>Email</span><span>{{contact.email}}</span></div>{{/contact.email}}
+      {{#contact.phone}}<div class="contact-line"><span>Tél.</span><span>{{contact.phone}}</span></div>{{/contact.phone}}
+      {{#contact.location}}<div class="contact-line"><span>Ville</span><span>{{contact.location}}</span></div>{{/contact.location}}
+      {{#contact.linkedin}}<div class="contact-line"><span>LinkedIn</span><span>{{contact.linkedin}}</span></div>{{/contact.linkedin}}
+      {{#contact.website}}<div class="contact-line"><span>Web</span><span>{{contact.website}}</span></div>{{/contact.website}}
+
+      {{#has_languages}}
+      <h3>Compétences linguistiques</h3>
+      {{#languages}}<div class="lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+      {{/has_languages}}
+    </aside>
+
+    <main>
+      {{#summary}}<p class="accroche">« {{summary}} »</p>{{/summary}}
+
+      {{#has_experience}}
+      <h2>Expériences professionnelles</h2>
+      {{#experience}}
+      <div class="xp">
+        <div class="row"><h3>{{role}}</h3><span class="meta">{{date}}</span></div>
+        <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+        {{#has_bullets}}
+        <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+        {{/has_bullets}}
+      </div>
+      {{/experience}}
+      {{/has_experience}}
+
+      {{#has_education}}
+      <h2>Formation</h2>
+      {{#education}}
+      <div class="form-row">
+        <div><strong>{{degree}}</strong><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+        <div class="when">{{date}}</div>
+      </div>
+      {{/education}}
+      {{/has_education}}
+
+      {{#has_skills}}
+      <h2>Compétences</h2>
+      <div class="comp-grid">
+        <div>
+          <h3>Techniques</h3>
+          {{#skills}}<span class="comp-pill">{{name}}</span>{{/skills}}
+        </div>
+      </div>
+      {{/has_skills}}
+
+      {{#has_certifications}}
+      <h2>Certifications</h2>
+      {{#certifications}}
+      <div class="form-row">
+        <div><strong>{{name}}</strong></div>
+        <div class="when">{{date}}</div>
+      </div>
+      {{/certifications}}
+      {{/has_certifications}}
+
+      {{#has_interests}}
+      <h2>Centres d'intérêt</h2>
+      <p class="interest">{{#interests}}<span>{{.}}</span>{{/interests}}</p>
+      {{/has_interests}}
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

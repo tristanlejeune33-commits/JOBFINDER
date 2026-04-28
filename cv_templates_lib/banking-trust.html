@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Banking Trust","category":"Premium","preview":"Navy + champagne gold, vibe banque privée prestigieuse, Lora serif sur Inter.","tags":["banking","premium","gold","navy"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e7ecf2;font-family:'Inter',sans-serif;color:#0f1c33;padding:28px;min-height:100vh}
+.cv{max-width:920px;margin:0 auto;background:#fff;box-shadow:0 18px 50px -16px rgba(15,28,51,.18);border-radius:8px;overflow:hidden}
+
+.cv-bt{
+  --c-ink:#0f1c33;--c-paper:#fff;--c-muted:#5a6a82;--c-line:#dde3ec;
+  --c-navy:{{color}};--c-navy-l:{{color_dark}};--c-gold:#b89554;--c-gold-l:#e6d3a3;--c-soft:#f4f6fa;
+  font-family:'Inter',sans-serif;color:var(--c-ink);background:var(--c-paper);min-height:1200px
+}
+
+.bt-hero{background:linear-gradient(135deg,var(--c-navy) 0%,var(--c-navy-l) 100%);color:#fff;padding:38px 44px;display:grid;grid-template-columns:auto 1fr auto;gap:28px;align-items:center;position:relative;overflow:hidden}
+.bt-hero::after{content:"";position:absolute;top:0;right:0;width:200px;height:100%;background:radial-gradient(circle at 100% 50%,rgba(184,149,84,.18),transparent 60%);pointer-events:none}
+.bt-photo{width:115px;height:115px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--c-gold-l);color:var(--c-navy);font-family:'Lora',serif;font-weight:600;font-size:42px;border:4px solid #fff;box-shadow:0 0 0 1px var(--c-gold);overflow:hidden}
+.bt-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.bt-id{position:relative;z-index:2}
+.bt-id h1{font-family:'Lora',serif;font-size:32px;font-weight:600;letter-spacing:-.01em}
+.bt-id .role{color:var(--c-gold-l);font-size:14.5px;font-weight:600;margin-top:4px;letter-spacing:.02em}
+.bt-id .meta{margin-top:12px;display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:#cbd5e1}
+.bt-id .meta b{color:var(--c-gold-l);font-weight:600;margin-right:4px;text-transform:uppercase;font-size:10.5px;letter-spacing:.06em}
+.bt-stamp{display:flex;flex-direction:column;align-items:flex-end;gap:6px;position:relative;z-index:2}
+.bt-stamp .badge{background:var(--c-gold);color:var(--c-navy);padding:5px 14px;border-radius:4px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+
+.bt-accroche{padding:18px 44px;background:var(--c-soft);border-bottom:2px solid var(--c-gold);font-family:'Lora',serif;font-style:italic;font-size:15.5px;line-height:1.55;color:var(--c-navy)}
+.bt-accroche::before{content:"« ";color:var(--c-gold);font-weight:700;font-size:18px}
+.bt-accroche::after{content:" »";color:var(--c-gold);font-weight:700;font-size:18px}
+
+.bt-body{padding:30px 44px}
+.bt h2{font-family:'Lora',serif;font-size:18px;font-weight:600;color:var(--c-navy);margin:24px 0 12px;padding-bottom:6px;border-bottom:2px solid var(--c-gold);display:inline-block;letter-spacing:.005em}
+.bt h2:first-of-type{margin-top:0}
+
+.bt-xp{padding:16px 20px;background:#fff;border:1px solid var(--c-line);border-left:3px solid var(--c-gold);border-radius:0 8px 8px 0;margin-bottom:8px}
+.bt-xp .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.bt-xp h3{font-family:'Lora',serif;font-size:16.5px;font-weight:600}
+.bt-xp .when{font-size:11.5px;color:var(--c-navy);background:var(--c-gold-l);padding:4px 10px;border-radius:4px;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.bt-xp .co{color:var(--c-gold);font-style:italic;font-size:13px;margin:2px 0 6px;font-family:'Lora',serif;font-weight:500}
+.bt-xp ul{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.65;color:#1e3358}
+.bt-xp ul li::marker{color:var(--c-gold)}
+
+.bt-form{padding:14px 18px;background:var(--c-soft);border-radius:8px;margin-bottom:6px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:baseline;border-left:3px solid var(--c-navy)}
+.bt-form b{font-family:'Lora',serif;font-size:15.5px;font-weight:600;display:block}
+.bt-form span{display:block;color:var(--c-muted);font-size:12.5px;margin-top:1px;font-style:italic}
+.bt-form .when{font-size:11.5px;color:var(--c-navy);font-weight:700;font-family:'Lora',serif;white-space:nowrap}
+
+.bt-skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.bt-skill-grid .panel{padding:18px 20px;background:#fff;border:1px solid var(--c-line);border-top:3px solid var(--c-gold);border-radius:0 0 8px 8px}
+.bt-skill-grid .panel h3{font-family:'Lora',serif;font-size:15px;font-weight:600;color:var(--c-navy);margin-bottom:10px}
+.bt-pill{display:inline-block;background:var(--c-soft);border:1px solid var(--c-line);color:var(--c-navy);padding:4px 11px;border-radius:4px;font-size:12px;font-weight:500;margin:0 4px 5px 0}
+.bt-lang{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--c-line);font-family:'Lora',serif}
+.bt-lang:last-child{border:none}
+.bt-lang em{font-family:'Inter',sans-serif;font-style:normal;color:var(--c-gold);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+
+.bt-int{padding:18px 22px;background:linear-gradient(135deg,var(--c-soft),#fff);border-radius:8px;border-left:3px solid var(--c-gold);font-family:'Lora',serif;font-style:italic;font-size:14.5px;line-height:1.7;color:var(--c-navy)}
+.bt-int span{display:inline-block;font-style:normal;font-family:'Inter',sans-serif;font-size:13px;background:#fff;padding:3px 10px;border-radius:4px;margin:3px 4px 3px 0;font-weight:500;border:1px solid var(--c-line)}
+
+@media (max-width:760px){body{padding:0}.cv{border-radius:0;box-shadow:none}.bt-hero{padding:28px 22px;grid-template-columns:1fr;text-align:center}.bt-photo{margin:0 auto}.bt-id .meta{justify-content:center}.bt-stamp{align-items:center}.bt-accroche,.bt-body{padding-left:22px;padding-right:22px}.bt-skill-grid{grid-template-columns:1fr}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-bt bt">
+
+<div class="bt-hero">
+  <div class="bt-photo">{{photo_or_initials}}</div>
+  <div class="bt-id">
+    <h1>{{name}}</h1>
+    {{#title}}<div class="role">{{title}}</div>{{/title}}
+    <div class="meta">
+      {{#contact.email}}<span><b>Email</b>{{contact.email}}</span>{{/contact.email}}
+      {{#contact.phone}}<span><b>Téléphone</b>{{contact.phone}}</span>{{/contact.phone}}
+      {{#contact.location}}<span><b>Ville</b>{{contact.location}}</span>{{/contact.location}}
+      {{#contact.linkedin}}<span><b>LinkedIn</b>{{contact.linkedin}}</span>{{/contact.linkedin}}
+    </div>
+  </div>
+  <div class="bt-stamp">
+    <span class="badge">Disponible</span>
+  </div>
+</div>
+
+{{#summary}}<p class="bt-accroche">{{summary}}</p>{{/summary}}
+
+<div class="bt-body">
+
+  {{#has_experience}}
+  <h2>Expériences professionnelles</h2>
+  {{#experience}}
+  <div class="bt-xp">
+    <div class="row"><h3>{{role}}</h3><span class="when">{{date}}</span></div>
+    <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+    {{#has_bullets}}
+    <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+    {{/has_bullets}}
+  </div>
+  {{/experience}}
+  {{/has_experience}}
+
+  {{#has_education}}
+  <h2>Formation</h2>
+  {{#education}}
+  <div class="bt-form">
+    <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/education}}
+  {{/has_education}}
+
+  {{#has_skills}}
+  <h2>Compétences</h2>
+  <div class="bt-skill-grid">
+    <div class="panel">
+      <h3>Techniques</h3>
+      {{#skills}}<span class="bt-pill">{{name}}</span>{{/skills}}
+    </div>
+    {{#has_languages}}
+    <div class="panel">
+      <h3>Langues</h3>
+      {{#languages}}<div class="bt-lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+    </div>
+    {{/has_languages}}
+  </div>
+  {{/has_skills}}
+
+  {{#has_certifications}}
+  <h2>Certifications</h2>
+  {{#certifications}}
+  <div class="bt-form">
+    <div><b>{{name}}</b></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/certifications}}
+  {{/has_certifications}}
+
+  {{#has_interests}}
+  <h2>Centres d'intérêt</h2>
+  <p class="bt-int">{{#interests}}<span>{{.}}</span>{{/interests}}</p>
+  {{/has_interests}}
+
+</div>
+
+</div></div>
+</body>
+</html>

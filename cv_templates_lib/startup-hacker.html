@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Startup Hacker","category":"Business","preview":"Mode dark sur fond noir, panneaux carbone, accent cyan et rose, badges live."} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#000;font-family:'Inter',sans-serif;padding:24px;min-height:100vh}
+.cv{max-width:900px;margin:0 auto;background:#0a0a0a;box-shadow:0 10px 40px rgba(0,0,0,.6);border-radius:10px;overflow:hidden;border:1px solid #1f1f1f}
+
+.cv-sh{
+  --c-bg:#0a0a0a;--c-panel:#141414;--c-text:#ededed;--c-muted:#737373;
+  --c-cyan:{{color}};--c-pink:{{color_dark}};--c-yellow:#fef9c3;
+  font-family:'Inter',sans-serif;color:var(--c-text);background:var(--c-bg);
+  padding:34px 36px;min-height:1180px
+}
+
+.cv-sh .header{display:grid;grid-template-columns:auto 1fr auto;gap:22px;align-items:center;margin-bottom:20px}
+.cv-sh .portrait{width:80px;height:80px;border-radius:8px;object-fit:cover;display:flex;align-items:center;justify-content:center;border:1px solid #2a2a2a;background:#1a1a1a;color:var(--c-cyan);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:28px;overflow:hidden}
+.cv-sh .portrait img{width:100%;height:100%;object-fit:cover;display:block;border-radius:8px}
+.cv-sh h1{font-size:26px;font-weight:700;color:#fff;letter-spacing:-.02em}
+.cv-sh .role{color:var(--c-cyan);font-family:'JetBrains Mono',monospace;font-size:12px;margin-top:4px}
+.cv-sh .header .contact{font-size:11.5px;color:var(--c-muted);font-family:'JetBrains Mono',monospace;text-align:right;line-height:1.85}
+.cv-sh .header .contact b{color:var(--c-text)}
+
+.cv-sh .accroche{padding:14px 18px;background:var(--c-panel);border:1px solid #1f1f1f;border-radius:8px;font-size:13.5px;line-height:1.65;color:#d4d4d4;margin-bottom:18px;border-left:3px solid var(--c-cyan)}
+.cv-sh .accroche::before{content:"// "}
+
+.cv-sh h2{font-size:11px;color:var(--c-muted);text-transform:uppercase;letter-spacing:.14em;font-weight:600;margin:22px 0 12px;font-family:'JetBrains Mono',monospace;display:flex;align-items:center;gap:8px}
+.cv-sh h2::before{content:"";width:6px;height:6px;background:var(--c-cyan);border-radius:50%}
+.cv-sh h2:first-of-type{margin-top:0}
+
+.cv-sh .xp{padding:14px 18px;background:var(--c-panel);border:1px solid #1f1f1f;border-radius:8px;margin-bottom:8px}
+.cv-sh .xp .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.cv-sh .xp h3{font-size:14.5px;font-weight:600;color:#fff}
+.cv-sh .xp .date{color:var(--c-cyan);font-family:'JetBrains Mono',monospace;font-size:11px;background:rgba(255,255,255,.05);padding:2px 7px;border-radius:3px;white-space:nowrap}
+.cv-sh .xp .co{color:var(--c-pink);font-size:12.5px;margin:2px 0 6px;font-family:'JetBrains Mono',monospace}
+.cv-sh .xp .co::before{content:"@ "}
+.cv-sh .xp ul{margin:6px 0 0;padding-left:18px;font-size:12.5px;color:#d4d4d4;line-height:1.6}
+.cv-sh .xp ul li::marker{color:var(--c-cyan)}
+
+.cv-sh .form{padding:12px 18px;background:var(--c-panel);border:1px solid #1f1f1f;border-radius:8px;margin-bottom:6px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:baseline}
+.cv-sh .form b{font-size:13.5px;color:#fff;font-weight:700;display:block}
+.cv-sh .form span{color:var(--c-pink);font-size:12px;display:block;margin-top:1px;font-family:'JetBrains Mono',monospace}
+.cv-sh .form .when{color:var(--c-cyan);font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap}
+
+.cv-sh .comp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.cv-sh .comp-grid .panel{padding:14px 16px;background:var(--c-panel);border:1px solid #1f1f1f;border-radius:8px}
+.cv-sh .comp-grid h3{font-size:10.5px;color:var(--c-pink);text-transform:uppercase;letter-spacing:.14em;font-weight:700;margin-bottom:10px;font-family:'JetBrains Mono',monospace}
+.cv-sh .comp-grid h3::before{content:"// "}
+.cv-sh .pill{display:inline-block;background:#1a1a1a;color:var(--c-cyan);border:1px solid rgba(255,255,255,.1);padding:3px 8px;border-radius:3px;font-size:11px;font-family:'JetBrains Mono',monospace;margin:0 3px 4px 0}
+.cv-sh .ln{font-size:12px;padding:4px 0;display:flex;justify-content:space-between;border-bottom:1px dashed #1f1f1f;color:#d4d4d4}
+.cv-sh .ln:last-child{border:none}
+.cv-sh .ln span:last-child{color:var(--c-cyan);font-family:'JetBrains Mono',monospace;font-size:11px}
+
+.cv-sh .interest{padding:14px 18px;background:var(--c-panel);border:1px solid #1f1f1f;border-radius:8px;font-size:12.5px;color:#d4d4d4;line-height:1.7}
+.cv-sh .interest span{display:inline-block;background:#1a1a1a;border:1px solid rgba(254,249,195,.3);color:var(--c-yellow);padding:3px 8px;border-radius:3px;font-size:11px;font-family:'JetBrains Mono',monospace;margin:3px 4px 3px 0}
+
+@media (max-width:720px){body{padding:0}.cv{border-radius:0}.cv-sh{padding:24px 20px}.cv-sh .header{grid-template-columns:1fr;text-align:center}.cv-sh .portrait{margin:0 auto}.cv-sh .header .contact{text-align:center}.cv-sh .comp-grid{grid-template-columns:1fr}}
+@media print{body{background:#fff;padding:0;color:#000}.cv{max-width:none;border:none;box-shadow:none;background:#fff}.cv-sh{background:#fff;color:#000}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-sh">
+
+<div class="header">
+  <div class="portrait">{{photo_or_initials}}</div>
+  <div>
+    <h1>{{name}}</h1>
+    {{#title}}<div class="role">{{title}}</div>{{/title}}
+  </div>
+  <div class="contact">
+    {{#contact.email}}<b>email</b> {{contact.email}}<br>{{/contact.email}}
+    {{#contact.phone}}<b>tel</b> {{contact.phone}}<br>{{/contact.phone}}
+    {{#contact.location}}<b>loc</b> {{contact.location}}<br>{{/contact.location}}
+    {{#contact.linkedin}}<b>in</b> {{contact.linkedin}}{{/contact.linkedin}}
+  </div>
+</div>
+
+{{#summary}}<p class="accroche">{{summary}}</p>{{/summary}}
+
+{{#has_experience}}
+<h2>Expériences professionnelles</h2>
+{{#experience}}
+<div class="xp">
+  <div class="row"><h3>{{role}}</h3><span class="date">{{date}}</span></div>
+  <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+  {{#has_bullets}}
+  <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+  {{/has_bullets}}
+</div>
+{{/experience}}
+{{/has_experience}}
+
+{{#has_education}}
+<h2>Formation</h2>
+{{#education}}
+<div class="form">
+  <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+  <span class="when">{{date}}</span>
+</div>
+{{/education}}
+{{/has_education}}
+
+{{#has_skills}}
+<h2>Compétences</h2>
+<div class="comp-grid">
+  <div class="panel">
+    <h3>Techniques</h3>
+    {{#skills}}<span class="pill">{{name}}</span>{{/skills}}
+  </div>
+  {{#has_languages}}
+  <div class="panel">
+    <h3>Langues</h3>
+    {{#languages}}<div class="ln"><span>{{name}}</span><span>{{level}}</span></div>{{/languages}}
+  </div>
+  {{/has_languages}}
+</div>
+{{/has_skills}}
+
+{{#has_certifications}}
+<h2>Certifications</h2>
+{{#certifications}}<div class="form"><div><b>{{name}}</b></div><span class="when">{{date}}</span></div>{{/certifications}}
+{{/has_certifications}}
+
+{{#has_interests}}
+<h2>Centres d'intérêt</h2>
+<p class="interest">
+  {{#interests}}<span>{{.}}</span>{{/interests}}
+</p>
+{{/has_interests}}
+
+</div></div>
+</body>
+</html>

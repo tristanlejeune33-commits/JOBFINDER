@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Tech Modern","category":"Tech","preview":"CV deux colonnes avec sidebar dark gradient et accent cyan, typo Inter + JetBrains Mono."} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9ecf2;font-family:'Inter',sans-serif;padding:24px;min-height:100vh}
+.cv{max-width:900px;margin:0 auto;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.12),0 2px 6px rgba(0,0,0,.06);border-radius:6px;overflow:hidden}
+
+.cv-tech{
+  --c-side:#0f1f2e;--c-side-2:#13283b;
+  --c-text:#1a2230;--c-muted:#5a6477;
+  --c-accent:{{color}};--c-accent-2:{{color_dark}};
+  font-family:'Inter',sans-serif;color:var(--c-text);
+  display:grid;grid-template-columns:34% 66%;min-height:1180px
+}
+
+.cv-tech aside{background:linear-gradient(160deg,var(--c-side),var(--c-side-2));color:#e6f4ff;padding:42px 32px}
+.cv-tech aside .avatar{width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,var(--c-accent),var(--c-accent-2));padding:3px;margin:0 auto 18px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:32px;font-family:'JetBrains Mono',monospace}
+.cv-tech aside .avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block;background:#fff}
+.cv-tech aside h1{text-align:center;font-size:22px;font-weight:700;letter-spacing:-.01em}
+.cv-tech aside .role{text-align:center;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--c-accent);margin-top:6px}
+.cv-tech aside h3{font-size:11px;text-transform:uppercase;letter-spacing:.15em;color:var(--c-accent);margin:30px 0 12px;font-weight:600;border-bottom:1px solid rgba(255,255,255,.15);padding-bottom:6px}
+.cv-tech aside ul{list-style:none;font-size:13px;line-height:1.8}
+.cv-tech aside ul li{margin-bottom:5px;word-break:break-word}
+.cv-tech .skill-pill{display:inline-block;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.2);color:#e6f4ff;padding:4px 10px;border-radius:6px;font-size:11px;font-family:'JetBrains Mono',monospace;margin:0 4px 6px 0}
+.cv-tech .lang-line{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.08)}
+.cv-tech .lang-line:last-child{border:none}
+.cv-tech .lang-line span:last-child{color:var(--c-accent);font-family:'JetBrains Mono',monospace;font-size:11px}
+
+.cv-tech main{padding:42px 44px;background:#fff}
+.cv-tech main .accroche{font-size:14px;line-height:1.7;color:#3a4456;border-left:3px solid var(--c-accent);padding:6px 0 6px 16px;margin-bottom:30px;font-weight:500}
+.cv-tech main h2{font-size:13px;text-transform:uppercase;letter-spacing:.18em;color:var(--c-text);margin:30px 0 18px;font-weight:700;display:flex;align-items:center;gap:10px}
+.cv-tech main h2::before{content:"";width:18px;height:2px;background:var(--c-accent);display:inline-block}
+.cv-tech main h2:first-of-type{margin-top:0}
+
+.cv-tech .xp{position:relative;padding-left:22px;margin-bottom:22px}
+.cv-tech .xp::before{content:"";position:absolute;left:6px;top:6px;bottom:-22px;width:2px;background:#e5e9f0}
+.cv-tech .xp::after{content:"";position:absolute;left:0;top:4px;width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--c-accent)}
+.cv-tech .xp:last-child::before{display:none}
+.cv-tech .xp .row{display:flex;justify-content:space-between;gap:12px;align-items:flex-end}
+.cv-tech .xp h3{font-size:15px;font-weight:700}
+.cv-tech .xp .meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c-muted)}
+.cv-tech .xp .co{font-size:13px;color:var(--c-accent-2);font-weight:600;margin:2px 0 6px}
+.cv-tech .xp ul.bullets{margin:6px 0 0;padding-left:18px;font-size:13px;color:#4b5466;line-height:1.65}
+.cv-tech .xp ul.bullets li{margin-bottom:3px}
+
+.cv-tech .edu-row{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #eef0f4;font-size:13px;gap:12px}
+.cv-tech .edu-row:last-child{border:none}
+.cv-tech .edu-row strong{color:var(--c-text)}
+.cv-tech .edu-row .right{color:var(--c-muted);font-family:'JetBrains Mono',monospace;font-size:11px;white-space:nowrap}
+
+.cv-tech .interest{font-size:13.5px;line-height:1.7;color:#4b5466}
+.cv-tech .interest span{display:inline-block;background:{{color_light}};border:1px solid var(--c-accent);color:var(--c-text);padding:4px 10px;border-radius:99px;font-size:12.5px;margin:3px 4px 3px 0;font-weight:500}
+
+.cv-tech .cert{font-size:13px;color:#4b5466;margin-bottom:6px;padding-left:18px;position:relative}
+.cv-tech .cert::before{content:"✓";position:absolute;left:0;top:0;color:var(--c-accent);font-weight:700}
+
+@media (max-width:720px){body{padding:0}.cv{border-radius:0;box-shadow:none}.cv-tech{grid-template-columns:1fr}.cv-tech aside,.cv-tech main{padding:32px 24px}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+
+<div class="cv">
+  <div class="cv-tech">
+
+    <aside>
+      <div class="avatar">{{photo_or_initials}}</div>
+      <h1>{{name}}</h1>
+      {{#title}}<div class="role">{{title}}</div>{{/title}}
+
+      <h3>Coordonnées</h3>
+      <ul>
+        {{#contact.email}}<li>{{contact.email}}</li>{{/contact.email}}
+        {{#contact.phone}}<li>{{contact.phone}}</li>{{/contact.phone}}
+        {{#contact.location}}<li>{{contact.location}}</li>{{/contact.location}}
+        {{#contact.linkedin}}<li>{{contact.linkedin}}</li>{{/contact.linkedin}}
+        {{#contact.website}}<li>{{contact.website}}</li>{{/contact.website}}
+      </ul>
+
+      {{#has_skills}}
+      <h3>Compétences techniques</h3>
+      <div>
+        {{#skills}}<span class="skill-pill">{{name}}</span>{{/skills}}
+      </div>
+      {{/has_skills}}
+
+      {{#has_languages}}
+      <h3>Compétences linguistiques</h3>
+      {{#languages}}
+      <div class="lang-line"><span>{{name}}</span><span>{{level}}</span></div>
+      {{/languages}}
+      {{/has_languages}}
+    </aside>
+
+    <main>
+
+      {{#summary}}<p class="accroche">{{summary}}</p>{{/summary}}
+
+      {{#has_experience}}
+      <h2>Expériences professionnelles</h2>
+      {{#experience}}
+      <article class="xp">
+        <div class="row">
+          <h3>{{role}}</h3>
+          <span class="meta">{{date}}</span>
+        </div>
+        <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+        {{#has_bullets}}
+        <ul class="bullets">{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+        {{/has_bullets}}
+      </article>
+      {{/experience}}
+      {{/has_experience}}
+
+      {{#has_education}}
+      <h2>Formation</h2>
+      {{#education}}
+      <div class="edu-row">
+        <div><strong>{{degree}}</strong><br>{{school}}{{#location}} · {{location}}{{/location}}</div>
+        <div class="right">{{date}}</div>
+      </div>
+      {{/education}}
+      {{/has_education}}
+
+      {{#has_certifications}}
+      <h2>Certifications</h2>
+      {{#certifications}}<div class="cert">{{name}}{{#date}} · {{date}}{{/date}}</div>{{/certifications}}
+      {{/has_certifications}}
+
+      {{#has_interests}}
+      <h2>Centres d'intérêt</h2>
+      <p class="interest">
+        {{#interests}}<span>{{.}}</span>{{/interests}}
+      </p>
+      {{/has_interests}}
+
+    </main>
+  </div>
+</div>
+
+</body>
+</html>

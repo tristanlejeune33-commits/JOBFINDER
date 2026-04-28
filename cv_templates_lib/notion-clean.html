@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Notion Clean","category":"Moderne","preview":"Rendu inspiré de Notion : callouts, properties table, tags colorés, emoji.","tags":["notion","clean","callout"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f5f5f4;font-family:'Inter',sans-serif;color:#37352f;padding:28px;min-height:100vh}
+.cv{max-width:880px;margin:0 auto;background:#fff;box-shadow:0 8px 24px -8px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.04);border-radius:8px;overflow:hidden}
+
+.cv-no{
+  --c-ink:#37352f;--c-paper:#fff;--c-muted:#787774;--c-line:#e9e8e6;
+  --c-blue:{{color}};--c-soft-blue:#e7f3f9;--c-soft-yel:#fdf3d7;--c-soft-grn:#e3f0e3;--c-soft-pur:#f1eafa;--c-soft-pin:#fae3eb;
+  font-family:'Inter',sans-serif;color:var(--c-ink);background:var(--c-paper);min-height:1200px;padding:60px 70px;font-size:14px;line-height:1.55;letter-spacing:-.005em
+}
+
+.no-cover{height:100px;background:linear-gradient(135deg,#fdf3d7 0%,#fae3eb 50%,#f1eafa 100%);border-radius:6px;margin-bottom:14px}
+.no-icon{width:60px;height:60px;border-radius:12px;background:#fff;display:flex;align-items:center;justify-content:center;margin:-50px 0 12px;border:1px solid var(--c-line);box-shadow:0 4px 12px rgba(0,0,0,.06);font-size:24px;font-weight:700;color:var(--c-blue);overflow:hidden}
+.no-icon img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.no-hero h1{font-size:42px;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-bottom:6px}
+.no-hero .role{color:var(--c-muted);font-size:15.5px;font-weight:500}
+
+.no-props{margin:18px 0 22px;border-top:1px solid var(--c-line);border-bottom:1px solid var(--c-line);padding:6px 0}
+.no-prop{display:grid;grid-template-columns:160px 1fr;gap:14px;padding:7px 0;font-size:13.5px;align-items:center}
+.no-prop b{color:var(--c-muted);font-weight:500;font-size:13px}
+.no-prop .val{color:var(--c-ink);font-weight:500}
+
+.no-callout{padding:14px 18px;background:var(--c-soft-yel);border-radius:6px;font-size:14.5px;line-height:1.6;margin-bottom:24px;display:flex;gap:12px;align-items:flex-start}
+.no-callout .ic{font-size:20px;line-height:1}
+.no-callout p{flex:1;color:var(--c-ink)}
+
+.no h2{font-size:20px;font-weight:700;letter-spacing:-.015em;margin:30px 0 12px;color:var(--c-ink)}
+
+.no-xp{padding:14px 16px;border:1px solid var(--c-line);border-radius:6px;margin-bottom:8px;background:#fff}
+.no-xp .row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.no-xp h3{font-size:15px;font-weight:600;flex:1}
+.no-xp .when{font-size:11.5px;background:var(--c-soft-blue);color:var(--c-blue);padding:2px 8px;border-radius:4px;white-space:nowrap;font-weight:500}
+.no-xp .co{color:var(--c-muted);font-size:13px;margin:4px 0 8px;font-weight:500}
+.no-xp ul{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.6;color:var(--c-ink)}
+.no-xp ul li{margin-bottom:3px}
+
+.no-form{display:grid;grid-template-columns:1fr auto;gap:12px;padding:10px 14px;border:1px solid var(--c-line);border-radius:6px;margin-bottom:6px;background:#fff;align-items:center}
+.no-form b{font-size:14px;font-weight:600;display:block}
+.no-form span{color:var(--c-muted);font-size:12.5px;display:block;margin-top:1px}
+.no-form .when{font-size:11.5px;background:var(--c-soft-pur);color:#6c3aa8;padding:2px 8px;border-radius:4px;font-weight:500;white-space:nowrap}
+
+.no-skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.no-skill-grid .panel{padding:14px 16px;background:#fafaf9;border:1px solid var(--c-line);border-radius:6px}
+.no-skill-grid .panel h3{font-size:13px;font-weight:600;margin-bottom:10px}
+.no-tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:12px;font-weight:500;margin:0 4px 4px 0;background:var(--c-soft-blue);color:var(--c-blue)}
+
+.no-lang{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--c-line);font-size:13px}
+.no-lang:last-child{border:none}
+.no-lang em{font-style:normal;color:var(--c-muted);font-size:11.5px;background:#fff;padding:2px 7px;border-radius:4px;border:1px solid var(--c-line)}
+
+.no-int{padding:14px 18px;background:var(--c-soft-pin);border-radius:6px;font-size:14px;line-height:1.7;display:flex;gap:10px;align-items:flex-start}
+.no-int .ic{font-size:20px}
+
+@media (max-width:720px){body{padding:0}.cv{border-radius:0;box-shadow:none}.cv-no{padding:32px 22px}.no-prop{grid-template-columns:1fr;gap:2px}.no-skill-grid{grid-template-columns:1fr}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-no no">
+
+<div class="no-cover"></div>
+<div class="no-icon">{{photo_or_initials}}</div>
+<div class="no-hero">
+  <h1>{{name}}</h1>
+  {{#title}}<div class="role">{{title}}</div>{{/title}}
+</div>
+
+<div class="no-props">
+  {{#contact.email}}<div class="no-prop"><b>Email</b><span class="val">{{contact.email}}</span></div>{{/contact.email}}
+  {{#contact.phone}}<div class="no-prop"><b>Téléphone</b><span class="val">{{contact.phone}}</span></div>{{/contact.phone}}
+  {{#contact.location}}<div class="no-prop"><b>Ville</b><span class="val">{{contact.location}}</span></div>{{/contact.location}}
+  {{#contact.linkedin}}<div class="no-prop"><b>LinkedIn</b><span class="val">{{contact.linkedin}}</span></div>{{/contact.linkedin}}
+  {{#contact.website}}<div class="no-prop"><b>Site web</b><span class="val">{{contact.website}}</span></div>{{/contact.website}}
+</div>
+
+{{#summary}}
+<div class="no-callout">
+  <div class="ic">💡</div>
+  <p>{{summary}}</p>
+</div>
+{{/summary}}
+
+{{#has_experience}}
+<h2>Expériences professionnelles</h2>
+{{#experience}}
+<div class="no-xp">
+  <div class="row"><h3>{{role}}</h3><span class="when">{{date}}</span></div>
+  <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+  {{#has_bullets}}
+  <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+  {{/has_bullets}}
+</div>
+{{/experience}}
+{{/has_experience}}
+
+{{#has_education}}
+<h2>Formation</h2>
+{{#education}}
+<div class="no-form">
+  <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+  <span class="when">{{date}}</span>
+</div>
+{{/education}}
+{{/has_education}}
+
+{{#has_skills}}
+<h2>Compétences</h2>
+<div class="no-skill-grid">
+  <div class="panel">
+    <h3>Techniques</h3>
+    {{#skills}}<span class="no-tag">{{name}}</span>{{/skills}}
+  </div>
+  {{#has_languages}}
+  <div class="panel">
+    <h3>Langues</h3>
+    {{#languages}}<div class="no-lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+  </div>
+  {{/has_languages}}
+</div>
+{{/has_skills}}
+
+{{#has_certifications}}
+<h2>Certifications</h2>
+{{#certifications}}
+<div class="no-form">
+  <div><b>{{name}}</b></div>
+  <span class="when">{{date}}</span>
+</div>
+{{/certifications}}
+{{/has_certifications}}
+
+{{#has_interests}}
+<h2>Centres d'intérêt</h2>
+<div class="no-int">
+  <div class="ic">🌱</div>
+  <p>{{#interests}}{{.}} · {{/interests}}</p>
+</div>
+{{/has_interests}}
+
+</div></div>
+</body>
+</html>
