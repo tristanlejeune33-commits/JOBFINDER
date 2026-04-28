@@ -3876,6 +3876,63 @@ function openPrepTab(id){
   w.document.close();
 }
 
+// Applique la même compaction "PDF mode" que le backend, dans l'iframe de preview.
+// Garantit WYSIWYG : ce qu'on voit dans l'aperçu = ce qu'on obtient en PDF.
+function applyPdfPreviewMode(iframe){
+  const doc = iframe?.contentDocument;
+  if(!doc) return;
+
+  // Pré-compaction inline-style (même règles que le serveur)
+  const setStyle = (sel, props) => {
+    doc.querySelectorAll(sel).forEach(el => {
+      Object.entries(props).forEach(([k,v]) => el.style.setProperty(k, v, 'important'));
+    });
+  };
+
+  // Réinitialise body bg / shadows pour aperçu papier
+  setStyle('html, body', {'background':'#fff','margin':'0','padding':'0'});
+  setStyle('body > *', {'box-shadow':'none','border-radius':'0','margin':'0 auto'});
+
+  // Les mêmes règles que le pipeline PDF côté serveur
+  setStyle('h1', {'font-size':'24px','line-height':'1.05','margin':'0 0 4px'});
+  setStyle('h2', {'font-size':'13px','line-height':'1.15','margin':'8px 0 4px'});
+  setStyle('h3', {'font-size':'12.5px','line-height':'1.2','margin':'0 0 2px'});
+  setStyle('.name, [class*="name"]', {'font-size':'24px','line-height':'1.05'});
+  setStyle('.title, [class*="title"], .role, [class*="role"]',
+           {'font-size':'12px','margin-bottom':'6px','line-height':'1.2'});
+  setStyle('.lead, [class*="lead"]',
+           {'font-size':'12px','padding':'4px 16px','margin-bottom':'8px','line-height':'1.4'});
+  setStyle('.accroche, .summary',
+           {'font-size':'11px','padding':'5px 8px','margin-bottom':'8px','line-height':'1.4'});
+  setStyle('.photo, .avatar, .portrait, [class*="photo"], [class*="avatar"], [class*="portrait"]',
+           {'width':'80px','height':'80px','max-width':'80px','max-height':'80px'});
+  setStyle('section', {'margin-bottom':'8px'});
+  setStyle('p', {'margin':'0 0 3px','line-height':'1.4','font-size':'11px'});
+  setStyle('li', {'margin-bottom':'1px','line-height':'1.35','font-size':'10.5px'});
+  setStyle('ul, ol', {'margin':'3px 0','padding-left':'14px'});
+  setStyle('.cv', {'padding':'18px 24px'});
+  setStyle('aside, .sidebar, [class*="sidebar"]', {'padding':'18px 16px'});
+  setStyle('main, .content, .body-cv', {'padding':'18px 22px'});
+  setStyle('header, .header, .hero, .masthead, [class*="hero"]',
+           {'padding-top':'12px','padding-bottom':'8px','margin-bottom':'8px'});
+
+  // Mesure et applique le zoom shrink-to-fit (boucle 3 max)
+  const A4_H = 1123, BUFFER = 12;
+  let zoom = 1, attempts = 0;
+  while(attempts < 3){
+    const root = doc.querySelector('.cv') || doc.body;
+    const h = Math.max(root.scrollHeight, root.offsetHeight, doc.body.scrollHeight, doc.documentElement.scrollHeight);
+    if(!h || h <= A4_H - BUFFER) break;
+    const needed = (A4_H - BUFFER) / h;
+    const newZoom = Math.max(0.62, needed * 0.99);
+    if(newZoom >= zoom * 0.995) break;
+    zoom = newZoom;
+    doc.documentElement.style.zoom = zoom;
+    attempts++;
+    // Petite pause artificielle pour laisser le browser re-layouter
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 // CV STUDIO — éditeur avec preview live, switch instant template/couleur
 // ══════════════════════════════════════════════════════════════════════════════
@@ -3979,6 +4036,11 @@ const cvStudio = {
       if(r && r.html){
         const iframe = document.getElementById('cvs-preview');
         iframe.removeAttribute('srcdoc');
+        // Au load de l'iframe, applique la même compaction que le pipeline PDF
+        // → l'aperçu devient WYSIWYG (what-you-see-is-what-you-get)
+        iframe.onload = () => {
+          try { applyPdfPreviewMode(iframe); } catch(e){ console.error('preview mode:', e); }
+        };
         iframe.srcdoc = r.html;
       }
     } finally {
@@ -4239,9 +4301,11 @@ const cvStudio = {
       });
       if(r && r.html){
         fsIframe.removeAttribute('srcdoc');
+        fsIframe.onload = () => { try { applyPdfPreviewMode(fsIframe); } catch(e){} };
         fsIframe.srcdoc = r.html;
       }
     } else if(srcIframe.srcdoc){
+      fsIframe.onload = () => { try { applyPdfPreviewMode(fsIframe); } catch(e){} };
       fsIframe.srcdoc = srcIframe.srcdoc;
     }
     // Nom du template courant
@@ -4484,6 +4548,7 @@ const cvLibrary = {
         try{
           const r = await post('/api/cv/render', {data, template_id: tid, color: previewColor});
           if(r && r.html){
+            iframe.onload = () => { try { applyPdfPreviewMode(iframe); } catch(e){} };
             iframe.srcdoc = r.html;
             // Retire le skeleton quand chargé
             const thumb = iframe.closest('.cvlib-card-thumb');
