@@ -2602,6 +2602,15 @@ def _render_template(tpl, ctx):
                 text = text[:m.start()] + render_sections(inner, local_ctx) + text[m.end():]
             else:
                 text = text[:m.start()] + text[m.end():]
+        # Triple-brace {{{var}}} → valeur RAW (non échappée), pour HTML
+        def var_sub_raw(mv):
+            p = mv.group(1)
+            v = _get_path(local_ctx, p)
+            if v is None: return ""
+            if isinstance(v, (dict, list, tuple, set)): return ""
+            return str(v)
+        text = re.sub(r"\{\{\{([\w\.]+)\}\}\}", var_sub_raw, text)
+        # Double-brace {{var}} → valeur ÉCHAPPÉE (text-safe)
         def var_sub(mv):
             p = mv.group(1)
             v = _get_path(local_ctx, p)
