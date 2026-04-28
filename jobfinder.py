@@ -433,7 +433,13 @@ class _PgCursor:
 class _PgConn:
     """Wrapper qui présente l'API SQLite tout en parlant à Postgres."""
     def __init__(self):
-        self._conn = psycopg2.connect(DATABASE_URL)
+        # connect_timeout : évite que l'app HANG indéfiniment au boot si
+        # Postgres est inaccessible. Mieux vaut planter vite + log clair.
+        self._conn = psycopg2.connect(
+            DATABASE_URL,
+            connect_timeout=10,
+            application_name="jobfinder",
+        )
         self._conn.autocommit = False
 
     def execute(self, sql, params=()):
@@ -597,10 +603,15 @@ def init_db():
         );
         """)
 
-try:
-    init_db()
-except Exception as e:
-    log.error(f"init_db FAILED at boot — app continuera quand même : {e}")
+def _init_db_safe():
+    """Init DB tolérant aux pannes : le boot ne plante JAMAIS, même si la DB
+    est inaccessible. Les routes qui ont besoin de la DB échoueront proprement."""
+    try:
+        init_db()
+        log.info("init_db: OK")
+    except Exception as e:
+        log.error(f"init_db FAILED — app continue (DB peut-être inaccessible) : {e}")
+_init_db_safe()
 
 # Migrations idempotentes
 def _migrate_columns():
