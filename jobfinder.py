@@ -2101,149 +2101,36 @@ def _html_to_pdf_response(html_content, name):
         log.error("Playwright non installé")
         return jsonify({"error":"Playwright non installé sur le serveur"}), 500
 
-    # CSS print TRES agressif : compacte tout pour faire tenir les CV en A4
-    # sans avoir à scaler (ce qui rend illisible). Cible les patterns récurrents
-    # des 56 templates.
+    # CSS print MINIMAL : juste ce qu'il faut pour un rendu papier propre.
+    # PAS de compaction agressive — les templates gardent leur design d'origine.
+    # Si le contenu dépasse, on accepte 2 pages plutôt que rendre illisible.
     print_css = """
 <style id="__pdf_override">
 @media print {
   @page { size: A4; margin: 0; }
-
   html, body {
     background: #fff !important;
     margin: 0 !important;
     padding: 0 !important;
-    font-size: 11px !important;
-    line-height: 1.4 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
   body > * {
     box-shadow: none !important;
-    border-radius: 0 !important;
     margin: 0 auto !important;
   }
-
-  /* Container principal — paddings drastiquement réduits */
-  .cv {
-    padding: 20px 26px !important;
-    min-height: 0 !important;
-    max-height: none !important;
-  }
-  /* Sidebars (cv-tech, cv-exec, etc.) */
-  .cv > aside, [class*="cv-"] > aside, .sidebar,
-  [class*="cv-"] aside {
-    padding: 20px 18px !important;
-  }
-  /* Main content */
-  .cv > main, [class*="cv-"] > main, .content, .body-cv,
-  [class*="cv-"] main {
-    padding: 20px 22px !important;
-  }
-
-  /* Header / hero blocs (souvent énormes en haut) */
-  header, .header, .hero, .masthead, .hero-grid, .top, [class*="-hero"], [class*="-head"] {
-    padding-top: 14px !important;
-    padding-bottom: 10px !important;
-    margin-bottom: 10px !important;
-  }
-  /* Hero plein-largeur (bold, creative) — pas exagérément grand */
-  .hero, [class*="-hero"] {
-    padding: 22px 30px !important;
-  }
-
-  /* Hauteurs naturellement énormes des noms (52-62px) → cap raisonnable */
-  h1 {
-    font-size: 28px !important;
-    line-height: 1.05 !important;
-    margin: 0 0 4px !important;
-    letter-spacing: -.01em !important;
-  }
-  /* Titre du poste */
-  .role, .title, [class*="-role"], [class*="-title"] {
-    font-size: 13px !important;
-    margin-bottom: 8px !important;
-  }
-  h2 { font-size: 13px !important; margin: 10px 0 6px !important; line-height: 1.15 !important; }
-  h3 { font-size: 13px !important; margin: 0 0 2px !important; line-height: 1.2 !important; }
-
-  /* Sections */
-  section, .section { margin: 0 0 9px !important; padding: 0 !important; }
-  section:last-child, .section:last-child { margin-bottom: 0 !important; }
-
-  /* Paragraphes */
-  p { margin: 0 0 4px !important; line-height: 1.4 !important; font-size: 11px !important; }
-
-  /* Listes */
-  ul, ol { margin: 3px 0 !important; padding-left: 14px !important; }
-  li { margin-bottom: 1px !important; line-height: 1.35 !important; font-size: 10.5px !important; }
-
-  /* Expériences — bloc le plus consommateur, on serre fort */
-  .xp, .exp, .experience, .experience-item, [class*="-exp"], [class*="exp-"]:not([class*="exp-side"]):not([class*="exp-co"]):not([class*="exp-date"]):not([class*="exp-role"]):not([class*="exp-head"]) {
-    margin-bottom: 7px !important;
-    padding-bottom: 5px !important;
+  /* Anti-coupure des blocs cohérents au milieu d'une expérience */
+  .xp, .exp, .experience, .experience-item, [class*="-exp-item"],
+  .edu, .edu-item, .edu-row, [class*="edu-item"],
+  article {
     page-break-inside: avoid;
+    break-inside: avoid;
   }
-  .xp:last-child, .exp:last-child { padding-bottom: 0 !important; margin-bottom: 0 !important; }
-  .xp ul, .exp ul, .exp-desc, .bullets { margin-top: 3px !important; }
-  .xp li, .exp li, .exp-desc li, .bullets li {
-    font-size: 10.5px !important;
-    margin-bottom: 1px !important;
-  }
-
-  /* Formation */
-  .edu, .edu-item, .edu-row, [class*="edu-"]:not([class*="edu-deg"]):not([class*="edu-school"]):not([class*="edu-date"]) {
-    margin-bottom: 4px !important;
-    padding: 4px 8px !important;
-  }
-
-  /* Accroche / résumé / lead */
-  .accroche, .summary, .lead {
-    margin-bottom: 9px !important;
-    padding: 6px 10px !important;
-    line-height: 1.45 !important;
-    font-size: 11px !important;
-  }
-  /* Lead très grand (editorial) → cap */
-  .lead, [class*="-lead"] {
-    font-size: 13px !important;
-    padding: 4px 24px !important;
-  }
-
-  /* Pills / tags */
-  .skill-pill, .perso-pill, .interest, .tag,
-  [class*="-pill"], [class*="-tag"] {
-    margin: 0 3px 3px 0 !important;
-    padding: 2px 7px !important;
-    font-size: 10px !important;
-  }
-
-  /* Photo — taille raisonnable pour ne pas bouffer la verticale */
-  .photo, .avatar, .portrait, .photo-wrap,
-  [class*="-photo"], [class*="-avatar"], [class*="-portrait"] {
-    width: 90px !important;
-    height: 90px !important;
-    max-width: 90px !important;
-    max-height: 90px !important;
-  }
-  .photo img, .avatar img, .portrait img,
-  [class*="-photo"] img, [class*="-avatar"] img, [class*="-portrait"] img {
-    width: 100% !important;
-    height: 100% !important;
-  }
-
-  /* Compétences perso (skills sidebar) */
-  .skills-grid, .skills-list, [class*="skills-"] {
-    margin: 4px 0 !important;
-  }
-
-  /* Disable animations & transitions */
+  /* Disable animations */
   *, *::before, *::after {
     animation: none !important;
     transition: none !important;
   }
-
-  /* Empêche les éléments de forcer un break de page */
-  * { page-break-inside: avoid; }
-  section, article { page-break-after: auto; }
 }
 </style>
 """
@@ -2291,82 +2178,44 @@ def _html_to_pdf_response(html_content, name):
                     pass
                 page.wait_for_timeout(800)
 
-                # ── Pré-compaction via JS (inline-style = top specificity) ────
-                # Force la compaction des éléments lourds avant de mesurer,
-                # même si le template a des CSS très spécifiques avec !important.
-                page.evaluate("""() => {
-                    const setStyle = (sel, props) => {
-                        document.querySelectorAll(sel).forEach(el => {
-                            Object.entries(props).forEach(([k,v]) => el.style.setProperty(k, v, 'important'));
-                        });
-                    };
-                    // Headers & noms — les plus gros consommateurs
-                    setStyle('h1', {'font-size':'24px','line-height':'1.05','margin':'0 0 4px'});
-                    setStyle('h2', {'font-size':'13px','line-height':'1.15','margin':'8px 0 4px'});
-                    setStyle('h3', {'font-size':'12.5px','line-height':'1.2','margin':'0 0 2px'});
-                    // Titres gros décoratifs (editorial, bold, etc.)
-                    setStyle('.name, [class*="name"]', {'font-size':'24px','line-height':'1.05'});
-                    setStyle('.title, [class*="title"], .role, [class*="role"]',
-                             {'font-size':'12px','margin-bottom':'6px','line-height':'1.2'});
-                    setStyle('.lead, [class*="lead"]',
-                             {'font-size':'12px','padding':'4px 16px','margin-bottom':'8px','line-height':'1.4'});
-                    setStyle('.accroche, .summary',
-                             {'font-size':'11px','padding':'5px 8px','margin-bottom':'8px','line-height':'1.4'});
-                    // Photos — tailles moyennes
-                    setStyle('.photo, .avatar, .portrait, [class*="photo"], [class*="avatar"], [class*="portrait"]',
-                             {'width':'80px','height':'80px','max-width':'80px','max-height':'80px'});
-                    // Sections : margin réduite
-                    setStyle('section', {'margin-bottom':'8px'});
-                    // Paragraphes & bullets
-                    setStyle('p', {'margin':'0 0 3px','line-height':'1.4','font-size':'11px'});
-                    setStyle('li', {'margin-bottom':'1px','line-height':'1.35','font-size':'10.5px'});
-                    setStyle('ul, ol', {'margin':'3px 0','padding-left':'14px'});
-                    // Containers — paddings réduits
-                    setStyle('.cv', {'padding':'18px 24px'});
-                    setStyle('aside, .sidebar, [class*="sidebar"]', {'padding':'18px 16px'});
-                    setStyle('main, .content, .body-cv', {'padding':'18px 22px'});
-                    setStyle('header, .header, .hero, .masthead, [class*="hero"]',
-                             {'padding-top':'12px','padding-bottom':'8px','margin-bottom':'8px'});
-                }""")
-                page.wait_for_timeout(200)
-
-                # ── Shrink-to-fit via zoom CSS si encore besoin ────────────────
+                # ── Mesure et zoom LÉGER si presque-fit, sinon laisse 2 pages ─
+                # Philosophie : préserver le design des templates. On applique
+                # un zoom UNIQUEMENT s'il reste léger (≥ 0.88, presque invisible
+                # à l'œil), sinon on accepte 2 pages pour rester lisible.
                 A4_H = 1123
-                buffer = 12
+                content_h = page.evaluate("""() => {
+                    const root = document.querySelector('.cv') || document.body;
+                    return Math.max(
+                        root.scrollHeight, root.offsetHeight,
+                        document.body.scrollHeight,
+                        document.documentElement.scrollHeight
+                    );
+                }""")
                 zoom = 1.0
-                attempts = 0
-                while attempts < 3:
-                    content_h = page.evaluate("""() => {
-                        const root = document.querySelector('.cv') || document.body;
-                        return Math.max(
-                            root.scrollHeight, root.offsetHeight,
-                            document.body.scrollHeight,
-                            document.documentElement.scrollHeight
-                        );
-                    }""")
-                    if not content_h or content_h <= (A4_H - buffer):
-                        break
-                    needed = (A4_H - buffer) / content_h
-                    # Min 0.62 — text effectif ~7px en PDF, lisible (PDFs nets)
-                    new_zoom = max(0.62, needed * 0.99)
-                    if new_zoom >= zoom * 0.995:
-                        break
-                    zoom = new_zoom
-                    page.add_style_tag(content=f"html {{ zoom: {zoom}; }}")
-                    page.wait_for_timeout(150)
-                    attempts += 1
+                pages_target = 1
+                if content_h and content_h > A4_H:
+                    overflow_ratio = content_h / A4_H
+                    if overflow_ratio <= 1.28:
+                        # Débordement modéré (jusqu'à 28%) → zoom 0.78-1.0
+                        # Floor 0.78 = texte effectif ~9.5-10px, parfaitement
+                        # lisible en PDF, design préservé
+                        zoom = max(0.78, A4_H / content_h * 0.99)
+                        page.add_style_tag(content=f"html {{ zoom: {zoom}; }}")
+                        page.wait_for_timeout(150)
+                        log.info(f"pdf light-zoom: content_h={content_h}px zoom={zoom:.3f}")
+                    else:
+                        # Trop chargé → 2 pages clean (template préservé)
+                        pages_target = 2
+                        log.info(f"pdf 2-pages: content_h={content_h}px (overflow {overflow_ratio:.1%})")
 
-                if zoom < 1.0:
-                    log.info(f"pdf shrink-to-fit: content_h={content_h}px zoom={zoom:.3f}")
+                page_ranges = "1" if pages_target == 1 else "1-2"
 
-                # PDF final — pas de scale Playwright, le zoom CSS gère tout.
-                # page_ranges="1" en fail-safe ultime si ça déborde encore.
                 pdf_bytes = page.pdf(
                     format="A4",
                     print_background=True,
                     margin={"top":"0","right":"0","bottom":"0","left":"0"},
                     prefer_css_page_size=False,
-                    page_ranges="1",
+                    page_ranges=page_ranges,
                 )
             finally:
                 try: browser.close()
