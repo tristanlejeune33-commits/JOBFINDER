@@ -2090,10 +2090,10 @@ def route_preview_pdf():
     if not html: return jsonify({"error":"HTML manquant"}), 400
     return _html_to_pdf_response(html, name)
 
-def _html_to_pdf_response(html_content, name):
+def _html_to_pdf_response(html_content, name, one_page=False):
     """Convertit du HTML en PDF via Playwright.
-    Optimisé pour nos templates CV qui sont déjà au format A4
-    (max-width: 794px / min-height: 1123px à 96dpi = exactement A4)."""
+    one_page=False (défaut) : design préservé, 1-2 pages selon longueur
+    one_page=True : force 1 page (zoom plus fort si nécessaire)"""
     import tempfile
     try:
         from playwright.sync_api import sync_playwright
@@ -2195,20 +2195,23 @@ def _html_to_pdf_response(html_content, name):
                 pages_target = 1
                 if content_h and content_h > A4_H:
                     overflow_ratio = content_h / A4_H
-                    if overflow_ratio <= 1.28:
-                        # Débordement modéré (jusqu'à 28%) → zoom 0.78-1.0
-                        # Floor 0.78 = texte effectif ~9.5-10px, parfaitement
-                        # lisible en PDF, design préservé
+                    if one_page:
+                        # Mode "1 page forcée" : zoom plus fort (floor 0.62)
+                        zoom = max(0.62, A4_H / content_h * 0.99)
+                        page.add_style_tag(content=f"html {{ zoom: {zoom}; }}")
+                        page.wait_for_timeout(150)
+                        log.info(f"pdf 1-page-forced: content_h={content_h}px zoom={zoom:.3f}")
+                    elif overflow_ratio <= 1.28:
+                        # Mode design : zoom léger (floor 0.78), design préservé
                         zoom = max(0.78, A4_H / content_h * 0.99)
                         page.add_style_tag(content=f"html {{ zoom: {zoom}; }}")
                         page.wait_for_timeout(150)
                         log.info(f"pdf light-zoom: content_h={content_h}px zoom={zoom:.3f}")
                     else:
-                        # Trop chargé → 2 pages clean (template préservé)
                         pages_target = 2
                         log.info(f"pdf 2-pages: content_h={content_h}px (overflow {overflow_ratio:.1%})")
 
-                page_ranges = "1" if pages_target == 1 else "1-2"
+                page_ranges = "1" if (one_page or pages_target == 1) else "1-2"
 
                 pdf_bytes = page.pdf(
                     format="A4",
@@ -3095,14 +3098,16 @@ def route_cv_render():
 @require_auth
 @rate_limit(max_calls=30, window_sec=3600, key_fn=lambda: f"pdf:{session.get('user_id','?')}")
 def route_cv_pdf_v2():
-    """Rendu CV → PDF directement (un seul appel pour le frontend).
-    Body: {data, template_id, color, name}"""
+    """Rendu CV → PDF directement.
+    Body: {data, template_id, color, name, one_page}
+    one_page=True force 1 page A4 (zoom plus fort), False = peut faire 1-2 pages."""
     u    = get_current_user()
     data = request.json or {}
     cv_data     = data.get("data") or {}
     template_id = data.get("template_id", "modern")
     color       = (data.get("color", "#2F5DA8") or "#2F5DA8").strip()
     name        = (data.get("name", "CV") or "CV").strip()[:120]
+    one_page    = bool(data.get("one_page", False))
     if not re.match(r"^#[0-9a-fA-F]{6}$", color):
         color = "#2F5DA8"
     ud = get_user_data(u["id"])
@@ -3110,7 +3115,7 @@ def route_cv_pdf_v2():
     if ud.get("photo_b64"):
         photo_uri = f"data:{ud.get('photo_mime','image/jpeg')};base64,{ud['photo_b64']}"
     html = _render_cv(cv_data, template_id, color, photo_uri)
-    return _html_to_pdf_response(html, name)
+    return _html_to_pdf_response(html, name, one_page=one_page)
 
 @app.route("/api/cv/documents", methods=["GET"])
 @require_auth

@@ -1434,6 +1434,16 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 .cvs-tpl-tab:hover{border-color:var(--accent);color:var(--accent)}
 .cvs-tpl-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .cvs-color-picker{display:flex;align-items:center;gap:10px}
+.cvs-1page-toggle{
+  display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+  padding:6px 12px;border-radius:8px;border:1px solid var(--border2);
+  background:var(--card2);font-size:12px;font-weight:600;color:var(--text2);
+  transition:.15s;white-space:nowrap;user-select:none;
+}
+.cvs-1page-toggle:has(input:checked){
+  border-color:var(--accent);background:var(--accent-light);color:var(--accent);
+}
+.cvs-1page-toggle input{accent-color:var(--accent);width:14px;height:14px;margin:0}
 .cvs-color-picker input[type=color]{
   width:34px;height:34px;border:1px solid var(--border2);border-radius:8px;cursor:pointer;
   padding:0;background:#fff;
@@ -2121,6 +2131,10 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
     <div class="cvs-preview-col">
       <div class="cvs-preview-toolbar">
         <div class="cvs-tpl-tabs" id="cvs-tpl-tabs"></div>
+        <label class="cvs-1page-toggle" title="Force le CV à tenir sur 1 page (zoom plus fort si nécessaire)">
+          <input type="checkbox" id="cvs-1page" onchange="cvStudio.toggle1Page(this.checked)">
+          <span>📄 Mode 1 page</span>
+        </label>
         <button class="btn btn-secondary btn-sm" onclick="cvStudio.openFullscreen()" style="white-space:nowrap" title="Voir en plein écran (F)">👁️ Plein écran</button>
         <button class="btn btn-secondary btn-sm" onclick="cvLibrary.open()" style="white-space:nowrap" title="Voir tous les templates">📚 Bibliothèque</button>
         <div class="cvs-color-picker">
@@ -3876,13 +3890,13 @@ function openPrepTab(id){
   w.document.close();
 }
 
-// Aperçu papier identique au PDF : aucune compaction agressive, le template
-// garde son design natif. Zoom léger uniquement si débordement < 13 %, sinon
-// laisse défiler (le PDF généré sera 2 pages dans ce cas).
-function applyPdfPreviewMode(iframe){
+// Aperçu identique au PDF.
+// options.onePage = true → zoom plus fort pour forcer 1 page (floor 0.62)
+// options.onePage = false (défaut) → zoom léger seul, accepte 2 pages si trop long
+function applyPdfPreviewMode(iframe, options = {}){
   const doc = iframe?.contentDocument;
   if(!doc) return;
-  // Background blanc + retire les shadows screen-only
+  const onePage = !!options.onePage;
   const setStyle = (sel, props) => {
     doc.querySelectorAll(sel).forEach(el => {
       Object.entries(props).forEach(([k,v]) => el.style.setProperty(k, v, 'important'));
@@ -3891,17 +3905,22 @@ function applyPdfPreviewMode(iframe){
   setStyle('html, body', {'background':'#fff','margin':'0','padding':'0'});
   setStyle('body > *', {'box-shadow':'none','margin':'0 auto'});
 
-  // Mesure & zoom modéré si presque-fit, sinon laisse tel quel (= 2 pages PDF)
   const A4_H = 1123;
   const root = doc.querySelector('.cv') || doc.body;
   const h = Math.max(root.scrollHeight, root.offsetHeight, doc.body.scrollHeight, doc.documentElement.scrollHeight);
-  if(h && h > A4_H){
-    const overflow = h / A4_H;
+  if(!h || h <= A4_H) return;
+  const overflow = h / A4_H;
+
+  if(onePage){
+    // Force 1 page avec zoom plus fort si nécessaire (floor 0.62, text ~7-8px)
+    const zoom = Math.max(0.62, (A4_H / h) * 0.99);
+    doc.documentElement.style.zoom = zoom;
+  } else {
+    // Mode design : zoom léger uniquement (floor 0.78), sinon laisse défiler
     if(overflow <= 1.28){
       const zoom = Math.max(0.78, (A4_H / h) * 0.99);
       doc.documentElement.style.zoom = zoom;
     }
-    // sinon laisse défiler → l'aperçu montre que ça fait 2 pages
   }
 }
 
@@ -3917,6 +3936,7 @@ const cvStudio = {
     data: null,
     dirty: false,
     rendering: false,
+    onePage: false,  // false = design préservé (1-2 pages); true = force 1 page (zoom plus fort)
   },
   templates: [],
   renderTimer: null,
@@ -3996,6 +4016,16 @@ const cvStudio = {
     this.renderTimer = setTimeout(()=>this.renderPreview(), delay);
   },
 
+  toggle1Page(on){
+    this.state.onePage = !!on;
+    this.markDirty();
+    this.scheduleRender(0);
+    if(typeof toast === 'function'){
+      toast(on ? '📄 Mode 1 page activé — zoom plus fort si besoin'
+                : '🎨 Mode design — peut faire 2 pages si CV chargé', 'info');
+    }
+  },
+
   async renderPreview(){
     if(!this.state.data || this.state.rendering) return;
     this.state.rendering = true;
@@ -4008,10 +4038,10 @@ const cvStudio = {
       if(r && r.html){
         const iframe = document.getElementById('cvs-preview');
         iframe.removeAttribute('srcdoc');
-        // Au load de l'iframe, applique la même compaction que le pipeline PDF
-        // → l'aperçu devient WYSIWYG (what-you-see-is-what-you-get)
+        // WYSIWYG : applique la compaction selon le mode choisi
+        const onePage = !!this.state.onePage;
         iframe.onload = () => {
-          try { applyPdfPreviewMode(iframe); } catch(e){ console.error('preview mode:', e); }
+          try { applyPdfPreviewMode(iframe, {onePage}); } catch(e){ console.error('preview mode:', e); }
         };
         iframe.srcdoc = r.html;
       }
@@ -4066,6 +4096,7 @@ const cvStudio = {
           template_id: this.state.template_id,
           color: this.state.color,
           name: this.state.name || 'CV',
+          one_page: !!this.state.onePage,
         })
       });
       if(!resp.ok){
