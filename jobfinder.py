@@ -2164,12 +2164,34 @@ def _html_to_pdf_response(html_content, name):
                     pass
                 page.wait_for_timeout(800)  # petit buffer pour les @import async
 
-                # Rendu PDF en A4 strict, marges gérées par les @page CSS du template
+                # ── Auto-scale pour faire tenir le CV sur 1 page ──────────────
+                # A4 à 96 DPI = 794×1123 CSS pixels. On mesure le contenu réel
+                # et on scale down si ça déborde.
+                content_h = page.evaluate("""() => {
+                    const root = document.querySelector('.cv') || document.body;
+                    // Force le browser à mesurer après que tout soit stabilisé
+                    return Math.max(
+                        root.scrollHeight,
+                        root.offsetHeight,
+                        document.body.scrollHeight,
+                        document.documentElement.scrollHeight
+                    );
+                }""")
+                A4_H = 1123  # px à 96 DPI
+                buffer = 8   # petit padding pour éviter que ça touche les bords
+                scale = 1.0
+                if content_h and content_h > (A4_H - buffer):
+                    scale = max(0.55, (A4_H - buffer) / content_h)
+                    log.info(f"pdf auto-scale: content_h={content_h}px → scale={scale:.3f}")
+
+                # Rendu PDF en A4, pageRanges=1 force 1 seule page max
                 pdf_bytes = page.pdf(
                     format="A4",
                     print_background=True,
                     margin={"top":"0","right":"0","bottom":"0","left":"0"},
-                    prefer_css_page_size=True,
+                    prefer_css_page_size=False,  # on gère via format A4 + scale
+                    scale=scale,
+                    page_ranges="1",  # fail-safe : si jamais ça déborde quand même, on coupe
                 )
             finally:
                 try: browser.close()
