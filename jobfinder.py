@@ -2117,11 +2117,19 @@ def _html_to_pdf_response(html_content, name):
             f.write(html_content)
             tmp = f.name
         with sync_playwright() as p:
-            browser = p.chromium.launch(args=[
-                "--no-sandbox",                    # nécessaire en container Railway
-                "--disable-dev-shm-usage",         # mémoire partagée limitée
-                "--disable-setuid-sandbox",
-            ])
+            browser = p.chromium.launch(
+                headless=True,
+                timeout=60000,  # 60s pour le cold start container
+                args=[
+                    "--no-sandbox",                # nécessaire en container Railway/Docker
+                    "--disable-dev-shm-usage",     # mémoire partagée limitée en container
+                    "--disable-setuid-sandbox",
+                    "--disable-gpu",               # pas de GPU en container
+                    "--disable-software-rasterizer",
+                    "--single-process",            # évite les pb d'IPC sur certains containers
+                    "--no-zygote",
+                ],
+            )
             try:
                 # Viewport A4 réel : 794x1123 px à 96dpi
                 ctx = browser.new_context(viewport={"width": 794, "height": 1123})
