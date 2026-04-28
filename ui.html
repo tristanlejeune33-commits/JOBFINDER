@@ -1238,6 +1238,181 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 #s-doc-drop:hover{border-color:var(--accent) !important;background:var(--accent-light) !important}
 .doc-line:hover{border-color:var(--border2) !important}
 
+/* ══ BIBLIOTHÈQUE TEMPLATES — UX premium ══════════════════════════════════ */
+.cvlib-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;overflow-y:auto;
+  background:radial-gradient(1200px 600px at 30% -20%, rgba(124,92,255,.18) 0%, transparent 60%),
+             radial-gradient(900px 500px at 80% 100%, rgba(47,93,168,.16) 0%, transparent 55%),
+             #0a0d18;
+  animation:cvlib-fade-in .25s ease-out;
+}
+.cvlib-overlay.show{display:block}
+@keyframes cvlib-fade-in{from{opacity:0}to{opacity:1}}
+
+.cvlib-shell{
+  max-width:1380px;margin:0 auto;padding:28px 28px 140px;position:relative;
+  animation:cvlib-slide-up .35s cubic-bezier(.2,.7,.3,1);
+}
+@keyframes cvlib-slide-up{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Header */
+.cvlib-hdr{
+  display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:center;
+  padding:8px 0 24px;margin-bottom:18px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  position:sticky;top:0;background:linear-gradient(180deg,#0a0d18 0%,#0a0d18 80%,rgba(10,13,24,0));
+  backdrop-filter:blur(12px);z-index:10;padding-top:20px;
+}
+.cvlib-title h2{color:#fff;font-size:30px;font-weight:800;letter-spacing:-.025em;margin-bottom:2px;line-height:1.1}
+.cvlib-title p{color:rgba(255,255,255,.55);font-size:13px}
+.cvlib-search-wrap{position:relative;width:340px;max-width:100%}
+.cvlib-search-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.6;pointer-events:none}
+#cvlib-search{
+  width:100%;height:44px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:#fff;padding:0 38px 0 38px;border-radius:12px;font-size:14px;font-family:inherit;
+  transition:.2s;outline:none;
+}
+#cvlib-search::placeholder{color:rgba(255,255,255,.4)}
+#cvlib-search:focus{border-color:rgba(124,92,255,.6);background:rgba(255,255,255,.09);box-shadow:0 0 0 4px rgba(124,92,255,.15)}
+#cvlib-search-clear{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.1);
+  border:none;color:#fff;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;
+}
+.cvlib-close{
+  width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:18px;
+  transition:.2s;flex-shrink:0;
+}
+.cvlib-close:hover{background:rgba(255,255,255,.12);transform:rotate(90deg)}
+
+/* Categories */
+.cvlib-cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.cvlib-cat{
+  padding:8px 16px;border-radius:99px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:rgba(255,255,255,.85);
+  font-size:12.5px;font-weight:600;cursor:pointer;transition:.2s;
+  display:inline-flex;align-items:center;gap:8px;font-family:inherit;
+}
+.cvlib-cat:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)}
+.cvlib-cat.active{background:#fff;color:#0a0d18;border-color:#fff;box-shadow:0 4px 14px rgba(255,255,255,.18)}
+.cvlib-cat .cnt{
+  font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:99px;
+  background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);
+}
+.cvlib-cat.active .cnt{background:rgba(0,0,0,.1);color:#0a0d18}
+
+/* Grid */
+.cvlib-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:22px;
+}
+
+/* Card */
+.cvlib-card{
+  background:#fff;border-radius:16px;overflow:hidden;cursor:pointer;
+  transition:transform .25s cubic-bezier(.2,.7,.3,1), box-shadow .25s;
+  box-shadow:0 6px 28px rgba(0,0,0,.35);
+  position:relative;animation:cvlib-card-in .45s cubic-bezier(.2,.7,.3,1) backwards;
+  border:3px solid transparent;
+}
+@keyframes cvlib-card-in{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+.cvlib-card:hover{
+  transform:translateY(-6px) scale(1.015);
+  box-shadow:0 18px 50px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.05);
+}
+.cvlib-card.selected{
+  border-color:#7c5cff;
+  box-shadow:0 0 0 4px rgba(124,92,255,.25),0 18px 50px rgba(124,92,255,.3);
+  transform:translateY(-4px);
+}
+
+.cvlib-card-thumb{
+  aspect-ratio:794/1123;background:#eef0f5;overflow:hidden;position:relative;
+}
+.cvlib-card-thumb iframe{
+  width:794px;height:1123px;border:none;
+  transform:scale(.365);transform-origin:top left;
+  pointer-events:none;
+}
+/* Skeleton loading */
+.cvlib-card-thumb.loading::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,#eef0f5 0%,#f6f8fb 50%,#eef0f5 100%);
+  background-size:200% 100%;animation:cvlib-skel 1.4s ease-in-out infinite;z-index:1;
+}
+@keyframes cvlib-skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Hover overlay avec actions */
+.cvlib-card-hover{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.78) 100%);
+  display:flex;align-items:flex-end;justify-content:center;
+  padding:14px;opacity:0;transition:.25s;pointer-events:none;
+}
+.cvlib-card:hover .cvlib-card-hover{opacity:1;pointer-events:auto}
+.cvlib-card-hover button{
+  background:rgba(255,255,255,.96);color:#0a0d18;border:none;
+  padding:8px 14px;border-radius:99px;font-size:12px;font-weight:700;
+  cursor:pointer;transition:.15s;font-family:inherit;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+.cvlib-card-hover button:hover{transform:scale(1.05);background:#fff}
+
+/* Badge selected */
+.cvlib-card-badge{
+  position:absolute;top:10px;right:10px;
+  background:#7c5cff;color:#fff;padding:5px 11px;border-radius:99px;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  box-shadow:0 4px 10px rgba(124,92,255,.45);
+  display:flex;align-items:center;gap:5px;z-index:2;
+}
+
+/* Footer */
+.cvlib-card-foot{padding:14px 16px}
+.cvlib-card-foot-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.cvlib-card-name{font-size:14.5px;font-weight:700;color:var(--text);letter-spacing:-.005em}
+.cvlib-card-cat{
+  font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;
+  background:var(--card2);padding:3px 9px;border-radius:99px;flex-shrink:0;
+}
+.cvlib-card-prev{font-size:11.5px;color:var(--text3);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Empty state */
+.cvlib-empty{
+  text-align:center;padding:80px 20px;color:rgba(255,255,255,.7);font-size:18px;font-weight:600;
+}
+
+/* Action bar (sélection) */
+.cvlib-actionbar{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:rgba(20,24,38,.95);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.12);border-radius:18px;
+  padding:14px 20px;z-index:10001;
+  box-shadow:0 16px 50px rgba(0,0,0,.6);
+  display:flex;align-items:center;gap:24px;min-width:520px;max-width:calc(100% - 40px);
+  animation:cvlib-actionbar-in .3s cubic-bezier(.2,.7,.3,1);
+}
+@keyframes cvlib-actionbar-in{from{transform:translate(-50%,30px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.cvlib-actionbar-info{display:flex;flex-direction:column;gap:2px;flex:1}
+.cvlib-actionbar-btns{display:flex;gap:10px;flex-shrink:0}
+.cvlib-btn-primary,.cvlib-btn-secondary{
+  padding:10px 18px;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;
+  transition:.2s;font-family:inherit;border:none;
+}
+.cvlib-btn-primary{background:linear-gradient(135deg,#7c5cff,#4f7cff);color:#fff;box-shadow:0 4px 14px rgba(124,92,255,.4)}
+.cvlib-btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(124,92,255,.55)}
+.cvlib-btn-secondary{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15)}
+.cvlib-btn-secondary:hover{background:rgba(255,255,255,.14)}
+
+@media (max-width:780px){
+  .cvlib-hdr{grid-template-columns:1fr auto;gap:12px}
+  .cvlib-search-wrap{grid-column:1/-1;width:100%;order:3}
+  .cvlib-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+  .cvlib-actionbar{min-width:0;flex-direction:column;align-items:stretch;gap:12px;padding:14px 18px}
+  .cvlib-actionbar-btns{width:100%}
+  .cvlib-btn-primary,.cvlib-btn-secondary{flex:1}
+}
+
 /* ══ CV STUDIO ══════════════════════════════════════════════════════════════ */
 .cvs-layout{
   display:grid;grid-template-columns:1fr 380px;gap:18px;
@@ -2004,19 +2179,49 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 </div>
 
 <!-- ══ BIBLIOTHÈQUE TEMPLATES (modal plein écran) ══ -->
-<div id="cv-library-modal" style="display:none;position:fixed;inset:0;background:rgba(10,15,30,.92);backdrop-filter:blur(8px);z-index:9999;overflow-y:auto">
-  <div style="max-width:1280px;margin:0 auto;padding:30px 24px 60px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:14px">
-      <div>
-        <h2 style="color:#fff;font-size:28px;font-weight:800;letter-spacing:-.02em;margin-bottom:4px">📚 Bibliothèque de templates</h2>
-        <p style="color:rgba(255,255,255,.65);font-size:13px"><span id="cvlib-count">…</span> templates disponibles · clique pour appliquer</p>
+<div id="cv-library-modal" class="cvlib-overlay">
+  <div class="cvlib-shell">
+
+    <!-- HEADER : titre + recherche + ferme -->
+    <div class="cvlib-hdr">
+      <div class="cvlib-title">
+        <h2>📚 Bibliothèque</h2>
+        <p><span id="cvlib-count">…</span> templates · choisis ton style</p>
       </div>
-      <button onclick="cvLibrary.close()" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:40px;height:40px;border-radius:50%;cursor:pointer;font-size:18px">✕</button>
+      <div class="cvlib-search-wrap">
+        <span class="cvlib-search-ico">🔎</span>
+        <input id="cvlib-search" type="text" placeholder="Recherche : moderne, tech, créatif..."
+               oninput="cvLibrary.onSearch(this.value)" autocomplete="off">
+        <button id="cvlib-search-clear" onclick="cvLibrary.clearSearch()" style="display:none">✕</button>
+      </div>
+      <button class="cvlib-close" onclick="cvLibrary.close()" aria-label="Fermer">✕</button>
     </div>
 
-    <div id="cvlib-cats" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px"></div>
+    <!-- CATEGORIES en chips horizontaux -->
+    <div id="cvlib-cats" class="cvlib-cats"></div>
 
-    <div id="cvlib-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:18px"></div>
+    <!-- GRID -->
+    <div id="cvlib-grid" class="cvlib-grid"></div>
+
+    <!-- État vide -->
+    <div id="cvlib-empty" class="cvlib-empty" style="display:none">
+      <div style="font-size:54px;opacity:.4">🔍</div>
+      <div>Aucun résultat</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.45);margin-top:6px">Essaie une autre recherche ou catégorie</div>
+    </div>
+
+    <!-- BARRE INFÉRIEURE : actions sur la sélection -->
+    <div id="cvlib-actionbar" class="cvlib-actionbar" style="display:none">
+      <div class="cvlib-actionbar-info">
+        <span style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em">Sélectionné</span>
+        <strong id="cvlib-selected-name" style="font-size:15px;color:#fff;font-weight:700">—</strong>
+      </div>
+      <div class="cvlib-actionbar-btns">
+        <button class="cvlib-btn-secondary" onclick="cvLibrary.previewSelected()">👁️ Aperçu plein écran</button>
+        <button class="cvlib-btn-primary" onclick="cvLibrary.applySelected()">✓ Appliquer ce template</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -4089,7 +4294,15 @@ window.addEventListener('resize', () => {
 const cvLibrary = {
   cache: null,
   activeCategory: 'Tous',
-  // Données fictives pour les thumbnails (cohérent visuellement)
+  searchQuery: '',
+  selectedId: null,
+  // Icônes par catégorie
+  catIcons: {
+    'Tous':'✨','Moderne':'🎯','Premium':'👑','Créatif':'🎨','Tech':'💻',
+    'Académique':'🎓','Minimaliste':'⚪','Hospitality':'🍷','Health':'🩺',
+    'Business':'💼','Métier':'🛠️','Autres':'📄',
+  },
+  // Données fictives pour les thumbnails
   sampleData: {
     name: 'Marie Dupont', title: 'Designer Senior',
     summary: 'Designer produit avec 8 ans d\'expérience. Construire des interfaces utiles et belles.',
@@ -4108,35 +4321,53 @@ const cvLibrary = {
   },
 
   async open(){
-    document.getElementById('cv-library-modal').style.display = 'block';
+    const modal = document.getElementById('cv-library-modal');
+    modal.classList.add('show');
     document.body.style.overflow = 'hidden';
     if(!this.cache){
       const r = await api('/api/cv/templates');
       this.cache = r;
     }
+    // Pré-sélectionne le template courant
+    this.selectedId = cvStudio.state.template_id || null;
     this.renderCategories();
     this.renderGrid();
+    this.updateActionBar();
+    // Focus sur la recherche après animation
+    setTimeout(() => document.getElementById('cvlib-search')?.focus(), 350);
   },
 
   close(){
-    document.getElementById('cv-library-modal').style.display = 'none';
+    const modal = document.getElementById('cv-library-modal');
+    modal.classList.remove('show');
     document.body.style.overflow = '';
+  },
+
+  onSearch(q){
+    this.searchQuery = (q || '').trim().toLowerCase();
+    document.getElementById('cvlib-search-clear').style.display = this.searchQuery ? '' : 'none';
+    this.renderGrid();
+  },
+
+  clearSearch(){
+    document.getElementById('cvlib-search').value = '';
+    this.onSearch('');
+    document.getElementById('cvlib-search')?.focus();
   },
 
   renderCategories(){
     const wrap = document.getElementById('cvlib-cats');
     if(!this.cache) return;
     const cats = this.cache.categories || ['Tous'];
-    wrap.innerHTML = cats.map(c => `
-      <button onclick="cvLibrary.setCategory('${esc(c)}')"
-        class="cvlib-cat ${c === this.activeCategory ? 'active' : ''}"
-        style="padding:8px 16px;border-radius:99px;border:1px solid rgba(255,255,255,.18);
-               background:${c === this.activeCategory ? '#fff' : 'rgba(255,255,255,.06)'};
-               color:${c === this.activeCategory ? '#0a0a0a' : '#fff'};
-               font-size:12.5px;font-weight:600;cursor:pointer;transition:.2s">
-        ${esc(c)}
-      </button>
-    `).join('');
+    const tpls = this.cache.templates || [];
+    wrap.innerHTML = cats.map(c => {
+      const count = c === 'Tous' ? tpls.length : tpls.filter(t => t.category === c).length;
+      const ico = this.catIcons[c] || '📁';
+      const active = c === this.activeCategory;
+      return `<button class="cvlib-cat ${active?'active':''}" onclick="cvLibrary.setCategory('${esc(c)}')">
+        <span>${ico}</span><span>${esc(c)}</span><span class="cnt">${count}</span>
+      </button>`;
+    }).join('');
   },
 
   setCategory(cat){
@@ -4145,83 +4376,169 @@ const cvLibrary = {
     this.renderGrid();
   },
 
-  async renderGrid(){
+  filteredTemplates(){
+    if(!this.cache) return [];
+    let tpls = this.cache.templates || [];
+    if(this.activeCategory && this.activeCategory !== 'Tous'){
+      tpls = tpls.filter(t => t.category === this.activeCategory);
+    }
+    if(this.searchQuery){
+      tpls = tpls.filter(t => {
+        const s = (t.name + ' ' + t.category + ' ' + (t.preview||'') + ' ' + (t.tags||[]).join(' ')).toLowerCase();
+        return s.includes(this.searchQuery);
+      });
+    }
+    return tpls;
+  },
+
+  renderGrid(){
     const grid = document.getElementById('cvlib-grid');
+    const empty = document.getElementById('cvlib-empty');
     const counter = document.getElementById('cvlib-count');
     if(!this.cache) return;
-    let templates = this.cache.templates || [];
-    if(this.activeCategory && this.activeCategory !== 'Tous'){
-      templates = templates.filter(t => t.category === this.activeCategory);
-    }
-    counter.textContent = templates.length;
+    const tpls = this.filteredTemplates();
+    counter.textContent = tpls.length;
 
-    if(!templates.length){
-      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:rgba(255,255,255,.5)">Aucun template dans cette catégorie</div>`;
+    if(!tpls.length){
+      grid.innerHTML = '';
+      empty.style.display = '';
       return;
     }
+    empty.style.display = 'none';
 
-    // Couleur de prévisualisation = couleur active CV studio (ou bleu par défaut)
     const previewColor = (cvStudio.state.color || '#2F5DA8');
-    const data = (cvStudio.state.data && Object.keys(cvStudio.state.data).length) ? cvStudio.state.data : this.sampleData;
+    const data = (cvStudio.state.data && Object.keys(cvStudio.state.data).length)
+                 ? cvStudio.state.data : this.sampleData;
 
-    grid.innerHTML = templates.map(t => {
-      const active = (cvStudio.state.template_id === t.id);
+    grid.innerHTML = tpls.map((t, i) => {
+      const active = (this.selectedId === t.id);
       return `
-      <div class="cvlib-card" data-tid="${esc(t.id)}"
-           style="background:#fff;border-radius:14px;overflow:hidden;cursor:pointer;
-                  transition:.25s;border:3px solid ${active ? previewColor : 'transparent'};
-                  box-shadow:0 4px 24px rgba(0,0,0,.4);position:relative">
-        <div style="aspect-ratio:794/1123;background:#eee;overflow:hidden;position:relative">
-          <iframe sandbox="allow-same-origin" data-tid="${esc(t.id)}"
-                  style="width:794px;height:1123px;border:none;transform:scale(.31);transform-origin:top left;
-                         pointer-events:none"></iframe>
-          ${active ? '<div style="position:absolute;top:10px;right:10px;background:'+previewColor+';color:#fff;padding:4px 10px;border-radius:99px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">Sélectionné</div>' : ''}
-        </div>
-        <div style="padding:14px 16px">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-            <strong style="font-size:14.5px;color:var(--text)">${esc(t.name)}</strong>
-            <span style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;background:var(--card2);padding:2px 8px;border-radius:99px">${esc(t.category)}</span>
+      <div class="cvlib-card ${active?'selected':''}" data-tid="${esc(t.id)}" style="animation-delay:${Math.min(i*30,800)}ms">
+        <div class="cvlib-card-thumb loading" data-tid="${esc(t.id)}">
+          <iframe sandbox="allow-same-origin" data-tid="${esc(t.id)}"></iframe>
+          <div class="cvlib-card-hover">
+            <button onclick="event.stopPropagation();cvLibrary.previewTemplate('${esc(t.id)}')">👁️ Aperçu plein écran</button>
           </div>
-          <div style="font-size:11.5px;color:var(--text3);line-height:1.5">${esc(t.preview)}</div>
+          ${active ? '<div class="cvlib-card-badge">✓ Sélectionné</div>' : ''}
+        </div>
+        <div class="cvlib-card-foot">
+          <div class="cvlib-card-foot-row">
+            <strong class="cvlib-card-name">${esc(t.name)}</strong>
+            <span class="cvlib-card-cat">${this.catIcons[t.category]||''} ${esc(t.category)}</span>
+          </div>
+          <div class="cvlib-card-prev">${esc(t.preview)}</div>
         </div>
       </div>`;
     }).join('');
 
-    // Click handler + lazy render des thumbnails
+    // Single click = select + show actionbar; Double click = apply directly
     grid.querySelectorAll('.cvlib-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const tid = card.dataset.tid;
-        cvStudio.setTemplate(tid);
-        // Update active state visuel
-        cvLibrary.renderGrid();
-        // Ferme après un petit délai pour qu'on voie la sélection
-        setTimeout(() => cvLibrary.close(), 350);
+      let clickTimer = null;
+      card.addEventListener('click', (e) => {
+        if(e.target.closest('button')) return; // bouton aperçu géré séparément
+        if(clickTimer){ clearTimeout(clickTimer); clickTimer=null; return; }
+        clickTimer = setTimeout(() => {
+          this.selectCard(card.dataset.tid);
+          clickTimer = null;
+        }, 200);
       });
-      card.addEventListener('mouseenter', () => {
-        if(card.style.borderColor === 'transparent') card.style.transform = 'translateY(-4px)';
-      });
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = '';
+      card.addEventListener('dblclick', (e) => {
+        if(e.target.closest('button')) return;
+        if(clickTimer){ clearTimeout(clickTimer); clickTimer=null; }
+        this.selectCard(card.dataset.tid);
+        this.applySelected();
       });
     });
 
-    // Render thumbnails async (un par un pour pas tout bloquer)
-    grid.querySelectorAll('iframe[data-tid]').forEach(async (iframe, i) => {
+    // Lazy render iframes (étalé pour pas freezer)
+    grid.querySelectorAll('iframe[data-tid]').forEach((iframe, i) => {
       setTimeout(async () => {
         const tid = iframe.dataset.tid;
         try{
           const r = await post('/api/cv/render', {data, template_id: tid, color: previewColor});
-          if(r && r.html){ iframe.srcdoc = r.html; }
+          if(r && r.html){
+            iframe.srcdoc = r.html;
+            // Retire le skeleton quand chargé
+            const thumb = iframe.closest('.cvlib-card-thumb');
+            if(thumb){
+              setTimeout(() => thumb.classList.remove('loading'), 200);
+            }
+          }
         }catch(e){ /* silent */ }
-      }, i * 60);  // 60 ms entre chaque pour étaler la charge
+      }, Math.min(i * 50, 1500));
     });
+  },
+
+  selectCard(tid){
+    this.selectedId = tid;
+    // Update visuel : retire selected partout, ajoute sur la carte
+    document.querySelectorAll('.cvlib-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.tid === tid);
+      // Update badge
+      const oldBadge = c.querySelector('.cvlib-card-badge');
+      if(oldBadge) oldBadge.remove();
+      if(c.dataset.tid === tid){
+        const thumb = c.querySelector('.cvlib-card-thumb');
+        if(thumb && !thumb.querySelector('.cvlib-card-badge')){
+          const b = document.createElement('div');
+          b.className = 'cvlib-card-badge';
+          b.textContent = '✓ Sélectionné';
+          thumb.appendChild(b);
+        }
+      }
+    });
+    this.updateActionBar();
+  },
+
+  updateActionBar(){
+    const bar = document.getElementById('cvlib-actionbar');
+    if(!this.selectedId){ bar.style.display = 'none'; return; }
+    const tpl = (this.cache?.templates || []).find(t => t.id === this.selectedId);
+    if(!tpl){ bar.style.display = 'none'; return; }
+    bar.style.display = '';
+    document.getElementById('cvlib-selected-name').textContent =
+      `${this.catIcons[tpl.category]||''} ${tpl.name} — ${tpl.category}`;
+  },
+
+  async applySelected(){
+    if(!this.selectedId) return;
+    cvStudio.setTemplate(this.selectedId);
+    this.close();
+    if(typeof toast === 'function'){
+      const tpl = (this.cache?.templates || []).find(t => t.id === this.selectedId);
+      toast(`Template "${tpl?.name || this.selectedId}" appliqué`, 'success');
+    }
+  },
+
+  async previewSelected(){
+    if(!this.selectedId) return;
+    await this.previewTemplate(this.selectedId);
+  },
+
+  async previewTemplate(tid){
+    // Applique temporairement + ouvre fullscreen
+    const previousTpl = cvStudio.state.template_id;
+    cvStudio.setTemplate(tid);
+    // Petite attente pour que le render se déclenche
+    await new Promise(r => setTimeout(r, 250));
+    this.close();
+    cvStudio.openFullscreen();
   },
 };
 
 // ESC ferme le modal
 document.addEventListener('keydown', (e) => {
-  if(e.key === 'Escape' && document.getElementById('cv-library-modal')?.style.display === 'block'){
+  const modal = document.getElementById('cv-library-modal');
+  const isOpen = modal?.classList.contains('show');
+  if(e.key === 'Escape' && isOpen){
     cvLibrary.close();
+  }
+  // Enter = appliquer la sélection courante
+  if(e.key === 'Enter' && isOpen && cvLibrary.selectedId){
+    const tag = e.target?.tagName;
+    if(tag !== 'INPUT' || e.target.id !== 'cvlib-search'){
+      cvLibrary.applySelected();
+    }
   }
 });
 
