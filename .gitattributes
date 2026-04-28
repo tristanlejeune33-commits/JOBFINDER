@@ -1,0 +1,9 @@
+# Force LF (Unix) line endings pour les fichiers exécutés en container Linux.
+# Sinon le shebang #!/bin/sh\r casse sous Linux.
+*.sh        text eol=lf
+Dockerfile  text eol=lf
+Procfile    text eol=lf
+*.py        text
+*.html      text
+*.json      text
+*.md        text
