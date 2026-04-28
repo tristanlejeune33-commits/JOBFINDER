@@ -25,19 +25,8 @@ RUN SECRET_KEY=test python -c "import jobfinder; print('jobfinder import OK')"
 
 EXPOSE 8080
 
-# Wrapper pour avoir un log lisible avant gunicorn (si quelque chose plante
-# avant gunicorn, on saura que le container a au moins démarré)
-RUN echo '#!/bin/sh\n\
-echo "[boot] starting jobfinder on port ${PORT:-8080}"\n\
-echo "[boot] DATABASE_URL=$(echo $DATABASE_URL | sed "s/:[^@]*@/:****@/")"\n\
-echo "[boot] python: $(python --version)"\n\
-exec gunicorn jobfinder:app \\\n\
-  --bind "0.0.0.0:${PORT:-8080}" \\\n\
-  --workers 1 \\\n\
-  --timeout 120 \\\n\
-  --graceful-timeout 30 \\\n\
-  --log-level info \\\n\
-  --access-logfile - \\\n\
-  --error-logfile -' > /app/start.sh && chmod +x /app/start.sh
+# Le start.sh est COPY via le COPY . . plus haut (vrai fichier dans le repo,
+# évite les pièges d'echo avec dash)
+RUN chmod +x /app/start.sh && head -3 /app/start.sh
 
 CMD ["/app/start.sh"]
