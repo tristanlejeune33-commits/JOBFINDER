@@ -597,7 +597,10 @@ def init_db():
         );
         """)
 
-init_db()
+try:
+    init_db()
+except Exception as e:
+    log.error(f"init_db FAILED at boot — app continuera quand même : {e}")
 
 # Migrations idempotentes
 def _migrate_columns():
@@ -620,7 +623,10 @@ def _migrate_columns():
             if not _is_dup_column_err(e):
                 # Vraie erreur (ex: table absente) — log mais on continue
                 log.warning(f"migrate {table}.{col}: {e}")
-_migrate_columns()
+try:
+    _migrate_columns()
+except Exception as e:
+    log.error(f"_migrate_columns FAILED at boot — continuing : {e}")
 
 # ── Helpers SQL ─────────────────────────────────────────────────────────────────
 def row_to_dict(row):
@@ -2883,7 +2889,10 @@ def _migrate_cv_documents():
         )
         """)
         db.commit()
-_migrate_cv_documents()
+try:
+    _migrate_cv_documents()
+except Exception as e:
+    log.error(f"_migrate_cv_documents FAILED at boot — continuing : {e}")
 
 # ── Endpoints CV V2 ────────────────────────────────────────────────────────────
 @app.route("/api/cv/templates", methods=["GET"])
