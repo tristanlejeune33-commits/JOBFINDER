@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Bauhaus Geometric","category":"Créatif","preview":"Couleurs primaires Bauhaus · formes géométriques · optimisé A4 1 page","tags":["bauhaus","geometric","bold","a4","compact","optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Archivo+Black&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f5f1e8;font-family:'Archivo',sans-serif;color:#0e0e0e;font-size:11.5px;line-height:1.45}
+.cv{width:794px;height:1123px;margin:0 auto;background:#fff;box-shadow:0 30px 80px -20px rgba(0,0,0,.18);overflow:hidden}
+
+.cv-bh{
+  --c-ink:#0e0e0e;--c-paper:#fff;--c-cream:#f5f1e8;
+  --c-red:{{color}};--c-yellow:#ffb703;--c-blue:#1d4ed8;
+  font-family:'Archivo',sans-serif;color:var(--c-ink);background:var(--c-paper);min-height:1123px
+}
+
+.bh-hero{display:grid;grid-template-columns:1fr 1fr;border-bottom:4px solid var(--c-ink);min-height:160px}
+.bh-hero .left{padding:18px 22px;background:var(--c-yellow);position:relative;display:flex;flex-direction:column;justify-content:flex-end}
+.bh-hero .left::before{content:"";position:absolute;top:14px;right:14px;width:50px;height:50px;background:var(--c-red);border-radius:50%}
+.bh-hero .left::after{content:"";position:absolute;top:18px;left:14px;width:0;height:0;border-style:solid;border-width:0 0 36px 36px;border-color:transparent transparent var(--c-blue) transparent}
+.bh-hero .left .label{font-family:'Archivo Black',sans-serif;font-size:8.5px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:6px}
+.bh-hero .left h1{font-family:'Archivo Black',sans-serif;font-size:34px;line-height:.85;letter-spacing:-.04em;text-transform:uppercase}
+.bh-hero .left .role{font-size:10px;font-weight:600;margin-top:5px;max-width:300px;line-height:1.35}
+
+.bh-hero .right{padding:18px 22px;background:var(--c-blue);color:#fff;position:relative;display:flex;flex-direction:column;justify-content:center}
+.bh-hero .right::before{content:"";position:absolute;bottom:14px;right:14px;width:0;height:0;border-style:solid;border-width:36px 0 0 36px;border-color:transparent transparent transparent var(--c-yellow)}
+.bh-hero .right .photo{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--c-yellow);color:var(--c-blue);font-family:'Archivo Black',sans-serif;font-weight:900;font-size:26px;border:4px solid #fff;margin-bottom:7px;overflow:hidden}
+.bh-hero .right .photo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.bh-hero .right .ct{font-size:9.5px;line-height:1.55;font-weight:500}
+.bh-hero .right .ct b{display:block;font-family:'Archivo Black',sans-serif;font-size:8.5px;color:var(--c-yellow);text-transform:uppercase;letter-spacing:.12em;margin-top:3px}
+
+.bh-accroche{padding:10px 22px;background:var(--c-red);color:#fff;font-size:12px;line-height:1.35;font-weight:700;border-bottom:4px solid var(--c-ink);position:relative}
+.bh-accroche::before{content:"●";color:var(--c-yellow);font-size:18px;line-height:1;margin-right:7px;vertical-align:middle}
+
+.bh-sec{padding:13px 22px;border-bottom:4px solid var(--c-ink)}
+.bh-sec h2{font-family:'Archivo Black',sans-serif;font-size:18px;letter-spacing:-.02em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:9px}
+.bh-sec h2 .num{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;background:var(--c-red);color:#fff;border-radius:50%;font-size:10px}
+
+.bh-xp{padding:6px 0;border-bottom:1.5px solid var(--c-ink);display:grid;grid-template-columns:90px 1fr;gap:14px}
+.bh-xp:last-child{border:none}
+.bh-xp .when{font-family:'Archivo Black',sans-serif;font-size:9px;text-transform:uppercase;letter-spacing:.06em;background:var(--c-yellow);padding:3px 7px;display:inline-block;height:fit-content}
+.bh-xp h3{font-family:'Archivo Black',sans-serif;font-size:12px;text-transform:uppercase;letter-spacing:-.01em;line-height:1.2}
+.bh-xp .co{font-weight:700;color:var(--c-blue);font-size:10px;margin:1px 0 3px}
+.bh-xp ul{margin:3px 0 0;padding-left:14px;font-size:9.8px;line-height:1.42;font-weight:500}
+.bh-xp ul li::marker{color:var(--c-red)}
+
+.bh-form{padding:5px 0;border-bottom:1.5px solid var(--c-ink);display:grid;grid-template-columns:36px 1fr auto;gap:12px;align-items:center}
+.bh-form:last-child{border:none}
+.bh-form .shape{width:24px;height:24px;background:var(--c-blue)}
+.bh-form b{font-family:'Archivo Black',sans-serif;font-size:11px;text-transform:uppercase;display:block;line-height:1.2}
+.bh-form span{font-size:9.5px;font-weight:500;display:block;margin-top:1px}
+.bh-form .when{font-family:'Archivo Black',sans-serif;font-size:9px;background:#000;color:var(--c-yellow);padding:3px 7px;letter-spacing:.06em;white-space:nowrap}
+
+.bh-comp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:0;border:1.5px solid var(--c-ink);background:#fff}
+.bh-comp-grid .panel{padding:9px 12px;border-right:1.5px solid var(--c-ink)}
+.bh-comp-grid .panel:last-child{border-right:none}
+.bh-comp-grid .panel:nth-child(2){background:var(--c-cream)}
+.bh-comp-grid h3{font-family:'Archivo Black',sans-serif;font-size:10px;text-transform:uppercase;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.bh-comp-grid h3::before{content:"";width:10px;height:10px;background:var(--c-red);border-radius:50%}
+.bh-pill{display:inline-block;background:var(--c-paper);border:1.5px solid var(--c-ink);padding:1px 7px;font-size:9.5px;font-weight:700;text-transform:uppercase;margin:0 3px 3px 0}
+.bh-lang{display:flex;justify-content:space-between;font-size:10px;font-weight:600;padding:3px 0;border-bottom:1px solid var(--c-ink)}
+.bh-lang:last-child{border:none}
+.bh-lang em{font-family:'Archivo Black',sans-serif;font-style:normal;font-size:9px;text-transform:uppercase;letter-spacing:.04em}
+
+.bh-int{font-size:10px;line-height:1.5;font-weight:500}
+.bh-int span{display:inline-block;border:1.5px solid var(--c-ink);padding:1px 8px;font-size:9.5px;font-weight:700;text-transform:uppercase;margin:1px 3px 1px 0;background:var(--c-cream)}
+
+@media print{body{background:#fff}.cv{box-shadow:none;margin:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-bh bh">
+
+<div class="bh-hero">
+  <div class="left">
+    {{#title}}<div class="label">{{title}}</div>{{/title}}
+    <h1>{{name}}</h1>
+    {{#summary}}<div class="role">{{summary}}</div>{{/summary}}
+  </div>
+  <div class="right">
+    <div class="photo">{{{photo_or_initials}}}</div>
+    <div class="ct">
+      {{#contact.email}}<b>Email</b>{{contact.email}}{{/contact.email}}
+      {{#contact.phone}}<b>Téléphone</b>{{contact.phone}}{{/contact.phone}}
+      {{#contact.location}}<b>Ville</b>{{contact.location}}{{/contact.location}}
+      {{#contact.linkedin}}<b>LinkedIn</b>{{contact.linkedin}}{{/contact.linkedin}}
+      {{#contact.website}}<b>Site web</b>{{contact.website}}{{/contact.website}}
+    </div>
+  </div>
+</div>
+
+{{#summary}}<p class="bh-accroche">{{summary}}</p>{{/summary}}
+
+{{#has_experience}}
+<section class="bh-sec">
+  <h2><span class="num">01</span>Expériences professionnelles</h2>
+  {{#experience}}
+  <div class="bh-xp">
+    <div class="when">{{date}}</div>
+    <div>
+      <h3>{{role}}</h3>
+      <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+      {{#has_bullets}}
+      <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+      {{/has_bullets}}
+    </div>
+  </div>
+  {{/experience}}
+</section>
+{{/has_experience}}
+
+{{#has_education}}
+<section class="bh-sec">
+  <h2><span class="num">02</span>Formation</h2>
+  {{#education}}
+  <div class="bh-form">
+    <div class="shape"></div>
+    <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/education}}
+</section>
+{{/has_education}}
+
+{{#has_skills}}
+<section class="bh-sec">
+  <h2><span class="num">03</span>Compétences</h2>
+  <div class="bh-comp-grid">
+    <div class="panel">
+      <h3>Techniques</h3>
+      {{#skills}}<span class="bh-pill">{{name}}</span>{{/skills}}
+    </div>
+    {{#has_languages}}
+    <div class="panel">
+      <h3>Langues</h3>
+      {{#languages}}<div class="bh-lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+    </div>
+    {{/has_languages}}
+  </div>
+</section>
+{{/has_skills}}
+
+{{#has_certifications}}
+<section class="bh-sec">
+  <h2><span class="num">04</span>Certifications</h2>
+  {{#certifications}}
+  <div class="bh-form">
+    <div class="shape"></div>
+    <div><b>{{name}}</b></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/certifications}}
+</section>
+{{/has_certifications}}
+
+{{#has_interests}}
+<section class="bh-sec">
+  <h2><span class="num">05</span>Centres d'intérêt</h2>
+  <p class="bh-int">
+    {{#interests}}<span>{{.}}</span>{{/interests}}
+  </p>
+</section>
+{{/has_interests}}
+
+</div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

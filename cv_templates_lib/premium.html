@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Premium","category":"Premium","preview":"Cormorant serif · élégant · optimisé A4 1 page","tags":["a4","compact","optimisé","serif","élégant"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>{{name}} — CV</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:{{color}};
+  --primary-d:{{color_dark}};
+  --primary-l:{{color_light}};
+  --text:#1a1a1a;
+  --text2:#3a3a3a;
+  --text3:#7a7a7a;
+  --bg:#fafaf6;
+  --gold:#c9a44c;
+  --line:#d8d3c5;
+}
+body{font-family:'Montserrat',sans-serif;background:#e8e6df;color:var(--text);line-height:1.45;font-size:11.5px;font-weight:300}
+.cv{
+  width:794px;height:1123px;margin:0 auto;background:var(--bg);
+  padding:28px 36px 22px;box-shadow:0 4px 30px rgba(0,0,0,.06);
+  position:relative;overflow:hidden;
+}
+
+/* Header — 2 colonnes */
+.header{display:grid;grid-template-columns:1fr 90px;gap:18px;align-items:center;padding-bottom:14px;border-bottom:1px solid var(--line);margin-bottom:14px;position:relative}
+.header::after{content:'❖';position:absolute;bottom:-8px;left:50%;transform:translateX(-50%);background:var(--bg);padding:0 10px;color:var(--primary);font-size:12px}
+.name{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--text);line-height:1.05;letter-spacing:-.01em;margin-bottom:4px}
+.title{font-size:10.5px;color:var(--primary);font-weight:500;text-transform:uppercase;letter-spacing:.18em;margin-bottom:8px}
+.title::before{content:'';display:inline-block;width:18px;height:1px;background:var(--primary);vertical-align:middle;margin-right:8px}
+.contact-row{display:flex;flex-wrap:wrap;gap:9px;font-size:9.5px;color:var(--text3)}
+.contact-row span{display:flex;align-items:center;gap:4px}
+
+.photo{width:90px;height:90px;border:2.5px solid var(--primary);overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--primary-l);color:var(--primary);font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* Sections */
+.section{margin-bottom:13px}
+.section-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.section-title::before{content:'';display:block;width:5px;height:5px;background:var(--primary);transform:rotate(45deg);flex-shrink:0}
+.section-title::after{content:'';flex:1;height:1px;background:var(--line);margin-left:6px}
+
+/* Summary */
+.summary{font-size:10.5px;color:var(--text2);line-height:1.55;font-style:italic;font-weight:400;padding:0 10px;border-left:2px solid var(--primary);margin-bottom:10px}
+
+/* Experience — 2 columns */
+.exp{display:grid;grid-template-columns:90px 1fr;gap:14px;margin-bottom:8px;padding-bottom:7px;border-bottom:1px dashed var(--line)}
+.exp:last-child{border-bottom:none;padding-bottom:0;margin-bottom:0}
+.exp-date{font-size:9.5px;font-weight:500;color:var(--primary);letter-spacing:.04em;padding-top:2px}
+.exp-date small{display:block;font-weight:300;color:var(--text3);font-size:9px;margin-top:1px;letter-spacing:0;font-style:italic}
+.exp-role{font-size:11.5px;font-weight:600;color:var(--text);margin-bottom:1px;line-height:1.2}
+.exp-co{font-size:10px;color:var(--text2);margin-bottom:3px;font-weight:500}
+.exp-co em{color:var(--text3);font-weight:300;font-style:italic}
+.exp-desc{list-style:none;margin-top:3px}
+.exp-desc li{position:relative;padding-left:12px;font-size:9.8px;color:var(--text2);line-height:1.42;margin-bottom:1px}
+.exp-desc li::before{content:'—';position:absolute;left:0;color:var(--primary)}
+
+/* Education */
+.edu-item{display:grid;grid-template-columns:90px 1fr;gap:14px;margin-bottom:5px}
+.edu-date{font-size:9.5px;color:var(--primary);font-weight:500;padding-top:2px}
+.edu-deg{font-size:11px;font-weight:600;color:var(--text);line-height:1.2}
+.edu-school{font-size:9.8px;color:var(--text2);font-style:italic;margin-top:1px}
+
+/* Two-col split */
+.split{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.split .section{margin-bottom:0}
+
+/* Skills */
+.skill{display:flex;align-items:center;gap:8px;margin-bottom:3px}
+.skill-info{flex:1}
+.skill-name{font-size:10.5px;font-weight:500;color:var(--text)}
+.skill-name::before{content:'· ';color:var(--primary);font-weight:700}
+
+/* Languages */
+.lang{display:flex;justify-content:space-between;align-items:center;font-size:10.5px;margin-bottom:3px;padding:2px 0;border-bottom:1px solid var(--line)}
+.lang:last-child{border-bottom:none}
+.lang-name{font-weight:500;color:var(--text)}
+.lang-level{font-size:9px;color:var(--text3);font-style:italic;letter-spacing:.05em}
+
+/* Certifications */
+.cert{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;color:var(--text2);margin-bottom:2px;padding:1px 0}
+.cert-name{font-weight:500;color:var(--text)}
+.cert-name::before{content:'❖ ';color:var(--primary);font-weight:700;margin-right:1px}
+.cert-date{font-size:9px;color:var(--text3);font-style:italic}
+
+/* Interests */
+.interest{display:inline-block;border:1px solid var(--line);padding:1px 8px;border-radius:99px;font-size:9.5px;color:var(--text2);margin:0 4px 3px 0;background:#fff}
+
+@media print{
+  body{background:#fff}
+  .cv{box-shadow:none;margin:0}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="cv">
+  <header class="header">
+    <div>
+      <h1 class="name">{{name}}</h1>
+      {{#title}}<div class="title">{{title}}</div>{{/title}}
+      <div class="contact-row">
+        {{#contact.email}}<span>✉ {{contact.email}}</span>{{/contact.email}}
+        {{#contact.phone}}<span>☎ {{contact.phone}}</span>{{/contact.phone}}
+        {{#contact.location}}<span>📍 {{contact.location}}</span>{{/contact.location}}
+        {{#contact.linkedin}}<span>in {{contact.linkedin}}</span>{{/contact.linkedin}}
+        {{#contact.website}}<span>🌐 {{contact.website}}</span>{{/contact.website}}
+      </div>
+    </div>
+    <div class="photo">{{{photo_or_initials}}}</div>
+  </header>
+
+  {{#summary}}
+  <section class="section">
+    <div class="summary">{{summary}}</div>
+  </section>
+  {{/summary}}
+
+  {{#has_experience}}
+  <section class="section">
+    <div class="section-title">Expérience professionnelle</div>
+    {{#experience}}
+    <div class="exp">
+      <div class="exp-date">{{date}}{{#location}}<small>{{location}}</small>{{/location}}</div>
+      <div>
+        <div class="exp-role">{{role}}</div>
+        <div class="exp-co">{{company}}</div>
+        {{#has_bullets}}
+        <ul class="exp-desc">{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+        {{/has_bullets}}
+      </div>
+    </div>
+    {{/experience}}
+  </section>
+  {{/has_experience}}
+
+  {{#has_education}}
+  <section class="section">
+    <div class="section-title">Formation</div>
+    {{#education}}
+    <div class="edu-item">
+      <div class="edu-date">{{date}}</div>
+      <div>
+        <div class="edu-deg">{{degree}}</div>
+        <div class="edu-school">{{school}}{{#location}} — {{location}}{{/location}}</div>
+      </div>
+    </div>
+    {{/education}}
+  </section>
+  {{/has_education}}
+
+  <div class="split">
+    {{#has_skills}}
+    <section class="section">
+      <div class="section-title">Compétences</div>
+      {{#skills}}
+      <div class="skill">
+        <div class="skill-info"><div class="skill-name">{{name}}</div></div>
+      </div>
+      {{/skills}}
+    </section>
+    {{/has_skills}}
+
+    {{#has_languages}}
+    <section class="section">
+      <div class="section-title">Langues</div>
+      {{#languages}}
+      <div class="lang"><span class="lang-name">{{name}}</span><span class="lang-level">{{level}}</span></div>
+      {{/languages}}
+    </section>
+    {{/has_languages}}
+  </div>
+
+  {{#has_certifications}}
+  <section class="section">
+    <div class="section-title">Certifications</div>
+    {{#certifications}}<div class="cert"><span class="cert-name">{{name}}</span>{{#date}}<span class="cert-date">{{date}}</span>{{/date}}</div>{{/certifications}}
+  </section>
+  {{/has_certifications}}
+
+  {{#has_interests}}
+  <section class="section" style="margin-bottom:0">
+    <div class="section-title">Centres d'intérêt</div>
+    <div>{{#interests}}<span class="interest">{{.}}</span>{{/interests}}</div>
+  </section>
+  {{/has_interests}}
+</div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

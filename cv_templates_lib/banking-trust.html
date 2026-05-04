@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Banking Trust","category":"Premium","preview":"Navy + champagne gold · banque privée · optimisé A4 1 page","tags":["banking","premium","gold","navy","a4","compact","optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e7ecf2;font-family:'Inter',sans-serif;color:#0f1c33;font-size:11.5px;line-height:1.45}
+.cv{width:794px;height:1123px;margin:0 auto;background:#fff;box-shadow:0 18px 50px -16px rgba(15,28,51,.18);overflow:hidden}
+
+.cv-bt{
+  --c-ink:#0f1c33;--c-paper:#fff;--c-muted:#5a6a82;--c-line:#dde3ec;
+  --c-navy:{{color}};--c-navy-l:{{color_dark}};--c-gold:#b89554;--c-gold-l:#e6d3a3;--c-soft:#f4f6fa;
+  font-family:'Inter',sans-serif;color:var(--c-ink);background:var(--c-paper);min-height:1123px
+}
+
+.bt-hero{background:linear-gradient(135deg,var(--c-navy) 0%,var(--c-navy-l) 100%);color:#fff;padding:18px 26px;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;position:relative;overflow:hidden}
+.bt-hero::after{content:"";position:absolute;top:0;right:0;width:140px;height:100%;background:radial-gradient(circle at 100% 50%,rgba(184,149,84,.18),transparent 60%);pointer-events:none}
+.bt-photo{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--c-gold-l);color:var(--c-navy);font-family:'Lora',serif;font-weight:600;font-size:28px;border:3px solid #fff;box-shadow:0 0 0 1px var(--c-gold);overflow:hidden}
+.bt-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.bt-id{position:relative;z-index:2}
+.bt-id h1{font-family:'Lora',serif;font-size:24px;font-weight:600;letter-spacing:-.01em;line-height:1.1}
+.bt-id .role{color:var(--c-gold-l);font-size:11px;font-weight:600;margin-top:2px;letter-spacing:.02em}
+.bt-id .meta{margin-top:6px;display:flex;flex-wrap:wrap;gap:9px;font-size:9.5px;color:#cbd5e1}
+.bt-id .meta b{color:var(--c-gold-l);font-weight:600;margin-right:3px;text-transform:uppercase;font-size:8.5px;letter-spacing:.06em}
+.bt-stamp{display:flex;flex-direction:column;align-items:flex-end;gap:4px;position:relative;z-index:2}
+.bt-stamp .badge{background:var(--c-gold);color:var(--c-navy);padding:3px 10px;border-radius:3px;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+
+.bt-accroche{padding:9px 26px;background:var(--c-soft);border-bottom:2px solid var(--c-gold);font-family:'Lora',serif;font-style:italic;font-size:11px;line-height:1.45;color:var(--c-navy)}
+.bt-accroche::before{content:"« ";color:var(--c-gold);font-weight:700;font-size:14px}
+.bt-accroche::after{content:" »";color:var(--c-gold);font-weight:700;font-size:14px}
+
+.bt-body{padding:14px 26px 16px}
+.bt h2{font-family:'Lora',serif;font-size:13px;font-weight:600;color:var(--c-navy);margin:13px 0 7px;padding-bottom:3px;border-bottom:2px solid var(--c-gold);display:inline-block;letter-spacing:.005em}
+.bt h2:first-of-type{margin-top:0}
+
+.bt-xp{padding:8px 12px;background:#fff;border:1px solid var(--c-line);border-left:3px solid var(--c-gold);border-radius:0 6px 6px 0;margin-bottom:5px}
+.bt-xp .row{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.bt-xp h3{font-family:'Lora',serif;font-size:12px;font-weight:600;line-height:1.2}
+.bt-xp .when{font-size:9px;color:var(--c-navy);background:var(--c-gold-l);padding:2px 7px;border-radius:3px;font-weight:600;letter-spacing:.04em;white-space:nowrap}
+.bt-xp .co{color:var(--c-gold);font-style:italic;font-size:10px;margin:1px 0 3px;font-family:'Lora',serif;font-weight:500}
+.bt-xp ul{margin:3px 0 0;padding-left:14px;font-size:9.8px;line-height:1.42;color:#1e3358}
+.bt-xp ul li::marker{color:var(--c-gold)}
+
+.bt-form{padding:6px 12px;background:var(--c-soft);border-radius:6px;margin-bottom:4px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:baseline;border-left:3px solid var(--c-navy)}
+.bt-form b{font-family:'Lora',serif;font-size:11px;font-weight:600;display:block;line-height:1.2}
+.bt-form span{display:block;color:var(--c-muted);font-size:9.5px;margin-top:1px;font-style:italic}
+.bt-form .when{font-size:9px;color:var(--c-navy);font-weight:700;font-family:'Lora',serif;white-space:nowrap}
+
+.bt-skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.bt-skill-grid .panel{padding:8px 12px;background:#fff;border:1px solid var(--c-line);border-top:2.5px solid var(--c-gold);border-radius:0 0 6px 6px}
+.bt-skill-grid .panel h3{font-family:'Lora',serif;font-size:11px;font-weight:600;color:var(--c-navy);margin-bottom:5px}
+.bt-pill{display:inline-block;background:var(--c-soft);border:1px solid var(--c-line);color:var(--c-navy);padding:2px 8px;border-radius:3px;font-size:9.5px;font-weight:500;margin:0 3px 3px 0}
+.bt-lang{display:flex;justify-content:space-between;font-size:10px;padding:3px 0;border-bottom:1px solid var(--c-line);font-family:'Lora',serif}
+.bt-lang:last-child{border:none}
+.bt-lang em{font-family:'Inter',sans-serif;font-style:normal;color:var(--c-gold);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+
+.bt-int{padding:8px 12px;background:linear-gradient(135deg,var(--c-soft),#fff);border-radius:6px;border-left:3px solid var(--c-gold);font-family:'Lora',serif;font-style:italic;font-size:10.5px;line-height:1.5;color:var(--c-navy)}
+.bt-int span{display:inline-block;font-style:normal;font-family:'Inter',sans-serif;font-size:9.5px;background:#fff;padding:1px 8px;border-radius:3px;margin:1px 3px 1px 0;font-weight:500;border:1px solid var(--c-line)}
+
+@media print{body{background:#fff}.cv{box-shadow:none;margin:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-bt bt">
+
+<div class="bt-hero">
+  <div class="bt-photo">{{{photo_or_initials}}}</div>
+  <div class="bt-id">
+    <h1>{{name}}</h1>
+    {{#title}}<div class="role">{{title}}</div>{{/title}}
+    <div class="meta">
+      {{#contact.email}}<span><b>Email</b>{{contact.email}}</span>{{/contact.email}}
+      {{#contact.phone}}<span><b>Téléphone</b>{{contact.phone}}</span>{{/contact.phone}}
+      {{#contact.location}}<span><b>Ville</b>{{contact.location}}</span>{{/contact.location}}
+      {{#contact.linkedin}}<span><b>LinkedIn</b>{{contact.linkedin}}</span>{{/contact.linkedin}}
+    </div>
+  </div>
+  <div class="bt-stamp">
+    <span class="badge">Disponible</span>
+  </div>
+</div>
+
+{{#summary}}<p class="bt-accroche">{{summary}}</p>{{/summary}}
+
+<div class="bt-body">
+
+  {{#has_experience}}
+  <h2>Expériences professionnelles</h2>
+  {{#experience}}
+  <div class="bt-xp">
+    <div class="row"><h3>{{role}}</h3><span class="when">{{date}}</span></div>
+    <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+    {{#has_bullets}}
+    <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+    {{/has_bullets}}
+  </div>
+  {{/experience}}
+  {{/has_experience}}
+
+  {{#has_education}}
+  <h2>Formation</h2>
+  {{#education}}
+  <div class="bt-form">
+    <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/education}}
+  {{/has_education}}
+
+  {{#has_skills}}
+  <h2>Compétences</h2>
+  <div class="bt-skill-grid">
+    <div class="panel">
+      <h3>Techniques</h3>
+      {{#skills}}<span class="bt-pill">{{name}}</span>{{/skills}}
+    </div>
+    {{#has_languages}}
+    <div class="panel">
+      <h3>Langues</h3>
+      {{#languages}}<div class="bt-lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+    </div>
+    {{/has_languages}}
+  </div>
+  {{/has_skills}}
+
+  {{#has_certifications}}
+  <h2>Certifications</h2>
+  {{#certifications}}
+  <div class="bt-form">
+    <div><b>{{name}}</b></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/certifications}}
+  {{/has_certifications}}
+
+  {{#has_interests}}
+  <h2>Centres d'intérêt</h2>
+  <p class="bt-int">{{#interests}}<span>{{.}}</span>{{/interests}}</p>
+  {{/has_interests}}
+
+</div>
+
+</div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

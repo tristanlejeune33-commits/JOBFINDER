@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<!-- meta: {"name": "Sustainability Eco", "category": "Moderne", "preview": "Palette kraft + sage + cream, motif pointillé organique, typ · optimisé A4 1 page", "tags": ["eco", "sustainability", "green", "organic", "a4", "compact", "optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e7e1d3;font-family:'Inter',sans-serif;color:#3a3528;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#f6f1e3;box-shadow:0 18px 50px -16px rgba(60,50,20,.18);overflow:hidden;border-radius:14px}
+
+.cv-se{
+  --c-ink:#3a3528;--c-paper:#f6f1e3;--c-muted:#7a6f5c;--c-line:#dccfae;
+  --c-sage:{{color}};--c-sage-d:{{color_dark}};--c-kraft:#a07b4a;--c-cream:#fdf9ed;--c-soft:#ede5cf;
+  font-family:'Inter',sans-serif;color:var(--c-ink);background:var(--c-paper);min-height:1123px;padding:22px 26px;background-image:radial-gradient(circle at 1px 1px,rgba(120,105,70,.12) 1px,transparent 0);background-size:24px 24px
+}
+
+.se-hero{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;background:var(--c-cream);padding:28px;border-radius:16px;border:1px solid var(--c-line);margin-bottom:18px}
+.se-photo{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--c-soft);color:var(--c-sage-d);font-family:'Lora',serif;font-weight:600;font-size:42px;border:5px solid var(--c-paper);box-shadow:0 0 0 1px var(--c-sage);overflow:hidden}
+.se-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.se-id .tag{display:inline-flex;align-items:center;gap:6px;background:var(--c-sage);color:#fff;padding:5px 13px;border-radius:99px;font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
+.se-id .tag::before{content:"🌱"}
+.se-id h1{font-family:'Lora',serif;font-size:24px;font-weight:600;letter-spacing:-.01em;margin:10px 0 4px;line-height:1.05}
+.se-id .role{font-family:'Lora',serif;font-style:italic;color:var(--c-sage-d);font-size:15.5px;font-weight:500}
+.se-id .meta{margin-top:12px;display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--c-muted)}
+.se-id .meta b{color:var(--c-ink);font-weight:600;margin-right:4px}
+
+.se-accroche{padding:18px 22px;background:var(--c-soft);border-radius:12px;font-family:'Lora',serif;font-style:italic;font-size:15.5px;line-height:1.55;color:var(--c-ink);margin-bottom:24px;border-left:4px solid var(--c-kraft)}
+.se-accroche::before{content:"« ";color:var(--c-kraft);font-weight:700}
+.se-accroche::after{content:" »";color:var(--c-kraft);font-weight:700}
+
+.se h2{font-family:'Lora',serif;font-size:20px;font-weight:600;color:var(--c-sage-d);margin:22px 0 12px;display:flex;align-items:center;gap:12px}
+.se h2::before{content:"";width:18px;height:18px;border-radius:50%;background:var(--c-sage);display:inline-block;flex-shrink:0}
+
+.se-xp{padding:18px 22px;background:var(--c-cream);border-radius:12px;border:1px solid var(--c-line);margin-bottom:8px}
+.se-xp .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.se-xp h3{font-family:'Lora',serif;font-size:17px;font-weight:600}
+.se-xp .when{font-size:11.5px;color:var(--c-sage-d);background:var(--c-soft);padding:4px 10px;border-radius:99px;font-weight:600;letter-spacing:.04em;white-space:nowrap;border:1px solid var(--c-line)}
+.se-xp .co{color:var(--c-kraft);font-style:italic;font-size:13.5px;margin:2px 0 6px;font-family:'Lora',serif;font-weight:500}
+.se-xp ul{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.65;color:#3a3528}
+.se-xp ul li::marker{color:var(--c-sage)}
+
+.se-form{padding:14px 20px;background:var(--c-cream);border:1px solid var(--c-line);border-radius:10px;margin-bottom:6px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+.se-form .ic{width:38px;height:38px;border-radius:50%;background:var(--c-soft);color:var(--c-sage-d);display:flex;align-items:center;justify-content:center;font-size:18px}
+.se-form b{font-family:'Lora',serif;font-size:15.5px;font-weight:600;display:block}
+.se-form span{display:block;color:var(--c-muted);font-style:italic;font-size:12.5px;margin-top:1px}
+.se-form .when{font-size:11.5px;color:var(--c-muted);font-weight:600;white-space:nowrap}
+
+.se-skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.se-skill-grid .panel{padding:18px 20px;background:var(--c-cream);border:1px solid var(--c-line);border-radius:12px}
+.se-skill-grid .panel h3{font-family:'Lora',serif;font-size:16px;font-weight:600;color:var(--c-sage-d);margin-bottom:10px}
+.se-pill{display:inline-block;background:var(--c-soft);border:1px solid var(--c-line);color:var(--c-ink);padding:4px 11px;border-radius:99px;font-size:12px;font-weight:500;margin:0 4px 5px 0}
+.se-lang{display:flex;justify-content:space-between;font-size:13px;padding:5px 0;border-bottom:1px solid var(--c-line)}
+.se-lang:last-child{border:none}
+.se-lang em{font-style:normal;color:var(--c-sage-d);font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+
+.se-int{padding:18px 22px;background:linear-gradient(135deg,var(--c-soft),var(--c-cream));border-radius:12px;font-family:'Lora',serif;font-style:italic;font-size:15px;line-height:1.65;color:var(--c-ink);border:1px solid var(--c-line)}
+.se-int span{display:inline-block;font-style:normal;font-family:'Inter',sans-serif;font-size:13px;background:#fff;padding:3px 10px;border-radius:99px;margin:3px 4px 3px 0;font-weight:500;border:1px solid var(--c-line)}
+
+@media (max-width:760px){body{padding:0}.cv{border-radius:0;box-shadow:none}.cv-se{padding:28px 22px}.se-hero{grid-template-columns:1fr;text-align:center;padding:22px}.se-photo{margin:0 auto}.se-id .meta{justify-content:center}.se-skill-grid{grid-template-columns:1fr}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}.cv-se{background-image:none}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-se se">
+
+<div class="se-hero">
+  <div class="se-photo">{{{photo_or_initials}}}</div>
+  <div class="se-id">
+    <span class="tag">Disponible</span>
+    <h1>{{name}}</h1>
+    {{#title}}<div class="role">{{title}}</div>{{/title}}
+    <div class="meta">
+      {{#contact.email}}<span><b>Email</b> {{contact.email}}</span>{{/contact.email}}
+      {{#contact.phone}}<span><b>Téléphone</b> {{contact.phone}}</span>{{/contact.phone}}
+      {{#contact.location}}<span><b>Ville</b> {{contact.location}}</span>{{/contact.location}}
+      {{#contact.linkedin}}<span><b>LinkedIn</b> {{contact.linkedin}}</span>{{/contact.linkedin}}
+    </div>
+  </div>
+</div>
+
+{{#summary}}<p class="se-accroche">{{summary}}</p>{{/summary}}
+
+{{#has_experience}}
+<h2>Expériences professionnelles</h2>
+{{#experience}}
+<div class="se-xp">
+  <div class="row"><h3>{{role}}</h3><span class="when">{{date}}</span></div>
+  <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+  {{#has_bullets}}
+  <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+  {{/has_bullets}}
+</div>
+{{/experience}}
+{{/has_experience}}
+
+{{#has_education}}
+<h2>Formation</h2>
+{{#education}}
+<div class="se-form">
+  <div class="ic">🌳</div>
+  <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+  <span class="when">{{date}}</span>
+</div>
+{{/education}}
+{{/has_education}}
+
+{{#has_skills}}
+<h2>Compétences</h2>
+<div class="se-skill-grid">
+  <div class="panel">
+    <h3>Techniques</h3>
+    {{#skills}}<span class="se-pill">{{name}}</span>{{/skills}}
+  </div>
+  {{#has_languages}}
+  <div class="panel">
+    <h3>Langues</h3>
+    {{#languages}}<div class="se-lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+  </div>
+  {{/has_languages}}
+</div>
+{{/has_skills}}
+
+{{#has_certifications}}
+<h2>Certifications</h2>
+{{#certifications}}
+<div class="se-form">
+  <div class="ic">📜</div>
+  <div><b>{{name}}</b></div>
+  <span class="when">{{date}}</span>
+</div>
+{{/certifications}}
+{{/has_certifications}}
+
+{{#has_interests}}
+<h2>Centres d'intérêt</h2>
+<p class="se-int">{{#interests}}<span>{{.}}</span>{{/interests}}</p>
+{{/has_interests}}
+
+</div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

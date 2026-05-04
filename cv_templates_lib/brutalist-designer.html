@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Brutalist Designer","category":"Créatif","preview":"Brutaliste · bordures noires épaisses · accent rouge · optimisé A4 1 page","tags":["brutalist","designer","a4","compact","optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e5e5e5;font-family:'Space Grotesk',sans-serif;font-size:11.5px;line-height:1.45}
+.cv{width:794px;height:1123px;margin:0 auto;background:#fff;box-shadow:6px 6px 0 #000;overflow:hidden}
+
+.cv-brut{
+  --c-ink:#000;--c-paper:#fff;--c-accent:{{color}};--c-blue:{{color_dark}};
+  font-family:'Space Grotesk',sans-serif;color:var(--c-ink);background:var(--c-paper);min-height:1123px
+}
+
+.cv-brut .hero{padding:20px 26px 16px;border-bottom:3px solid #000;display:grid;grid-template-columns:auto 1fr;gap:18px;align-items:end}
+.cv-brut .hero .portrait{width:90px;height:90px;object-fit:cover;border:3px solid #000;display:flex;align-items:center;justify-content:center;background:var(--c-accent);color:#fff;font-weight:700;font-size:32px;overflow:hidden}
+.cv-brut .hero .portrait img{width:100%;height:100%;object-fit:cover;display:block}
+.cv-brut .hero h1{font-size:42px;line-height:.85;font-weight:700;letter-spacing:-.04em;text-transform:uppercase}
+.cv-brut .hero .role{margin-top:6px;background:var(--c-accent);color:#fff;display:inline-block;padding:3px 9px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+
+.cv-brut .meta{padding:8px 26px;border-bottom:3px solid #000;display:flex;flex-wrap:wrap;gap:14px;font-size:9.8px;font-weight:500;background:#fafafa}
+.cv-brut .meta b{font-weight:700;text-transform:uppercase;font-size:9px;letter-spacing:.08em;margin-right:5px;background:#000;color:#fff;padding:1px 5px}
+
+.cv-brut .accroche{padding:10px 26px;border-bottom:3px solid #000;font-size:11.5px;line-height:1.4;font-weight:600;background:#fafafa}
+.cv-brut .accroche::before{content:"// ";color:var(--c-accent)}
+
+.cv-brut .sec{padding:13px 26px;border-bottom:3px solid #000}
+.cv-brut h2{font-size:14px;text-transform:uppercase;font-weight:700;margin:0 0 8px;letter-spacing:-.01em;border-bottom:2px solid #000;padding-bottom:3px}
+.cv-brut h2::before{content:"→ ";color:var(--c-accent)}
+
+.cv-brut .xp{margin-bottom:7px;padding-bottom:5px;border-bottom:1.5px dashed #000}
+.cv-brut .xp:last-child{border:none;margin-bottom:0;padding-bottom:0}
+.cv-brut .xp .row{display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap}
+.cv-brut .xp h3{font-size:12px;font-weight:700;text-transform:uppercase;line-height:1.2}
+.cv-brut .xp .meta-line{font-size:9px;font-weight:600;background:#000;color:#fff;display:inline-block;padding:1px 7px;margin:2px 0;letter-spacing:.05em;text-transform:uppercase}
+.cv-brut .xp ul{margin:3px 0 0;padding-left:14px;font-size:9.8px;line-height:1.42;font-weight:500}
+.cv-brut .xp ul li{margin-bottom:1px}
+
+.cv-brut .form-row{padding:5px 0;border-bottom:1px solid #000;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;font-size:10px;font-weight:500}
+.cv-brut .form-row:last-child{border:none}
+.cv-brut .form-row strong{font-size:11px;text-transform:uppercase;font-weight:700;line-height:1.2}
+.cv-brut .form-row span{color:#444;font-size:9.5px;display:block}
+.cv-brut .form-row .when{font-size:9px;font-weight:700;background:#000;color:#fff;padding:2px 7px;letter-spacing:.04em;white-space:nowrap}
+
+.cv-brut .comp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.cv-brut .comp-grid h3{font-size:11px;text-transform:uppercase;font-weight:700;margin-bottom:5px;border-bottom:1.5px solid #000;padding-bottom:2px}
+.cv-brut .skill{display:inline-block;border:1.5px solid #000;padding:2px 8px;margin:0 4px 3px 0;font-size:9.5px;font-weight:700;text-transform:uppercase;background:#fff}
+.cv-brut .skill.alt{background:var(--c-accent);color:#fff;border-color:var(--c-accent)}
+.cv-brut .lang-row{display:flex;justify-content:space-between;font-size:10px;font-weight:500;padding:3px 0;border-bottom:1px solid #000}
+.cv-brut .lang-row:last-child{border:none}
+.cv-brut .lang-row b{font-weight:700;text-transform:uppercase}
+
+.cv-brut .interest{font-size:10px;line-height:1.5;font-weight:500}
+.cv-brut .interest span{display:inline-block;border:1.5px solid #000;padding:1px 7px;font-size:9.5px;font-weight:700;text-transform:uppercase;margin:0 4px 3px 0;background:#fafafa}
+
+@media print{body{background:#fff}.cv{box-shadow:none;margin:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-brut">
+
+<div class="hero">
+  <div class="portrait">{{{photo_or_initials}}}</div>
+  <div>
+    <h1>{{name}}</h1>
+    {{#title}}<span class="role">{{title}}</span>{{/title}}
+  </div>
+</div>
+
+<div class="meta">
+  {{#contact.email}}<span><b>EMAIL</b>{{contact.email}}</span>{{/contact.email}}
+  {{#contact.phone}}<span><b>TÉL</b>{{contact.phone}}</span>{{/contact.phone}}
+  {{#contact.location}}<span><b>VILLE</b>{{contact.location}}</span>{{/contact.location}}
+  {{#contact.linkedin}}<span><b>LINKEDIN</b>{{contact.linkedin}}</span>{{/contact.linkedin}}
+  {{#contact.website}}<span><b>WEB</b>{{contact.website}}</span>{{/contact.website}}
+</div>
+
+{{#summary}}<p class="accroche">{{summary}}</p>{{/summary}}
+
+{{#has_experience}}
+<section class="sec">
+  <h2>Expériences professionnelles</h2>
+  {{#experience}}
+  <div class="xp">
+    <h3>{{role}}</h3>
+    <div class="meta-line">{{company}}{{#location}} · {{location}}{{/location}} · {{date}}</div>
+    {{#has_bullets}}
+    <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+    {{/has_bullets}}
+  </div>
+  {{/experience}}
+</section>
+{{/has_experience}}
+
+{{#has_education}}
+<section class="sec">
+  <h2>Formation</h2>
+  {{#education}}
+  <div class="form-row">
+    <div><strong>{{degree}}</strong><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+    <div class="when">{{date}}</div>
+  </div>
+  {{/education}}
+</section>
+{{/has_education}}
+
+{{#has_skills}}
+<section class="sec">
+  <h2>Compétences</h2>
+  <div class="comp-grid">
+    <div>
+      <h3>Techniques</h3>
+      {{#skills}}<span class="skill">{{name}}</span>{{/skills}}
+    </div>
+    {{#has_languages}}
+    <div>
+      <h3>Langues</h3>
+      {{#languages}}<div class="lang-row"><b>{{name}}</b><span>{{level}}</span></div>{{/languages}}
+    </div>
+    {{/has_languages}}
+  </div>
+</section>
+{{/has_skills}}
+
+{{#has_certifications}}
+<section class="sec">
+  <h2>Certifications</h2>
+  {{#certifications}}<div class="form-row"><div><strong>{{name}}</strong></div><div class="when">{{date}}</div></div>{{/certifications}}
+</section>
+{{/has_certifications}}
+
+{{#has_interests}}
+<section class="sec">
+  <h2>Centres d'intérêt</h2>
+  <p class="interest">
+    {{#interests}}<span>{{.}}</span>{{/interests}}
+  </p>
+</section>
+{{/has_interests}}
+
+</div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

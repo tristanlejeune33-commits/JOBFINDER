@@ -1171,6 +1171,344 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   .cal-day-col{min-width:88px}
 }
 
+/* ── Mobile responsive — passe complète ────────────────────────────────────── */
+@media(max-width:768px){
+  /* Header & navigation */
+  .ph{flex-direction:column;align-items:stretch;gap:12px;padding-bottom:14px}
+  .ph-text h2{font-size:20px}
+  .ph-text p{font-size:12.5px}
+  .ph .flex{flex-wrap:wrap}
+  .ph .btn{flex:1;min-width:140px}
+
+  /* Adapter mon CV — colonne unique */
+  .layout{grid-template-columns:1fr !important;gap:14px}
+  .adapter-out{height:480px;min-height:480px}
+  #cv-preview, #wiz-preview-frame{min-height:420px}
+
+  /* Settings — colonne unique */
+  .settings-grid{grid-template-columns:1fr !important;gap:14px}
+
+  /* Tables → cards (les desktop tables disparaissent au profit de m-card-list) */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .admin-table{font-size:13px}
+  .admin-table th, .admin-table td{padding:8px 10px !important}
+
+  /* Boutons : taille tactile minimale (44px Apple guideline) */
+  .btn{min-height:40px}
+  .btn-sm{min-height:36px;font-size:13px}
+
+  /* Inputs plus larges */
+  input, textarea, select{font-size:16px !important} /* évite zoom auto iOS */
+
+  /* Modal plein écran sur mobile */
+  .modal{width:100%;height:100%;max-height:100%;border-radius:0;max-width:100%}
+  .modal-bg{padding:0}
+
+  /* Auth modal centrée */
+  #auth-overlay .auth-card{max-width:100%;margin:20px;padding:24px 20px}
+
+  /* Bottom nav assez haute */
+  .bn{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+
+  /* Kanban : scroll horizontal sur mobile */
+  #kanban{display:flex;overflow-x:auto;gap:10px;padding-bottom:14px;scroll-snap-type:x mandatory}
+  #kanban .kcol{min-width:280px;scroll-snap-align:start;flex-shrink:0}
+
+  /* Cartes RGPD admin/settings : grid → 1 colonne */
+  .settings-grid .card[style*="grid-column:1/-1"] > div[style*="grid-template-columns"]{
+    grid-template-columns:1fr !important;
+  }
+
+  /* Toast un peu plus haut pour pas être caché par bottom-nav */
+  #toasts{bottom:80px}
+
+  /* Calendar : scroll horizontal */
+  .cal-grid{overflow-x:auto}
+  .cal-30-cell{min-height:60px;padding:4px}
+  .cal-30-num{font-size:11px}
+  .cal-30-ev{font-size:10px;padding:2px 4px}
+}
+
+/* iPhone notch & encoches — safe areas */
+@supports(padding:max(0px)){
+  body{padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)}
+}
+
+/* Drop zone documentation */
+#s-doc-drop:hover{border-color:var(--accent) !important;background:var(--accent-light) !important}
+.doc-line:hover{border-color:var(--border2) !important}
+
+/* ══ BIBLIOTHÈQUE TEMPLATES — UX premium ══════════════════════════════════ */
+.cvlib-overlay{
+  display:none;position:fixed;inset:0;z-index:9999;overflow-y:auto;
+  background:radial-gradient(1200px 600px at 30% -20%, rgba(124,92,255,.18) 0%, transparent 60%),
+             radial-gradient(900px 500px at 80% 100%, rgba(47,93,168,.16) 0%, transparent 55%),
+             #0a0d18;
+  animation:cvlib-fade-in .25s ease-out;
+}
+.cvlib-overlay.show{display:block}
+@keyframes cvlib-fade-in{from{opacity:0}to{opacity:1}}
+
+.cvlib-shell{
+  max-width:1380px;margin:0 auto;padding:28px 28px 140px;position:relative;
+  animation:cvlib-slide-up .35s cubic-bezier(.2,.7,.3,1);
+}
+@keyframes cvlib-slide-up{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* Header */
+.cvlib-hdr{
+  display:grid;grid-template-columns:1fr auto auto;gap:18px;align-items:center;
+  padding:8px 0 24px;margin-bottom:18px;
+  border-bottom:1px solid rgba(255,255,255,.08);
+  position:sticky;top:0;background:linear-gradient(180deg,#0a0d18 0%,#0a0d18 80%,rgba(10,13,24,0));
+  backdrop-filter:blur(12px);z-index:10;padding-top:20px;
+}
+.cvlib-title h2{color:#fff;font-size:30px;font-weight:800;letter-spacing:-.025em;margin-bottom:2px;line-height:1.1}
+.cvlib-title p{color:rgba(255,255,255,.55);font-size:13px}
+.cvlib-search-wrap{position:relative;width:340px;max-width:100%}
+.cvlib-search-ico{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:14px;opacity:.6;pointer-events:none}
+#cvlib-search{
+  width:100%;height:44px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+  color:#fff;padding:0 38px 0 38px;border-radius:12px;font-size:14px;font-family:inherit;
+  transition:.2s;outline:none;
+}
+#cvlib-search::placeholder{color:rgba(255,255,255,.4)}
+#cvlib-search:focus{border-color:rgba(124,92,255,.6);background:rgba(255,255,255,.09);box-shadow:0 0 0 4px rgba(124,92,255,.15)}
+#cvlib-search-clear{
+  position:absolute;right:8px;top:50%;transform:translateY(-50%);
+  width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.1);
+  border:none;color:#fff;cursor:pointer;font-size:11px;display:flex;align-items:center;justify-content:center;
+}
+.cvlib-close{
+  width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);color:#fff;cursor:pointer;font-size:18px;
+  transition:.2s;flex-shrink:0;
+}
+.cvlib-close:hover{background:rgba(255,255,255,.12);transform:rotate(90deg)}
+
+/* Categories */
+.cvlib-cats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:24px}
+.cvlib-cat{
+  padding:8px 16px;border-radius:99px;border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.04);color:rgba(255,255,255,.85);
+  font-size:12.5px;font-weight:600;cursor:pointer;transition:.2s;
+  display:inline-flex;align-items:center;gap:8px;font-family:inherit;
+}
+.cvlib-cat:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.2)}
+.cvlib-cat.active{background:#fff;color:#0a0d18;border-color:#fff;box-shadow:0 4px 14px rgba(255,255,255,.18)}
+.cvlib-cat .cnt{
+  font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:99px;
+  background:rgba(255,255,255,.12);color:rgba(255,255,255,.7);
+}
+.cvlib-cat.active .cnt{background:rgba(0,0,0,.1);color:#0a0d18}
+
+/* Grid */
+.cvlib-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:22px;
+}
+
+/* Card */
+.cvlib-card{
+  background:#fff;border-radius:16px;overflow:hidden;cursor:pointer;
+  transition:transform .25s cubic-bezier(.2,.7,.3,1), box-shadow .25s;
+  box-shadow:0 6px 28px rgba(0,0,0,.35);
+  position:relative;animation:cvlib-card-in .45s cubic-bezier(.2,.7,.3,1) backwards;
+  border:3px solid transparent;
+}
+@keyframes cvlib-card-in{from{opacity:0;transform:translateY(14px) scale(.96)}to{opacity:1;transform:none}}
+.cvlib-card:hover{
+  transform:translateY(-6px) scale(1.015);
+  box-shadow:0 18px 50px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.05);
+}
+.cvlib-card.selected{
+  border-color:#7c5cff;
+  box-shadow:0 0 0 4px rgba(124,92,255,.25),0 18px 50px rgba(124,92,255,.3);
+  transform:translateY(-4px);
+}
+
+.cvlib-card-thumb{
+  aspect-ratio:794/1123;background:#eef0f5;overflow:hidden;position:relative;
+}
+.cvlib-card-thumb iframe{
+  width:794px;height:1123px;border:none;
+  transform:scale(.365);transform-origin:top left;
+  pointer-events:none;
+}
+/* Skeleton loading */
+.cvlib-card-thumb.loading::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(90deg,#eef0f5 0%,#f6f8fb 50%,#eef0f5 100%);
+  background-size:200% 100%;animation:cvlib-skel 1.4s ease-in-out infinite;z-index:1;
+}
+@keyframes cvlib-skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* Hover overlay avec actions */
+.cvlib-card-hover{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.78) 100%);
+  display:flex;align-items:flex-end;justify-content:center;
+  padding:14px;opacity:0;transition:.25s;pointer-events:none;
+}
+.cvlib-card:hover .cvlib-card-hover{opacity:1;pointer-events:auto}
+.cvlib-card-hover button{
+  background:rgba(255,255,255,.96);color:#0a0d18;border:none;
+  padding:8px 14px;border-radius:99px;font-size:12px;font-weight:700;
+  cursor:pointer;transition:.15s;font-family:inherit;
+  box-shadow:0 4px 14px rgba(0,0,0,.25);
+}
+.cvlib-card-hover button:hover{transform:scale(1.05);background:#fff}
+
+/* Badge selected */
+.cvlib-card-badge{
+  position:absolute;top:10px;right:10px;
+  background:#7c5cff;color:#fff;padding:5px 11px;border-radius:99px;
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;
+  box-shadow:0 4px 10px rgba(124,92,255,.45);
+  display:flex;align-items:center;gap:5px;z-index:2;
+}
+
+/* Footer */
+.cvlib-card-foot{padding:14px 16px}
+.cvlib-card-foot-row{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.cvlib-card-name{font-size:14.5px;font-weight:700;color:var(--text);letter-spacing:-.005em}
+.cvlib-card-cat{
+  font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;
+  background:var(--card2);padding:3px 9px;border-radius:99px;flex-shrink:0;
+}
+.cvlib-card-prev{font-size:11.5px;color:var(--text3);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+/* Empty state */
+.cvlib-empty{
+  text-align:center;padding:80px 20px;color:rgba(255,255,255,.7);font-size:18px;font-weight:600;
+}
+
+/* Action bar (sélection) */
+.cvlib-actionbar{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:rgba(20,24,38,.95);backdrop-filter:blur(20px);
+  border:1px solid rgba(255,255,255,.12);border-radius:18px;
+  padding:14px 20px;z-index:10001;
+  box-shadow:0 16px 50px rgba(0,0,0,.6);
+  display:flex;align-items:center;gap:24px;min-width:520px;max-width:calc(100% - 40px);
+  animation:cvlib-actionbar-in .3s cubic-bezier(.2,.7,.3,1);
+}
+@keyframes cvlib-actionbar-in{from{transform:translate(-50%,30px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+.cvlib-actionbar-info{display:flex;flex-direction:column;gap:2px;flex:1}
+.cvlib-actionbar-btns{display:flex;gap:10px;flex-shrink:0}
+.cvlib-btn-primary,.cvlib-btn-secondary{
+  padding:10px 18px;border-radius:11px;font-size:13px;font-weight:700;cursor:pointer;
+  transition:.2s;font-family:inherit;border:none;
+}
+.cvlib-btn-primary{background:linear-gradient(135deg,#7c5cff,#4f7cff);color:#fff;box-shadow:0 4px 14px rgba(124,92,255,.4)}
+.cvlib-btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(124,92,255,.55)}
+.cvlib-btn-secondary{background:rgba(255,255,255,.08);color:#fff;border:1px solid rgba(255,255,255,.15)}
+.cvlib-btn-secondary:hover{background:rgba(255,255,255,.14)}
+
+@media (max-width:780px){
+  .cvlib-hdr{grid-template-columns:1fr auto;gap:12px}
+  .cvlib-search-wrap{grid-column:1/-1;width:100%;order:3}
+  .cvlib-grid{grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+  .cvlib-actionbar{min-width:0;flex-direction:column;align-items:stretch;gap:12px;padding:14px 18px}
+  .cvlib-actionbar-btns{width:100%}
+  .cvlib-btn-primary,.cvlib-btn-secondary{flex:1}
+}
+
+/* ══ CV STUDIO ══════════════════════════════════════════════════════════════ */
+.cvs-layout{
+  display:grid;grid-template-columns:1fr 380px;gap:18px;
+  height:calc(100vh - 180px);min-height:700px;
+}
+.cvs-preview-col{
+  display:flex;flex-direction:column;gap:10px;background:var(--card);
+  border:1px solid var(--border);border-radius:14px;overflow:hidden;
+}
+.cvs-preview-toolbar{
+  display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;
+  padding:14px 18px;background:var(--card2);border-bottom:1px solid var(--border);
+}
+.cvs-tpl-tabs{display:flex;gap:6px;flex-wrap:wrap}
+.cvs-tpl-tab{
+  padding:6px 12px;border:1px solid var(--border2);background:#fff;border-radius:8px;
+  font-size:12px;font-weight:500;color:var(--text2);cursor:pointer;transition:var(--t);
+}
+.cvs-tpl-tab:hover{border-color:var(--accent);color:var(--accent)}
+.cvs-tpl-tab.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.cvs-color-picker{display:flex;align-items:center;gap:10px}
+.cvs-1page-toggle{
+  display:inline-flex;align-items:center;gap:6px;cursor:pointer;
+  padding:6px 12px;border-radius:8px;border:1px solid var(--border2);
+  background:var(--card2);font-size:12px;font-weight:600;color:var(--text2);
+  transition:.15s;white-space:nowrap;user-select:none;
+}
+.cvs-1page-toggle:has(input:checked){
+  border-color:var(--accent);background:var(--accent-light);color:var(--accent);
+}
+.cvs-1page-toggle input{accent-color:var(--accent);width:14px;height:14px;margin:0}
+.cvs-color-picker input[type=color]{
+  width:34px;height:34px;border:1px solid var(--border2);border-radius:8px;cursor:pointer;
+  padding:0;background:#fff;
+}
+.cvs-presets{display:flex;gap:5px}
+.cvs-presets button{
+  width:22px;height:22px;border-radius:50%;border:2px solid #fff;cursor:pointer;
+  box-shadow:0 0 0 1px var(--border2);transition:transform .15s;
+}
+.cvs-presets button:hover{transform:scale(1.18)}
+
+.cvs-preview-frame{
+  flex:1;background:#eef0f5;overflow:auto;display:flex;justify-content:center;padding:18px;
+}
+.cvs-preview-frame iframe{
+  width:794px;min-width:794px;min-height:1123px;border:none;background:#fff;
+  box-shadow:0 4px 20px rgba(0,0,0,.08);
+}
+
+.cvs-editor-col{
+  background:var(--card);border:1px solid var(--border);border-radius:14px;
+  display:flex;flex-direction:column;overflow:hidden;
+}
+.cvs-editor-hd{padding:14px;border-bottom:1px solid var(--border);background:var(--card2)}
+.cvs-editor-body{flex:1;overflow-y:auto;padding:14px}
+
+.cvs-section-card{
+  background:var(--card2);border:1px solid var(--border);border-radius:10px;
+  padding:12px;margin-bottom:10px;
+}
+.cvs-section-title{
+  font-size:11.5px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;
+}
+.cvs-section-title button{
+  background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;font-weight:600;
+}
+.cvs-row{display:flex;gap:6px;margin-bottom:6px}
+.cvs-row input,.cvs-row textarea{
+  flex:1;background:#fff;border:1px solid var(--border);color:var(--text);
+  border-radius:6px;padding:6px 8px;font-size:12.5px;font-family:inherit;
+}
+.cvs-row textarea{min-height:50px;resize:vertical}
+.cvs-row .btn-mini{
+  background:var(--card);border:1px solid var(--border);color:var(--text3);
+  cursor:pointer;border-radius:6px;width:28px;height:28px;flex-shrink:0;
+}
+.cvs-row .btn-mini:hover{color:var(--red);border-color:var(--red)}
+.cvs-item{
+  background:#fff;border:1px solid var(--border);border-radius:8px;padding:9px 10px;margin-bottom:6px;
+}
+.cvs-item-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.cvs-item-num{font-size:10.5px;color:var(--text3);font-weight:700;text-transform:uppercase}
+.cvs-add-btn{
+  width:100%;padding:7px;background:none;border:1px dashed var(--border2);
+  border-radius:6px;color:var(--text3);font-size:12px;cursor:pointer;
+}
+.cvs-add-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+@media(max-width:900px){
+  .cvs-layout{grid-template-columns:1fr;height:auto}
+  .cvs-preview-frame{padding:8px}
+  .cvs-preview-frame iframe{min-width:0;width:100%;transform-origin:top left}
+}
+
 /* ══════════════════════════════════════════════════════════
    GLOBAL PREMIUM POLISH
 ══════════════════════════════════════════════════════════ */
@@ -1428,9 +1766,13 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <span class="nav-icon">📅</span>
       <span class="nav-label"><span class="nav-label-main">Planning</span><span class="nav-label-sub">Calendrier d'entretiens</span></span>
     </div>
-    <div class="nav-item" data-page="templates">
+    <div class="nav-item" data-page="cvstudio">
       <span class="nav-icon">🎨</span>
-      <span class="nav-label"><span class="nav-label-main">Templates CV</span><span class="nav-label-sub">Créer & gérer ses modèles</span></span>
+      <span class="nav-label"><span class="nav-label-main">CV Studio</span><span class="nav-label-sub">Crée &amp; édite ton CV</span></span>
+    </div>
+    <div class="nav-item" data-page="templates" style="display:none">
+      <span class="nav-icon">📐</span>
+      <span class="nav-label"><span class="nav-label-main">Templates CV (legacy)</span><span class="nav-label-sub">Ancien wizard</span></span>
     </div>
     <div class="nav-item" data-page="settings">
       <span class="nav-icon">⚙️</span>
@@ -1551,8 +1893,16 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
         <textarea id="a-desc" rows="8" placeholder="Collez ici le texte complet de l'offre (Indeed, LinkedIn, etc.) ou récupérez via l'URL..."></textarea>
       </div>
 
+      <!-- Mode PDF (priorité si CV PDF importé dans Paramètres) -->
+      <div class="fg" id="pdf-mode-row" style="margin-bottom:10px;display:none">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
+          <input type="checkbox" id="use-pdf-cv" style="accent-color:var(--accent);width:16px;height:16px" onchange="togglePdfMode()">
+          <span>📄 Adapter mon CV PDF <strong id="pdf-cv-label"></strong> <span class="tx-sm tx-m">(préserve le design original)</span></span>
+        </label>
+      </div>
+
       <!-- Template mode toggle -->
-      <div class="fg" style="margin-bottom:10px">
+      <div class="fg" id="template-mode-row" style="margin-bottom:10px">
         <label style="display:flex;align-items:center;gap:10px;cursor:pointer">
           <input type="checkbox" id="use-template" style="accent-color:var(--accent);width:16px;height:16px" checked onchange="toggleTemplateMode()">
           <span>Utiliser le template <strong id="active-tpl-label">cv_vibe_modern</strong> (recommandé)</span>
@@ -1579,7 +1929,7 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <div class="flex items-c justify-b">
         <span class="card-title" style="margin-bottom:0">👁️ Aperçu du CV adapté</span>
       </div>
-      <iframe id="cv-preview" srcdoc="<body style='font-family:system-ui;color:#6B7280;display:flex;height:100%;align-items:center;justify-content:center;background:#F4F7FD;padding:24px;box-sizing:border-box'><div style='text-align:center;max-width:300px'><div style='font-size:40px;margin-bottom:14px'>✨</div><div style='font-size:15px;font-weight:700;color:#374151;margin-bottom:10px'>Comment ça marche</div><ol style='text-align:left;font-size:12px;line-height:1.8;color:#6B7280;padding-left:18px'><li>Choisissez une <b>candidature</b> ou collez l&apos;URL d&apos;une offre</li><li>Renseignez l&apos;entreprise et le poste</li><li>Cliquez sur <b>✨ Générer mon CV</b></li></ol><div style='font-size:11px;color:#9CA3AF;margin-top:12px'>Votre CV adapté apparaîtra ici</div></div></body>"></iframe>
+      <iframe id="cv-preview" sandbox="allow-same-origin" srcdoc="<body style='font-family:system-ui;color:#6B7280;display:flex;height:100%;align-items:center;justify-content:center;background:#F4F7FD;padding:24px;box-sizing:border-box'><div style='text-align:center;max-width:300px'><div style='font-size:40px;margin-bottom:14px'>✨</div><div style='font-size:15px;font-weight:700;color:#374151;margin-bottom:10px'>Comment ça marche</div><ol style='text-align:left;font-size:12px;line-height:1.8;color:#6B7280;padding-left:18px'><li>Choisissez une <b>candidature</b> ou collez l&apos;URL d&apos;une offre</li><li>Renseignez l&apos;entreprise et le poste</li><li>Cliquez sur <b>✨ Générer mon CV</b></li></ol><div style='font-size:11px;color:#9CA3AF;margin-top:12px'>Votre CV adapté apparaîtra ici</div></div></body>"></iframe>
       <div class="gen-overlay" id="gen-overlay">
         <div class="gen-photo-ring">
           <div class="gen-photo-inner" id="gen-photo-inner">🤖</div>
@@ -1636,18 +1986,6 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
     </div>
   </div>
   <div class="settings-grid">
-    <div class="card">
-      <div class="card-title">📄 CV de base</div>
-      <div class="fg">
-        <label>Importer votre CV (.html)</label>
-        <div class="flex gap-2 items-c">
-          <input id="s-cv-name" placeholder="Aucun CV importé" readonly style="flex:1">
-          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('s-cv-inp').click()">📂 Choisir</button>
-          <input type="file" id="s-cv-inp" accept=".html,.htm" style="display:none" onchange="importCV(event)">
-        </div>
-      </div>
-      <div id="s-cv-status" class="tx-sm mt2" style="color:var(--green)"></div>
-    </div>
     <div class="card" style="grid-column:1/-1">
       <div class="card-title">✍️ Mon résumé personnel</div>
       <div class="tx-sm tx-m" style="margin-bottom:12px;line-height:1.6">
@@ -1659,16 +1997,36 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       </div>
       <div id="s-summary-status" class="tx-sm mt1" style="color:var(--green);text-align:right"></div>
     </div>
-    <div class="card">
+    <div class="card" style="grid-column:1/-1">
       <div class="card-title">📎 Ma documentation</div>
-      <div class="tx-sm tx-m" style="margin-bottom:12px;line-height:1.6">Importez vos anciens CV, lettres de motivation, profils LinkedIn (PDF ou HTML) — ils serviront de base pour rédiger votre CV et préparer vos entretiens <strong style="color:var(--text)">sans rien inventer</strong>.</div>
-      <div class="flex gap-2 items-c" style="margin-bottom:10px">
-        <input id="s-doc-names" placeholder="Aucun document importé" readonly style="flex:1;font-size:12px">
-        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('s-doc-inp').click()">📂 Ajouter</button>
-        <input type="file" id="s-doc-inp" accept=".html,.htm,.txt,.pdf" multiple style="display:none" onchange="loadSettingsDocs(event)">
-        <button class="btn btn-red btn-sm" onclick="clearSettingsDocs()">✕</button>
+      <div class="tx-sm tx-m" style="margin-bottom:12px;line-height:1.6">
+        Importez vos anciens CV, lettres de motivation, profils LinkedIn (<strong>PDF, HTML, TXT</strong>) — ils serviront de base pour rédiger votre CV et préparer vos entretiens <strong style="color:var(--text)">sans rien inventer</strong>.
       </div>
-      <div id="s-doc-status" class="tx-sm" style="color:var(--green)"></div>
+
+      <!-- Zone drag & drop -->
+      <div id="s-doc-drop"
+           ondragover="docDrop.over(event)"
+           ondragleave="docDrop.leave(event)"
+           ondrop="docDrop.drop(event)"
+           onclick="document.getElementById('s-doc-inp').click()"
+           style="border:2px dashed var(--border2);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:.2s;background:var(--card2)">
+        <div style="font-size:32px;margin-bottom:6px">📂</div>
+        <div style="font-size:13.5px;font-weight:600;color:var(--text);margin-bottom:4px">Glisse-dépose tes fichiers ici</div>
+        <div style="font-size:11.5px;color:var(--text3)">ou clique pour choisir — PDF, HTML, TXT acceptés (max 12 Mo / fichier)</div>
+        <input type="file" id="s-doc-inp" accept=".html,.htm,.txt,.pdf,application/pdf"
+               multiple style="display:none" onchange="docDrop.handleFiles(this.files); this.value=''">
+      </div>
+
+      <!-- Liste des fichiers ligne par ligne -->
+      <div id="s-doc-list" style="margin-top:14px"></div>
+
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;flex-wrap:wrap;gap:8px">
+        <div id="s-doc-status" class="tx-sm" style="color:var(--text3)"></div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-red btn-sm" onclick="docDrop.clearAll()">🗑️ Tout supprimer</button>
+          <button class="btn btn-green btn-sm" onclick="docDrop.save()">💾 Enregistrer</button>
+        </div>
+      </div>
     </div>
     <div class="card">
       <div class="card-title">📸 Photo de profil</div>
@@ -1689,9 +2047,29 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <div class="card-title">ℹ️ À propos</div>
       <div class="tx-sm tx-m" style="line-height:1.7">
         JobFinder — Le copilote de ta recherche d'emploi<br>
-        Compatible Claude &amp; ChatGPT · Interface web locale<br>
-        Données stockées dans le dossier <code style="color:var(--accent)">data/</code>
+        Compatible Claude &amp; ChatGPT<br>
+        <a href="/cgu" target="_blank" style="color:var(--accent)">CGU</a> ·
+        <a href="/privacy" target="_blank" style="color:var(--accent)">Confidentialité</a>
       </div>
+    </div>
+
+    <!-- Mon compte / RGPD -->
+    <div class="card" style="grid-column:1/-1">
+      <div class="card-title">🛡️ Mon compte &amp; RGPD</div>
+
+      <div id="s-verify-banner" style="display:none;padding:10px 12px;background:var(--yellow-d);border-left:3px solid var(--yellow);border-radius:6px;margin-bottom:12px;font-size:13px">
+        ⚠️ <strong>Email non vérifié.</strong>
+        <button class="btn btn-secondary btn-sm" style="margin-left:8px" onclick="resendVerification()">📧 Renvoyer le lien</button>
+      </div>
+
+      <div id="s-quota-row" class="tx-sm tx-m" style="margin-bottom:14px"></div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+        <button class="btn btn-secondary btn-sm" onclick="changePasswordPrompt()">🔑 Changer le mot de passe</button>
+        <button class="btn btn-secondary btn-sm" onclick="exportMyData()">📥 Exporter mes données (RGPD)</button>
+        <button class="btn btn-red btn-sm" onclick="deleteMyAccountPrompt()">🗑️ Supprimer mon compte</button>
+      </div>
+      <div id="s-account-status" class="tx-sm mt2" style="color:var(--text3)"></div>
     </div>
   </div>
 </div>
@@ -1737,7 +2115,131 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
   </div>
 </div>
 
-<!-- Templates CV -->
+<!-- CV Studio (nouveau système) -->
+<div id="page-cvstudio" class="page">
+  <div class="ph">
+    <div class="ph-text"><h2>🎨 CV Studio</h2><p>Crée un CV joli en 1 clic, édite-le, change le style. Aucun design à toucher.</p></div>
+    <div class="flex gap-2" style="flex-wrap:wrap">
+      <button class="btn btn-primary btn-sm" onclick="cvStudio.generate()">✨ Générer depuis mon profil</button>
+      <button class="btn btn-secondary btn-sm" onclick="cvStudio.save()">💾 Sauvegarder</button>
+      <button class="btn btn-secondary btn-sm" onclick="cvStudio.downloadPdf()">⬇️ PDF</button>
+    </div>
+  </div>
+
+  <div class="cvs-layout">
+    <!-- Colonne gauche : aperçu -->
+    <div class="cvs-preview-col">
+      <div class="cvs-preview-toolbar">
+        <div class="cvs-tpl-tabs" id="cvs-tpl-tabs"></div>
+        <label class="cvs-1page-toggle" title="Force le CV à tenir sur 1 page (zoom plus fort si nécessaire)">
+          <input type="checkbox" id="cvs-1page" onchange="cvStudio.toggle1Page(this.checked)">
+          <span>📄 Mode 1 page</span>
+        </label>
+        <button class="btn btn-secondary btn-sm" onclick="cvStudio.openFullscreen()" style="white-space:nowrap" title="Voir en plein écran (F)">👁️ Plein écran</button>
+        <button class="btn btn-secondary btn-sm" onclick="cvLibrary.open()" style="white-space:nowrap" title="Voir tous les templates">📚 Bibliothèque</button>
+        <div class="cvs-color-picker">
+          <label style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Couleur</label>
+          <input type="color" id="cvs-color" value="#2F5DA8" oninput="cvStudio.onColorChange(this.value)">
+          <div class="cvs-presets">
+            <button onclick="cvStudio.setColor('#2F5DA8')" style="background:#2F5DA8" title="Bleu confiance"></button>
+            <button onclick="cvStudio.setColor('#1f6f4f')" style="background:#1f6f4f" title="Vert sage"></button>
+            <button onclick="cvStudio.setColor('#7c3aed')" style="background:#7c3aed" title="Violet créatif"></button>
+            <button onclick="cvStudio.setColor('#dc2626')" style="background:#dc2626" title="Rouge impact"></button>
+            <button onclick="cvStudio.setColor('#ea580c')" style="background:#ea580c" title="Orange chaleureux"></button>
+            <button onclick="cvStudio.setColor('#0f172a')" style="background:#0f172a" title="Noir élégant"></button>
+          </div>
+        </div>
+      </div>
+      <div class="cvs-preview-frame">
+        <iframe id="cvs-preview" sandbox="allow-same-origin" srcdoc="<body style='font-family:system-ui;display:flex;align-items:center;justify-content:center;height:100%;color:#888;text-align:center;padding:40px'><div><div style='font-size:60px'>🎨</div><div style='margin-top:20px;font-size:14px'>Clique sur <strong>Générer depuis mon profil</strong> pour créer ton CV.<br><br>Tu pourras ensuite changer le style et la couleur en 1 clic, et éditer chaque champ ci-contre.</div></div></body>"></iframe>
+      </div>
+    </div>
+
+    <!-- Colonne droite : éditeur -->
+    <div class="cvs-editor-col">
+      <div class="cvs-editor-hd">
+        <input type="text" id="cvs-name" placeholder="Nom du CV" value="Mon CV"
+          style="background:var(--card2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:6px 10px;font-size:13px;width:100%"
+          onchange="cvStudio.markDirty()">
+      </div>
+      <div class="cvs-editor-body" id="cvs-editor-body">
+        <div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">
+          ✨ Aucun CV généré pour l'instant.<br>Clique sur <strong>Générer depuis mon profil</strong>.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ APERÇU CV PLEIN ÉCRAN ══ -->
+<div id="cv-fullscreen-modal" style="display:none;position:fixed;inset:0;background:#1a1d24;z-index:9998;overflow-y:auto;padding:24px">
+  <div style="position:fixed;top:16px;right:16px;display:flex;gap:8px;z-index:10000">
+    <button id="cvfs-zoom-out" onclick="cvStudio.fsZoom(-0.1)" title="Réduire" style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;font-size:18px;font-weight:700">−</button>
+    <button id="cvfs-zoom-fit" onclick="cvStudio.fsZoomFit()" title="Ajuster largeur" style="padding:0 14px;height:42px;border-radius:21px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.04em"><span id="cvfs-zoom-pct">100%</span></button>
+    <button id="cvfs-zoom-in" onclick="cvStudio.fsZoom(0.1)" title="Agrandir" style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;font-size:18px;font-weight:700">+</button>
+    <button onclick="cvStudio.closeFullscreen()" title="Fermer (Échap)" style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;cursor:pointer;font-size:16px;margin-left:6px">✕</button>
+  </div>
+  <div style="position:fixed;top:16px;left:16px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:99px;padding:8px 16px;color:#fff;font-size:12px;font-weight:500;z-index:10000;display:flex;align-items:center;gap:10px">
+    <span style="color:#9ca3af">A4</span>
+    <span>·</span>
+    <span id="cvfs-tpl-name">—</span>
+    <span>·</span>
+    <span style="color:#9ca3af">Échap pour fermer</span>
+  </div>
+  <div id="cvfs-stage" style="min-height:100vh;display:flex;align-items:flex-start;justify-content:center;padding-top:72px">
+    <iframe id="cvfs-iframe" sandbox="allow-same-origin"
+      style="width:794px;height:1123px;border:none;background:#fff;box-shadow:0 30px 80px rgba(0,0,0,.6);transform-origin:top center;transition:transform .15s ease"></iframe>
+  </div>
+</div>
+
+<!-- ══ BIBLIOTHÈQUE TEMPLATES (modal plein écran) ══ -->
+<div id="cv-library-modal" class="cvlib-overlay">
+  <div class="cvlib-shell">
+
+    <!-- HEADER : titre + recherche + ferme -->
+    <div class="cvlib-hdr">
+      <div class="cvlib-title">
+        <h2>📚 Bibliothèque</h2>
+        <p><span id="cvlib-count">…</span> templates · choisis ton style</p>
+      </div>
+      <div class="cvlib-search-wrap">
+        <span class="cvlib-search-ico">🔎</span>
+        <input id="cvlib-search" type="text" placeholder="Recherche : moderne, tech, créatif..."
+               oninput="cvLibrary.onSearch(this.value)" autocomplete="off">
+        <button id="cvlib-search-clear" onclick="cvLibrary.clearSearch()" style="display:none">✕</button>
+      </div>
+      <button class="cvlib-close" onclick="cvLibrary.close()" aria-label="Fermer">✕</button>
+    </div>
+
+    <!-- CATEGORIES en chips horizontaux -->
+    <div id="cvlib-cats" class="cvlib-cats"></div>
+
+    <!-- GRID -->
+    <div id="cvlib-grid" class="cvlib-grid"></div>
+
+    <!-- État vide -->
+    <div id="cvlib-empty" class="cvlib-empty" style="display:none">
+      <div style="font-size:54px;opacity:.4">🔍</div>
+      <div>Aucun résultat</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.45);margin-top:6px">Essaie une autre recherche ou catégorie</div>
+    </div>
+
+    <!-- BARRE INFÉRIEURE : actions sur la sélection -->
+    <div id="cvlib-actionbar" class="cvlib-actionbar" style="display:none">
+      <div class="cvlib-actionbar-info">
+        <span style="font-size:11px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.08em">Sélectionné</span>
+        <strong id="cvlib-selected-name" style="font-size:15px;color:#fff;font-weight:700">—</strong>
+      </div>
+      <div class="cvlib-actionbar-btns">
+        <button class="cvlib-btn-secondary" onclick="cvLibrary.previewSelected()">👁️ Aperçu plein écran</button>
+        <button class="cvlib-btn-primary" onclick="cvLibrary.applySelected()">✓ Appliquer ce template</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Templates CV (legacy, masqué par défaut) -->
 <div id="page-templates" class="page">
   <div class="ph">
     <div class="ph-text"><h2>🎨 Templates CV</h2><p>Vos modèles de CV — créez-en un via le wizard ou importez le vôtre</p></div>
@@ -1771,24 +2273,41 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <!-- Admin -->
 <div id="page-admin" class="page">
   <div class="ph">
-    <div class="ph-text"><h2>🛡️ Administration</h2><p>Gestion des utilisateurs</p></div>
-    <div style="display:flex;gap:8px;align-items:center">
-      <button class="btn btn-secondary btn-sm" style="background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;border:none;" onclick="startTutorial()">▶ Aperçu didacticiel</button>
-      <button class="btn btn-secondary btn-sm" onclick="loadAdminUsers()">🔄 Actualiser</button>
+    <div class="ph-text"><h2>🛡️ Administration</h2><p>Gestion des utilisateurs &amp; opérations</p></div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <button class="btn btn-secondary btn-sm" onclick="downloadDbBackup()">💾 Backup DB</button>
+      <button class="btn btn-secondary btn-sm" onclick="runReminders()">📧 Tester rappels</button>
+      <button class="btn btn-secondary btn-sm" onclick="loadAdminAll()">🔄 Actualiser</button>
     </div>
   </div>
+
+  <!-- Stats globales -->
+  <div class="card" style="margin-bottom:14px">
+    <div class="card-title">📊 Stats globales</div>
+    <div id="admin-stats" class="tx-sm tx-m">Chargement...</div>
+  </div>
+
   <div class="card">
     <div class="card-title">👥 Utilisateurs</div>
-    <table class="admin-table" style="width:100%;border-collapse:collapse">
+    <div class="tx-sm tx-m" style="margin-bottom:14px;line-height:1.6">
+      <strong>Quota mensuel</strong> : nombre d'appels IA autorisés par utilisateur et par mois.
+      <code style="background:var(--card2);padding:2px 6px;border-radius:4px">0</code> = utilise le défaut global (variable d'env <code style="background:var(--card2);padding:2px 6px;border-radius:4px">MONTHLY_AI_QUOTA</code>).
+      Le bouton <strong>↻ Reset</strong> remet le compteur du mois en cours à zéro pour l'utilisateur.
+    </div>
+    <div class="tbl-wrap" style="overflow-x:auto">
+    <table class="admin-table" style="width:100%;min-width:880px;border-collapse:collapse">
       <thead><tr style="border-bottom:1px solid var(--border)">
         <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Utilisateur</th>
         <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Email</th>
         <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Inscription</th>
         <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Rôle</th>
+        <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase" title="Quota mensuel d'appels IA. 0 = défaut global.">Quota / mois</th>
+        <th style="text-align:left;padding:10px 14px;font-size:11px;color:var(--text3);text-transform:uppercase">Usage en cours</th>
         <th style="padding:10px 14px"></th>
       </tr></thead>
       <tbody id="admin-users-tbody"></tbody>
     </table>
+    </div>
   </div>
 </div>
 
@@ -1946,15 +2465,28 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
       <div id="auth-login-form">
         <div class="fg"><label>Email</label><input type="email" id="a-email" placeholder="vous@email.com" onkeydown="if(event.key==='Enter')doLogin()"></div>
         <div class="fg"><label>Mot de passe</label><input type="password" id="a-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--text2);margin-top:6px;cursor:pointer">
+          <input type="checkbox" id="a-remember" checked style="accent-color:var(--accent);width:14px;height:14px">
+          Se souvenir de moi <span style="color:var(--text3);font-size:11px">(décoche sur PC public)</span>
+        </label>
         <div class="auth-error" id="login-err"></div>
         <button class="btn btn-primary" style="width:100%;margin-top:16px;padding:13px;font-size:14px" onclick="doLogin()">→ Se connecter</button>
+        <div style="text-align:center;margin-top:12px;font-size:12px">
+          <a href="#" onclick="forgotPasswordPrompt();return false" style="color:var(--accent)">Mot de passe oublié ?</a>
+        </div>
       </div>
       <div id="auth-register-form" style="display:none">
         <div class="fg"><label>Prénom</label><input type="text" id="r-name" placeholder="Votre prénom"></div>
         <div class="fg"><label>Email</label><input type="email" id="r-email" placeholder="vous@email.com"></div>
-        <div class="fg"><label>Mot de passe</label><input type="password" id="r-pwd" placeholder="Min 6 caractères" onkeydown="if(event.key==='Enter')doRegister()"></div>
+        <div class="fg"><label>Mot de passe</label><input type="password" id="r-pwd" placeholder="Min 8 caractères" onkeydown="if(event.key==='Enter')doRegister()"></div>
+        <div id="r-hcaptcha-wrap" style="margin:10px 0"></div>
         <div class="auth-error" id="register-err"></div>
         <button class="btn btn-primary" style="width:100%;margin-top:16px;padding:13px;font-size:14px" onclick="doRegister()">✨ Créer mon compte gratuit</button>
+        <div style="text-align:center;margin-top:10px;font-size:11px;color:var(--text3)">
+          En créant un compte, tu acceptes les
+          <a href="/cgu" target="_blank" style="color:var(--accent)">CGU</a> et la
+          <a href="/privacy" target="_blank" style="color:var(--accent)">politique de confidentialité</a>.
+        </div>
       </div>
       <div class="auth-trust">
         <span class="auth-trust-item"><span>🔒</span> Sécurisé</span>
@@ -1986,6 +2518,8 @@ hr.div{border:none;border-top:1px solid var(--border);margin:16px 0}
 <script>
 // ── State ──────────────────────────────────────────────────────────────────────
 let apps = [], config = {}, selAppId = null, generateCV_force = false;
+let cvPdfHas = false, cvPdfName = '';
+let generatedPdfBlobUrl = null, generatedPdfFilename = '';
 let generatedCV = '', generatedCVFilename = '', cvContent = '';
 let dragId = null;
 let currentUser = null;
@@ -2060,11 +2594,23 @@ function switchAuthTab(tab){
 async function doLogin(){
   const email=document.getElementById('a-email').value.trim();
   const pwd=document.getElementById('a-pwd').value;
+  const remember=document.getElementById('a-remember')?.checked ?? true;
   const err=document.getElementById('login-err');
   err.style.display='none';
-  const data=await post('/api/auth/login',{email,password:pwd});
-  if(data.error){err.textContent=data.error;err.style.display='';return;}
-  onLogin(data.user);
+  if(!email || !pwd){
+    err.textContent='Email et mot de passe requis'; err.style.display='block'; return;
+  }
+  try{
+    const data=await post('/api/auth/login',{email,password:pwd,remember});
+    if(!data){ err.textContent='Pas de réponse du serveur'; err.style.display='block'; return; }
+    if(data.error){err.textContent=data.error;err.style.display='block';return;}
+    if(!data.user){ err.textContent='Réponse serveur incomplète'; err.style.display='block'; return; }
+    onLogin(data.user);
+  }catch(e){
+    console.error('login error', e);
+    err.textContent='Erreur réseau : '+(e.message||e);
+    err.style.display='block';
+  }
 }
 
 async function doRegister(){
@@ -2073,9 +2619,111 @@ async function doRegister(){
   const pwd=document.getElementById('r-pwd').value;
   const err=document.getElementById('register-err');
   err.style.display='none';
-  const data=await post('/api/auth/register',{name,email,password:pwd});
-  if(data.error){err.textContent=data.error;err.style.display='';return;}
-  onLogin(data.user);
+  if(!email || !pwd){
+    err.textContent='Email et mot de passe requis'; err.style.display='block'; return;
+  }
+  if(pwd.length < 8){
+    err.textContent='Mot de passe trop court (min 8 caractères)'; err.style.display='block'; return;
+  }
+  let captcha_token = '';
+  if(window.hcaptcha && window._hcaptcha_widget_id !== undefined){
+    captcha_token = window.hcaptcha.getResponse(window._hcaptcha_widget_id) || '';
+  }
+  try{
+    const data=await post('/api/auth/register',{name,email,password:pwd,hcaptcha_token:captcha_token});
+    if(!data){ err.textContent='Pas de réponse du serveur'; err.style.display='block'; return; }
+    if(data.error){
+      err.textContent=data.error;err.style.display='block';
+      if(window.hcaptcha) try{window.hcaptcha.reset(window._hcaptcha_widget_id);}catch(e){}
+      return;
+    }
+    if(!data.user){ err.textContent='Réponse serveur incomplète : '+JSON.stringify(data).slice(0,200); err.style.display='block'; return; }
+    if(data.needs_verification){
+      toast('📧 Compte créé ! Vérifie ton email pour activer.','success');
+    }
+    onLogin(data.user);
+  }catch(e){
+    console.error('register error', e);
+    err.textContent='Erreur réseau : '+(e.message||e);
+    err.style.display='block';
+  }
+}
+
+async function forgotPasswordPrompt(){
+  const email = (document.getElementById('a-email').value || '').trim()
+             || prompt('Email du compte à réinitialiser :');
+  if(!email) return;
+  const r = await post('/api/auth/forgot-password',{email});
+  toast(r.message || (r.error || 'Si l\'email existe, un lien a été envoyé.'), r.error?'error':'success');
+}
+
+// Si l'URL contient ?reset_token=... on affiche un formulaire de reset
+function maybeShowResetForm(){
+  const params = new URLSearchParams(window.location.search);
+  const token = params.get('reset_token');
+  if(!token) return false;
+  const ov = document.getElementById('auth-overlay');
+  if(ov) ov.style.display='flex';
+  // Cache login/register, montre formulaire reset
+  const card = ov.querySelector('.auth-tabs')?.parentElement;
+  if(!card) return false;
+  document.getElementById('auth-login-form').style.display='none';
+  document.getElementById('auth-register-form').style.display='none';
+  // Insère le formulaire si pas déjà
+  if(!document.getElementById('auth-reset-form')){
+    const div = document.createElement('div');
+    div.id = 'auth-reset-form';
+    div.innerHTML = `
+      <div style="text-align:center;font-weight:700;font-size:15px;margin-bottom:14px">🔑 Nouveau mot de passe</div>
+      <div class="fg"><label>Nouveau mot de passe (min 8)</label>
+        <input type="password" id="reset-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')doResetPassword()"></div>
+      <div class="auth-error" id="reset-err"></div>
+      <button class="btn btn-primary" style="width:100%;margin-top:14px;padding:13px;font-size:14px" onclick="doResetPassword()">✓ Mettre à jour</button>
+    `;
+    card.appendChild(div);
+  }
+  document.getElementById('auth-reset-form').style.display='';
+  window._reset_token = token;
+  return true;
+}
+async function doResetPassword(){
+  const pwd = document.getElementById('reset-pwd').value;
+  const err = document.getElementById('reset-err');
+  err.style.display='none';
+  if(!pwd || pwd.length < 8){
+    err.textContent='Mot de passe trop court (min 8)'; err.style.display='block'; return;
+  }
+  const r = await post('/api/auth/reset-password',{token: window._reset_token, password: pwd});
+  if(r.error){ err.textContent = r.error; err.style.display='block'; return; }
+  toast('✅ Mot de passe mis à jour. Connecte-toi.','success');
+  // Cleanup URL
+  history.replaceState({},'',window.location.pathname);
+  document.getElementById('auth-reset-form').style.display='none';
+  document.getElementById('auth-login-form').style.display='';
+}
+
+// Init hCaptcha widget si site key disponible
+async function initHcaptchaIfNeeded(){
+  const me = await api('/api/auth/me');
+  const siteKey = me.hcaptcha_site_key;
+  if(!siteKey) return;
+  // Charge le script hcaptcha
+  if(!document.getElementById('hcaptcha-script')){
+    const s=document.createElement('script');
+    s.id='hcaptcha-script'; s.src='https://hcaptcha.com/1/api.js'; s.async=true; s.defer=true;
+    document.head.appendChild(s);
+  }
+  // Render lazily quand l'user clique sur l'onglet register
+  const tryRender=()=>{
+    const wrap=document.getElementById('r-hcaptcha-wrap');
+    if(window.hcaptcha && wrap && !wrap.dataset.rendered){
+      try{
+        window._hcaptcha_widget_id = window.hcaptcha.render(wrap, {sitekey: siteKey});
+        wrap.dataset.rendered='1';
+      }catch(e){ /* déjà rendered */ }
+    }
+  };
+  setInterval(tryRender, 1000);
 }
 
 function onLogin(user){
@@ -2105,12 +2753,16 @@ async function logout(){
 }
 
 async function checkAuth(){
+  // Si l'URL contient ?reset_token=, on saute le check (l'user est en flow reset)
+  if(maybeShowResetForm()){ return; }
   const data=await api('/api/auth/me');
   if(data.user){onLogin(data.user);}
   else{
     document.getElementById('auth-overlay').style.display='flex';
     setTimeout(()=>window._initAuthAnim&&window._initAuthAnim(), 100);
   }
+  // Init hCaptcha si configuré côté serveur
+  initHcaptchaIfNeeded();
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -2213,9 +2865,9 @@ function _renderCal7(stages, todayISO){
       const c=_planStageColor(s);
       const time=(s.scheduled_date||'').length>10?s.scheduled_date.slice(11,16):'';
       html+=`<div class="cal-ev" style="background:${c}18;border-left-color:${c};border-left-width:3px" onclick="openModal('${s.application_id}')">
-        ${time?`<div class="cal-ev-time" style="color:${c};font-weight:800">${time}</div>`:''}
-        <div class="cal-ev-co">${s.company||'?'}</div>
-        <div class="cal-ev-type" style="color:${c};opacity:.85">${s.stage_type||'Entretien'}</div>
+        ${time?`<div class="cal-ev-time" style="color:${c};font-weight:800">${esc(time)}</div>`:''}
+        <div class="cal-ev-co">${esc(s.company||'?')}</div>
+        <div class="cal-ev-type" style="color:${c};opacity:.85">${esc(s.stage_type||'Entretien')}</div>
       </div>`;
     });
     html+=`</div></div>`;
@@ -2250,7 +2902,7 @@ function _renderCal30(stages, todayISO){
       <div class="cal-30-num">${day}</div>`;
     evs.slice(0,3).forEach(s=>{
       const c=_planStageColor(s);
-      html+=`<div class="cal-30-ev" style="background:${c}18;border-left-color:${c};color:var(--text);border-left-width:3px" onclick="openModal('${s.application_id}')">${s.company||'?'}</div>`;
+      html+=`<div class="cal-30-ev" style="background:${c}18;border-left-color:${c};color:var(--text);border-left-width:3px" onclick="openModal('${esc(s.application_id)}')">${esc(s.company||'?')}</div>`;
     });
     if(evs.length>3) html+=`<div class="cal-30-more">+${evs.length-3} autres</div>`;
     html+=`</div>`;
@@ -2261,7 +2913,7 @@ function _renderCal30(stages, todayISO){
 
 async function openAddStageModal(){
   // Ouvre modal candidature en mode ajout stage
-  const appList=apps.map(a=>`<option value="${a.id}">${a.company} — ${a.role||''}</option>`).join('');
+  const appList=apps.map(a=>`<option value="${esc(a.id)}">${esc(a.company)} — ${esc(a.role||'')}</option>`).join('');
   if(!appList){toast('Ajoutez d\'abord une candidature','error');return;}
   const html=`
     <div class="fg"><label>Candidature</label><select id="asm-app">${appList}</select></div>
@@ -2316,29 +2968,135 @@ async function loadAdminUsers(){
   const data=await api('/api/admin/users');
   if(data.error){toast(data.error,'error');return;}
   const tbody=document.getElementById('admin-users-tbody');
-  tbody.innerHTML=data.map(u=>`
-    <tr style="border-top:1px solid var(--border)">
-      <td><strong>${u.name||'—'}</strong></td>
-      <td style="color:var(--text2)">${u.email}</td>
-      <td style="color:var(--text3);font-size:12px">${u.created_at?.slice(0,10)||''}</td>
-      <td>
+  tbody.innerHTML=data.map(u=>{
+    const used   = u.used || 0;
+    const eff    = u.effective_quota || 200;
+    const pct    = Math.min(100, Math.round((used/Math.max(1,eff))*100));
+    const color  = pct>=90 ? 'var(--red)' : pct>=70 ? 'var(--yellow)' : 'var(--green)';
+    const verifBadge = u.email_verified
+      ? '<span title="Email vérifié" style="color:var(--green);font-size:11px;margin-left:4px">✓</span>'
+      : '<span title="Email non vérifié" style="color:var(--yellow);font-size:11px;margin-left:4px">⚠</span>';
+    return `
+    <tr style="border-top:1px solid var(--border)" data-uid="${u.id}">
+      <td style="padding:8px 14px"><strong>${esc(u.name||'—')}</strong></td>
+      <td style="padding:8px 14px;color:var(--text2)">${esc(u.email)}${verifBadge}</td>
+      <td style="padding:8px 14px;color:var(--text3);font-size:12px">${esc(u.created_at?.slice(0,10)||'')}</td>
+      <td style="padding:8px 14px">
         <select class="role-select" onchange="changeRole(${u.id},this.value)">
           <option ${u.role==='membre'?'selected':''}>membre</option>
           <option ${u.role==='pro'?'selected':''}>pro</option>
           <option ${u.role==='admin'?'selected':''}>admin</option>
         </select>
       </td>
-      <td>
+      <td style="padding:8px 14px">
+        <input type="number" min="0" max="1000000" step="1"
+          value="${u.monthly_quota||0}"
+          title="${u.quota_is_default?'Utilise le défaut global ('+eff+')':'Quota personnalisé'}"
+          style="width:90px;background:var(--card2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:5px 8px;font-size:13px"
+          onchange="changeQuota(${u.id}, this.value)">
+        <div style="font-size:10px;color:var(--text3);margin-top:2px">
+          ${u.quota_is_default?'<em>défaut: '+eff+'</em>':'effectif: '+eff}
+        </div>
+      </td>
+      <td style="padding:8px 14px">
+        <div style="font-size:13px;font-weight:600;color:${color}">${used} / ${eff}</div>
+        <div style="height:4px;background:var(--border);border-radius:2px;margin-top:4px;overflow:hidden">
+          <div style="height:100%;width:${pct}%;background:${color}"></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="resetUserUsage(${u.id})"
+          title="Reset le compteur du mois en cours" style="font-size:10px;padding:2px 6px;margin-top:3px">↻ Reset</button>
+      </td>
+      <td style="padding:8px 14px">
         ${u.id!==currentUser?.id?`<button class="btn btn-red btn-sm" onclick="deleteUser(${u.id})">Supprimer</button>`:'<span style="color:var(--text3);font-size:12px">Vous</span>'}
       </td>
-    </tr>`).join('');
+    </tr>`;
+  }).join('');
 }
 
 async function changeRole(uid, role){
-  const data=await fetch('/api/admin/users/'+uid,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({role})});
-  const d=await data.json();
-  if(d.error){toast(d.error,'error');return;}
+  const r = await put('/api/admin/users/'+uid, {role});
+  if(r.error){toast(r.error,'error');return;}
   toast(`Rôle mis à jour → ${role}`,'success');
+}
+
+async function changeQuota(uid, value){
+  const v = parseInt(value, 10);
+  if(isNaN(v) || v < 0){ toast('Quota invalide','error'); loadAdminUsers(); return; }
+  const r = await put('/api/admin/users/'+uid, {monthly_quota: v});
+  if(r.error){toast(r.error,'error'); loadAdminUsers(); return;}
+  toast(v===0 ? 'Quota → défaut global' : `Quota → ${v}/mois`,'success');
+  // Refresh juste cette ligne (l'effective_quota change si on passe à 0)
+  loadAdminUsers();
+}
+
+async function resetUserUsage(uid){
+  if(!confirm('Remettre le compteur du mois courant à 0 pour cet utilisateur ?')) return;
+  const r = await put('/api/admin/users/'+uid, {reset_usage: true});
+  if(r.error){toast(r.error,'error');return;}
+  toast('✅ Compteur reset','success');
+  loadAdminUsers();
+}
+
+async function loadAdminStats(){
+  const s = await api('/api/admin/stats');
+  const el = document.getElementById('admin-stats');
+  if(!el) return;
+  if(s.error){ el.textContent = '❌ '+s.error; return; }
+  const top = (s.top_users_by_usage||[])
+    .map(u=>`<li>${esc(u.email)} — <strong>${u.used}</strong> appels</li>`).join('');
+  el.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:14px">
+      <div style="padding:14px;background:var(--card2);border-radius:10px">
+        <div style="font-size:24px;font-weight:800;color:var(--accent)">${s.users.total}</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase">Utilisateurs</div>
+        <div style="font-size:11px;color:var(--green);margin-top:4px">+${s.users.new_7d} cette semaine</div>
+      </div>
+      <div style="padding:14px;background:var(--card2);border-radius:10px">
+        <div style="font-size:24px;font-weight:800;color:var(--green)">${s.users.verified}</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase">Vérifiés</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">${Math.round(s.users.verified/Math.max(1,s.users.total)*100)}% du total</div>
+      </div>
+      <div style="padding:14px;background:var(--card2);border-radius:10px">
+        <div style="font-size:24px;font-weight:800;color:var(--text)">${s.applications}</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase">Candidatures</div>
+      </div>
+      <div style="padding:14px;background:var(--card2);border-radius:10px">
+        <div style="font-size:24px;font-weight:800;color:var(--text)">${s.interview_stages}</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase">Étapes planning</div>
+      </div>
+      <div style="padding:14px;background:var(--card2);border-radius:10px">
+        <div style="font-size:24px;font-weight:800;color:var(--purple)">${s.ai_calls_this_month}</div>
+        <div style="font-size:11px;color:var(--text3);text-transform:uppercase">Appels IA (${esc(s.ym)})</div>
+      </div>
+    </div>
+    ${top ? `<div><strong>Top consommateurs ce mois :</strong><ul style="margin:6px 0 0 18px;line-height:1.7">${top}</ul></div>` : ''}
+  `;
+}
+
+async function loadAdminAll(){
+  await Promise.all([loadAdminStats(), loadAdminUsers()]);
+}
+
+async function downloadDbBackup(){
+  try{
+    const resp = await fetch('/api/admin/backup-db', {credentials:'same-origin'});
+    if(!resp.ok){ toast('Backup impossible','error'); return; }
+    const blob = await resp.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `jobfinder_${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.db`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url), 5000);
+    toast('💾 Backup téléchargé','success');
+  }catch(e){ toast('Erreur : '+e.message,'error'); }
+}
+
+async function runReminders(){
+  if(!confirm('Envoyer maintenant les rappels d\'entretiens prévus DEMAIN ?')) return;
+  const r = await post('/api/admin/run-reminders', {});
+  if(r.error){ toast(r.error,'error'); return; }
+  toast(`📧 ${r.sent} envoyé(s), ${r.skipped} skipped, ${r.candidates} candidat(s)`,'success');
 }
 
 async function deleteUser(uid){
@@ -2392,7 +3150,8 @@ function nav(id){
   if(id==='settings')     loadSettings();
   if(id==='planning'){loadStages().then(renderPlanning);}
   if(id==='templates')    loadTemplates();
-  if(id==='admin')        loadAdminUsers();
+  if(id==='cvstudio')     cvStudio.init();
+  if(id==='admin')        loadAdminAll();
   if(id==='adapter')      updateAdapterTemplateLabel();
   // Close sidebar on mobile when navigating
   if(window.innerWidth<=768) closeSidebar();
@@ -2408,17 +3167,40 @@ function toast(msg, type='info'){
   setTimeout(()=>{el.style.animation='toastIn .25s ease reverse';setTimeout(()=>el.remove(),250);},3400);
 }
 
+// ── HTML escape (anti-XSS pour innerHTML) ─────────────────────────────────────
+function esc(s){
+  if(s==null) return '';
+  return String(s)
+    .replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')
+    .replaceAll('"','&quot;').replaceAll("'",'&#39;');
+}
+
 // ── API helpers ────────────────────────────────────────────────────────────────
 async function api(url, opts={}){
   const r = await fetch(url,{headers:{'Content-Type':'application/json'},...opts});
   if(r.status===401){
     // Session expirée → retour au login
     currentUser=null;
-    document.getElementById('auth-overlay').style.display='flex';
+    const ov=document.getElementById('auth-overlay');
+    if(ov) ov.style.display='flex';
     setTimeout(()=>window._initAuthAnim&&window._initAuthAnim(), 100);
     return {error:'Session expirée, reconnectez-vous'};
   }
-  return r.json();
+  if(r.status===429){
+    let body={};
+    try{ body=await r.json(); }catch(e){}
+    const msg = body.quota_exceeded
+      ? `⛔ Quota mensuel IA atteint (${body.used||'?'}/${body.quota||'?'}). Reset le 1er du mois prochain.`
+      : (body.error || '⚠️ Trop de requêtes — réessaye dans quelques minutes.');
+    if(typeof toast==='function') toast(msg,'error');
+    return {error: msg, rate_limited: true, ...body};
+  }
+  if(r.status===413){
+    if(typeof toast==='function') toast('Fichier trop volumineux (max 12 Mo)','error');
+    return {error:'Fichier trop volumineux'};
+  }
+  try{ return await r.json(); }
+  catch(e){ return {error:'Réponse serveur invalide'}; }
 }
 const post = (url,data)=>api(url,{method:'POST',body:JSON.stringify(data)});
 const put  = (url,data)=>api(url,{method:'PUT', body:JSON.stringify(data)});
@@ -2528,13 +3310,13 @@ function renderDash(){
   const tbody=document.getElementById('dash-tbody');
   if(!recent.length){ tbody.innerHTML=`<tr><td colspan="6">${emptyHtml}</td></tr>`; }
   else { tbody.innerHTML=recent.map(a=>`
-    <tr onclick="openModal('${a.id}')">
-      <td class="tx-m tx-sm">${a.date||''}</td>
-      <td><strong>${a.company||''}</strong></td>
-      <td class="tx-m">${a.role||''}</td>
-      <td><span class="sbadge s-${S_KEY(a.status)}">${S_ICON[a.status]||''} ${a.status}</span></td>
-      <td class="tx-sm" style="color:var(--blue)">${a.interview_date?'📅 '+a.interview_date:''}</td>
-      <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openModal('${a.id}')">✏️</button></td>
+    <tr onclick="openModal('${esc(a.id)}')">
+      <td class="tx-m tx-sm">${esc(a.date||'')}</td>
+      <td><strong>${esc(a.company||'')}</strong></td>
+      <td class="tx-m">${esc(a.role||'')}</td>
+      <td><span class="sbadge s-${esc(S_KEY(a.status))}">${esc(S_ICON[a.status]||'')} ${esc(a.status)}</span></td>
+      <td class="tx-sm" style="color:var(--blue)">${a.interview_date?'📅 '+esc(a.interview_date):''}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();openModal('${esc(a.id)}')">✏️</button></td>
     </tr>`).join(''); }
 
   // Cards (mobile)
@@ -2542,14 +3324,14 @@ function renderDash(){
   if(cards){
     if(!recent.length){ cards.innerHTML=emptyHtml; }
     else { cards.innerHTML=recent.map(a=>`
-      <div class="m-app-card" onclick="openModal('${a.id}')">
+      <div class="m-app-card" onclick="openModal('${esc(a.id)}')">
         <div class="m-app-card-body">
-          <div class="m-app-card-co">${a.company||''}</div>
-          <div class="m-app-card-role">${a.role||''}</div>
+          <div class="m-app-card-co">${esc(a.company||'')}</div>
+          <div class="m-app-card-role">${esc(a.role||'')}</div>
           <div class="m-app-card-foot">
-            <span class="sbadge s-${S_KEY(a.status)}" style="font-size:10px;padding:2px 7px">${S_ICON[a.status]||''} ${a.status}</span>
-            <span class="m-app-card-date">${a.date||''}</span>
-            ${a.interview_date?`<span style="font-size:11px;color:var(--blue)">🎤 ${a.interview_date}</span>`:''}
+            <span class="sbadge s-${esc(S_KEY(a.status))}" style="font-size:10px;padding:2px 7px">${esc(S_ICON[a.status]||'')} ${esc(a.status)}</span>
+            <span class="m-app-card-date">${esc(a.date||'')}</span>
+            ${a.interview_date?`<span style="font-size:11px;color:var(--blue)">🎤 ${esc(a.interview_date)}</span>`:''}
           </div>
         </div>
         <div class="m-app-card-arrow">›</div>
@@ -2570,47 +3352,163 @@ function loadCVFile(e){
   reader.readAsText(file);
 }
 
-// ── Documentation (Settings) ───────────────────────────────────────────────────
+// ── Documentation (Settings) — drag & drop, liste fichier par fichier ─────────
 async function loadDocsState(){
   const d=await api('/api/docs');
   docsLoaded=!!(d.text&&d.text.length>10)||(d.summary&&d.summary.length>10);
 }
 
-async function loadSettingsDocs(ev){
-  const files=[...ev.target.files]; if(!files.length) return;
-  const st=document.getElementById('s-doc-status');
-  st.style.color='var(--yellow)'; st.textContent=`Extraction de ${files.length} fichier(s)...`;
-  let allText=''; const names=[];
-  // Charger docs existants
-  const existing=await api('/api/docs');
-  if(existing.text) allText=existing.text;
-  const existingNames=existing.names||[];
-  for(const file of files){
-    const b64=await fileToB64(file);
-    const res=await post('/api/extract-doc',{b64,mime:file.type,name:file.name});
-    allText+=`\n\n--- ${file.name} ---\n`+(res.text||'');
-    names.push(file.name);
-  }
-  const allNames=[...existingNames,...names];
-  await post('/api/docs',{text:allText,names:allNames});
-  document.getElementById('s-doc-names').value=allNames.join(', ');
-  st.style.color='var(--green)'; st.textContent=`✅ ${allNames.length} document(s) sauvegardé(s) — ${allText.length} caractères`;
-  docsLoaded=true;
-  toast(`${names.length} document(s) ajouté(s) !`,'success');
-  ev.target.value='';
-}
+const docDrop = {
+  // state : liste des "items" {name, text, size}
+  items: [],
+  loaded: false,
 
-async function clearSettingsDocs(){
-  if(!confirm('Supprimer toute la documentation ?')) return;
-  await post('/api/docs',{text:'',names:[]});
-  document.getElementById('s-doc-names').value='';
-  document.getElementById('s-doc-status').textContent='';
-  docsLoaded=false;
-  toast('Documentation effacée','info');
-}
+  async load(){
+    const d = await api('/api/docs');
+    const names = d.names || [];
+    const fullText = d.text || '';
+    // Découpe par marqueur '--- filename ---' pour reconstituer l'état
+    this.items = [];
+    if(fullText){
+      const parts = fullText.split(/\n*--- ([^\n]+?) ---\n/);
+      // parts = ["", "name1", "text1", "name2", "text2", ...]
+      // Si le format ne correspond pas, on stocke en bloc unique
+      if(parts.length > 1){
+        for(let i=1;i<parts.length;i+=2){
+          this.items.push({name: parts[i], text: parts[i+1] || ''});
+        }
+      } else {
+        // Compat ancien format : 1 item bloc
+        names.forEach((n,i)=>{
+          this.items.push({name: n, text: i===0 ? fullText : ''});
+        });
+      }
+    }
+    this.loaded = true;
+    this.render();
+  },
+
+  render(){
+    const list = document.getElementById('s-doc-list');
+    const st   = document.getElementById('s-doc-status');
+    if(!list) return;
+    if(this.items.length === 0){
+      list.innerHTML = '<div style="text-align:center;padding:14px;color:var(--text3);font-size:12.5px;font-style:italic">Aucun document importé</div>';
+      st.textContent = 'Aucun document';
+      return;
+    }
+    list.innerHTML = this.items.map((it,i)=>{
+      const ext = (it.name||'').split('.').pop().toLowerCase();
+      const ico = ext==='pdf'?'📄':ext==='html'||ext==='htm'?'🌐':ext==='txt'?'📝':'📎';
+      const chars = (it.text||'').length;
+      return `
+        <div class="doc-line" style="display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--card2);border:1px solid var(--border);border-radius:8px;margin-bottom:6px">
+          <span style="font-size:18px;flex-shrink:0">${ico}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.name)}</div>
+            <div style="font-size:11px;color:var(--text3)">${chars.toLocaleString('fr-FR')} caractères extraits</div>
+          </div>
+          <button class="btn btn-ghost btn-sm" onclick="docDrop.remove(${i})" title="Retirer ce fichier"
+            style="color:var(--red);padding:4px 8px;flex-shrink:0">🗑</button>
+        </div>`;
+    }).join('');
+    const totalChars = this.items.reduce((s,i)=>s+(i.text||'').length, 0);
+    st.style.color = 'var(--green)';
+    st.textContent = `${this.items.length} fichier(s) — ${totalChars.toLocaleString('fr-FR')} caractères`;
+  },
+
+  // ── Drag & drop ─────────────────────────────────────────────────────────
+  over(e){
+    e.preventDefault(); e.stopPropagation();
+    const z = document.getElementById('s-doc-drop');
+    if(z){ z.style.borderColor='var(--accent)'; z.style.background='var(--accent-light)'; }
+  },
+  leave(e){
+    const z = document.getElementById('s-doc-drop');
+    if(z){ z.style.borderColor='var(--border2)'; z.style.background='var(--card2)'; }
+  },
+  drop(e){
+    e.preventDefault(); e.stopPropagation();
+    this.leave(e);
+    const files = [...(e.dataTransfer?.files || [])];
+    if(files.length) this.handleFiles(files);
+  },
+
+  async handleFiles(files){
+    files = [...files];
+    if(!files.length) return;
+    const allowed = ['pdf','html','htm','txt'];
+    const valid = files.filter(f=>{
+      const ext = f.name.split('.').pop().toLowerCase();
+      return allowed.includes(ext);
+    });
+    const skipped = files.length - valid.length;
+    if(skipped) toast(`${skipped} fichier(s) ignoré(s) (format non supporté)`,'info');
+    if(!valid.length) return;
+    const st = document.getElementById('s-doc-status');
+    st.style.color='var(--yellow)';
+    for(let i=0;i<valid.length;i++){
+      const file = valid[i];
+      st.textContent = `Extraction ${i+1}/${valid.length} : ${file.name}...`;
+      try{
+        const b64 = await fileToB64(file);
+        const res = await post('/api/extract-doc', {b64, mime:file.type, name:file.name});
+        if(res.error){ toast(`${file.name} : ${res.error}`,'error'); continue; }
+        // Évite les doublons
+        const idx = this.items.findIndex(x=>x.name===file.name);
+        if(idx>=0) this.items[idx] = {name: file.name, text: res.text||''};
+        else this.items.push({name: file.name, text: res.text||''});
+      }catch(err){
+        toast(`${file.name} : ${err.message||err}`, 'error');
+      }
+    }
+    this.render();
+    toast(`${valid.length} fichier(s) ajouté(s) — clique 💾 Enregistrer pour sauvegarder`, 'success');
+  },
+
+  remove(idx){
+    if(idx<0 || idx>=this.items.length) return;
+    const name = this.items[idx].name;
+    this.items.splice(idx, 1);
+    this.render();
+    toast(`Retiré : ${name} (n'oublie pas d'enregistrer)`, 'info');
+  },
+
+  async clearAll(){
+    if(!confirm('Supprimer tous les documents importés ?')) return;
+    this.items = [];
+    await post('/api/docs', {text:'', names:[]});
+    this.render();
+    docsLoaded = false;
+    toast('Documents effacés', 'info');
+  },
+
+  async save(){
+    // Reconstitue le grand bloc texte avec marqueurs séparateurs
+    const text = this.items
+      .map(it => `--- ${it.name} ---\n${it.text||''}`)
+      .join('\n\n');
+    const names = this.items.map(it=>it.name);
+    const r = await post('/api/docs', {text, names});
+    if(r && r.error){ toast(r.error, 'error'); return; }
+    docsLoaded = this.items.length > 0;
+    const st = document.getElementById('s-doc-status');
+    st.style.color = 'var(--green)';
+    st.textContent = `✅ Enregistré : ${this.items.length} fichier(s) — ${text.length.toLocaleString('fr-FR')} caractères`;
+    toast('💾 Documentation sauvegardée', 'success');
+  },
+};
+
 
 // ── Télécharger CV en PDF ──────────────────────────────────────────────────────
 async function downloadPDF(){
+  // Mode PDF : on a déjà un blob PDF prêt à télécharger
+  if(generatedPdfBlobUrl){
+    const a=document.createElement('a');
+    a.href=generatedPdfBlobUrl; a.download=generatedPdfFilename||'cv.pdf'; a.click();
+    toast('✅ PDF téléchargé !','success');
+    return;
+  }
   if(!generatedCVFilename){toast('Générez d\'abord un CV','error');return;}
   const co=document.getElementById('a-co').value.trim()||'CV';
   const ro=document.getElementById('a-role').value.trim()||'poste';
@@ -2680,10 +3578,45 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 });
 
+// ── PDF mode toggle (visible uniquement si un CV PDF est uploadé) ─────────────
+function refreshAdapterPdfMode(){
+  const row=document.getElementById('pdf-mode-row');
+  const chk=document.getElementById('use-pdf-cv');
+  const lbl=document.getElementById('pdf-cv-label');
+  if(!row || !chk) return;
+  if(cvPdfHas){
+    row.style.display='';
+    if(lbl) lbl.textContent=cvPdfName||'';
+    // Active automatiquement le mode PDF s'il n'a pas déjà été décoché manuellement
+    if(!chk.dataset.userToggled){ chk.checked=true; }
+    applyPdfModeUI();
+  } else {
+    chk.checked=false;
+    row.style.display='none';
+    applyPdfModeUI();
+  }
+}
+
+function togglePdfMode(){
+  const chk=document.getElementById('use-pdf-cv');
+  if(chk) chk.dataset.userToggled='1';
+  applyPdfModeUI();
+}
+
+function applyPdfModeUI(){
+  const pdfOn=document.getElementById('use-pdf-cv')?.checked;
+  const tplRow=document.getElementById('template-mode-row');
+  const cvBaseRow=document.getElementById('cv-base-row');
+  // En mode PDF, on masque le toggle template + le sélecteur HTML CV
+  if(tplRow) tplRow.style.display=pdfOn?'none':'';
+  if(cvBaseRow && pdfOn) cvBaseRow.style.display='none';
+}
+
 async function generateCV(){
   const co=document.getElementById('a-co').value.trim();
   const ro=document.getElementById('a-role').value.trim();
   const desc=document.getElementById('a-desc').value.trim();
+  const usePdf=document.getElementById('use-pdf-cv')?.checked && cvPdfHas;
   const useTemplate=document.getElementById('use-template').checked;
   if(desc.length<30){toast('Collez la description complète du poste ou récupérez via l\'URL','error');return;}
 
@@ -2740,7 +3673,34 @@ async function generateCV(){
   document.getElementById('savebtn').style.display='none';
 
   let data;
-  if(useTemplate){
+  if(usePdf){
+    // Mode PDF : binaire en retour, pas de JSON
+    try{
+      const resp=await fetch('/api/adapt-cv-pdf',{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        credentials:'same-origin',
+        body:JSON.stringify({company:co,role:ro,job_desc:desc})
+      });
+      if(!resp.ok){
+        const err=await resp.json().catch(()=>({error:'Erreur serveur'}));
+        data={error:err.error||'Erreur serveur'};
+      } else {
+        const blob=await resp.blob();
+        if(generatedPdfBlobUrl) URL.revokeObjectURL(generatedPdfBlobUrl);
+        generatedPdfBlobUrl=URL.createObjectURL(blob);
+        generatedPdfFilename=resp.headers.get('X-CV-Filename') || `CV_${co||'entreprise'}_${ro||'poste'}.pdf`;
+        const fallback=resp.headers.get('X-CV-Fallback')==='1';
+        const iframe=document.getElementById('cv-preview');
+        iframe.removeAttribute('srcdoc');
+        iframe.src=generatedPdfBlobUrl;
+        // Marqueurs pour les autres flows (saveAndApply, etc.)
+        generatedCV='';
+        generatedCVFilename=generatedPdfFilename;
+        data={ok:true, filename:generatedPdfFilename, fallback};
+      }
+    }catch(e){ data={error:e.message||'Erreur réseau'}; }
+  } else if(useTemplate){
     const payload={company:co,role:ro,job_desc:desc};
     if(activeTemplateId) payload.template_id=activeTemplateId;
     data=await post('/api/adapt-cv-template',payload);
@@ -2751,6 +3711,14 @@ async function generateCV(){
   overlay.classList.remove('show'); btn.disabled=false; btn.textContent='✨ Générer mon CV';
 
   if(data.error){toast(data.error,'error');document.getElementById('gen-status').textContent='❌ '+data.error;return;}
+  if(usePdf){
+    document.getElementById('gen-status').textContent = data.fallback
+      ? `⚠️ IA en échec — PDF original renvoyé (${data.filename})`
+      : `✅ ${data.filename}`;
+    document.getElementById('savebtn').style.display='';
+    toast(data.fallback?'IA en échec — PDF original renvoyé':'CV PDF adapté généré !', data.fallback?'info':'success');
+    return;
+  }
   generatedCV=data.html;
   generatedCVFilename=data.filename||'';
   document.getElementById('cv-preview').srcdoc=generatedCV;
@@ -2760,6 +3728,7 @@ async function generateCV(){
 }
 
 function previewCV(){
+  if(generatedPdfBlobUrl){ window.open(generatedPdfBlobUrl,'_blank'); return; }
   if(!generatedCV){toast('Générez d\'abord un CV','error');return;}
   const w=window.open('','_blank'); w.document.write(generatedCV); w.document.close();
 }
@@ -2792,13 +3761,13 @@ function renderKanban(){
       <div class="kcol-hd">${S_ICON[s]} ${s}<span class="cnt">${col.length}</span></div>
       <div class="kcol-body">
         ${col.map(a=>`
-          <div class="kcard" draggable="true" ondragstart="dStart(event,'${a.id}')" onclick="openModal('${a.id}')">
-            <h5>${a.company}</h5>
-            <div class="kcard-co">${a.role}</div>
-            <div class="kcard-date">📅 ${a.date||''}</div>
-            ${a.interview_date?`<div class="kcard-int">🎤 ${a.interview_date}</div>`:''}
+          <div class="kcard" draggable="true" ondragstart="dStart(event,'${esc(a.id)}')" onclick="openModal('${esc(a.id)}')">
+            <h5>${esc(a.company)}</h5>
+            <div class="kcard-co">${esc(a.role)}</div>
+            <div class="kcard-date">📅 ${esc(a.date||'')}</div>
+            ${a.interview_date?`<div class="kcard-int">🎤 ${esc(a.interview_date)}</div>`:''}
             ${a.cv_filename?`<div class="kcard-note">📄 CV adapté disponible</div>`:''}
-            ${a.notes?`<div class="kcard-note">📝 ${a.notes}</div>`:''}
+            ${a.notes?`<div class="kcard-note">📝 ${esc(a.notes)}</div>`:''}
           </div>`).join('')||`<div class="drop-zone" ondragover="dOver(event)" ondrop="dDrop(event,'${s}')">Déposez ici</div>`}
       </div>
     </div>`;
@@ -2822,16 +3791,16 @@ function renderKanbanMobile(){
     return;
   }
   list.innerHTML=filtered.map(a=>`
-    <div class="m-app-card" onclick="openModal('${a.id}')">
+    <div class="m-app-card" onclick="openModal('${esc(a.id)}')">
       <div class="m-app-card-body">
-        <div class="m-app-card-co">${a.company||''}</div>
-        <div class="m-app-card-role">${a.role||''}</div>
+        <div class="m-app-card-co">${esc(a.company||'')}</div>
+        <div class="m-app-card-role">${esc(a.role||'')}</div>
         <div class="m-app-card-foot">
-          <span class="sbadge s-${S_KEY(a.status)}" style="font-size:10px;padding:2px 7px">${S_ICON[a.status]||''} ${a.status}</span>
-          <span class="m-app-card-date">${a.date||''}</span>
-          ${a.interview_date?`<span style="font-size:11px;color:var(--blue)">🎤 ${a.interview_date}</span>`:''}
+          <span class="sbadge s-${esc(S_KEY(a.status))}" style="font-size:10px;padding:2px 7px">${esc(S_ICON[a.status]||'')} ${esc(a.status)}</span>
+          <span class="m-app-card-date">${esc(a.date||'')}</span>
+          ${a.interview_date?`<span style="font-size:11px;color:var(--blue)">🎤 ${esc(a.interview_date)}</span>`:''}
         </div>
-        ${a.notes?`<div style="font-size:11px;color:var(--text3);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📝 ${a.notes}</div>`:''}
+        ${a.notes?`<div style="font-size:11px;color:var(--text3);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📝 ${esc(a.notes)}</div>`:''}
       </div>
       <div class="m-app-card-arrow">›</div>
     </div>`).join('');
@@ -2857,9 +3826,9 @@ function renderAL(){
   const al=document.getElementById('al');
   if(!apps.length){al.innerHTML=`<div class="empty"><div class="empty-i">🎤</div><h4>Aucun entretien planifié</h4><p>Vos entretiens apparaîtront ici une fois vos candidatures au statut <strong>Entretien</strong>.</p></div>`;return;}
   al.innerHTML=[...apps].reverse().map(a=>`
-    <div class="al-item${selAppId===a.id?' active':''}" onclick="selApp('${a.id}')">
-      <h5>${S_ICON[a.status]||'📋'} ${a.company}</h5>
-      <p>${a.role}</p>
+    <div class="al-item${selAppId===a.id?' active':''}" onclick="selApp('${esc(a.id)}')">
+      <h5>${esc(S_ICON[a.status]||'📋')} ${esc(a.company)}</h5>
+      <p>${esc(a.role)}</p>
       ${a.interview_prep?'<div class="prep-ok">📝 Fiche prête</div>':''}
     </div>`).join('');
 }
@@ -2871,18 +3840,18 @@ function selApp(id){
   panel.innerHTML=`
     <div class="flex items-c justify-b" style="margin-bottom:18px;flex-shrink:0">
       <div>
-        <div style="font-size:17px;font-weight:700;color:var(--text)">${a.company} — ${a.role}</div>
-        <div class="tx-sm tx-m mt1">Candidature : ${a.date||''}${a.interview_date?' · Entretien : '+a.interview_date:''}</div>
+        <div style="font-size:17px;font-weight:700;color:var(--text)">${esc(a.company)} — ${esc(a.role)}</div>
+        <div class="tx-sm tx-m mt1">Candidature : ${esc(a.date||'')}${a.interview_date?' · Entretien : '+esc(a.interview_date):''}</div>
       </div>
       <div class="flex gap-2">
-        <button class="btn btn-primary btn-sm" id="prepbtn" onclick="genPrep('${a.id}')">✨ Générer fiche</button>
-        <button class="btn btn-secondary btn-sm" onclick="openPrepTab('${a.id}')">🖨️ Ouvrir</button>
-        <button class="btn btn-secondary btn-sm" onclick="savePrep('${a.id}')">💾</button>
+        <button class="btn btn-primary btn-sm" id="prepbtn" onclick="genPrep('${esc(a.id)}')">✨ Générer fiche</button>
+        <button class="btn btn-secondary btn-sm" onclick="openPrepTab('${esc(a.id)}')">🖨️ Ouvrir</button>
+        <button class="btn btn-secondary btn-sm" onclick="savePrep('${esc(a.id)}')">💾</button>
       </div>
     </div>
     <div id="prep-content" style="flex:1">
       ${a.interview_prep
-        ?`<div class="prep-raw">${a.interview_prep}</div>`
+        ?`<div class="prep-raw">${esc(a.interview_prep)}</div>`
         :`<div class="empty" style="margin:auto"><div class="empty-i">📋</div><h4>Aucune fiche générée</h4><p>Cliquez sur "✨ Générer fiche" pour créer votre préparation</p></div>`}
     </div>`;
 }
@@ -2896,7 +3865,7 @@ async function genPrep(id){
   btn.textContent='✨ Générer fiche'; btn.disabled=false;
   if(data.error){toast(data.error,'error');return;}
   a.interview_prep=data.prep;
-  document.getElementById('prep-content').innerHTML=`<div class="prep-raw">${data.prep}</div>`;
+  document.getElementById('prep-content').innerHTML=`<div class="prep-raw">${esc(data.prep)}</div>`;
   renderAL(); toast('Fiche générée !','success');
 }
 
@@ -2921,19 +3890,837 @@ function openPrepTab(id){
   w.document.close();
 }
 
+// Aperçu identique au PDF.
+// options.onePage = true → zoom plus fort pour forcer 1 page (floor 0.62)
+// options.onePage = false (défaut) → zoom léger seul, accepte 2 pages si trop long
+function applyPdfPreviewMode(iframe, options = {}){
+  const doc = iframe?.contentDocument;
+  if(!doc) return;
+  const onePage = !!options.onePage;
+  const setStyle = (sel, props) => {
+    doc.querySelectorAll(sel).forEach(el => {
+      Object.entries(props).forEach(([k,v]) => el.style.setProperty(k, v, 'important'));
+    });
+  };
+  setStyle('html, body', {'background':'#fff','margin':'0','padding':'0'});
+  setStyle('body > *', {'box-shadow':'none','margin':'0 auto'});
+
+  const A4_H = 1123;
+  const root = doc.querySelector('.cv') || doc.body;
+  const h = Math.max(root.scrollHeight, root.offsetHeight, doc.body.scrollHeight, doc.documentElement.scrollHeight);
+  if(!h || h <= A4_H) return;
+  const overflow = h / A4_H;
+
+  if(onePage){
+    // Force 1 page avec zoom plus fort si nécessaire (floor 0.62, text ~7-8px)
+    const zoom = Math.max(0.62, (A4_H / h) * 0.99);
+    doc.documentElement.style.zoom = zoom;
+  } else {
+    // Mode design : zoom léger uniquement (floor 0.78), sinon laisse défiler
+    if(overflow <= 1.28){
+      const zoom = Math.max(0.78, (A4_H / h) * 0.99);
+      doc.documentElement.style.zoom = zoom;
+    }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CV STUDIO — éditeur avec preview live, switch instant template/couleur
+// ══════════════════════════════════════════════════════════════════════════════
+const cvStudio = {
+  state: {
+    docId: null,
+    name: 'Mon CV',
+    template_id: 'modern',
+    color: '#2F5DA8',
+    data: null,
+    dirty: false,
+    rendering: false,
+    onePage: false,  // false = design préservé (1-2 pages); true = force 1 page (zoom plus fort)
+  },
+  templates: [],
+  renderTimer: null,
+
+  async init(){
+    if(this.templates.length===0){
+      const r = await api('/api/cv/templates');
+      // Compat : nouvelle API renvoie {templates, categories} ; ancienne renvoyait []
+      this.templates = Array.isArray(r) ? r : (r.templates || []);
+      this.renderTabs();
+    }
+    // Charge le dernier CV ou crée vierge
+    const docs = await api('/api/cv/documents');
+    if(docs && docs.length){
+      const last = docs[0];
+      const full = await api('/api/cv/documents/'+last.id);
+      this.state.docId = full.id;
+      this.state.name = full.name;
+      this.state.template_id = full.template_id;
+      this.state.color = full.color;
+      this.state.data = full.data;
+      document.getElementById('cvs-name').value = this.state.name;
+      document.getElementById('cvs-color').value = this.state.color;
+      this.activeTab(this.state.template_id);
+      this.renderEditor();
+      this.scheduleRender();
+    }
+  },
+
+  renderTabs(){
+    const w = document.getElementById('cvs-tpl-tabs');
+    if(!w) return;
+    // Affiche les 6 premiers (les "core") en onglets, le reste accessible via la bibliothèque
+    const tabsToShow = this.templates.slice(0, 6);
+    const extra = Math.max(0, this.templates.length - 6);
+    let html = tabsToShow.map(t=>`
+      <button class="cvs-tpl-tab" data-tpl="${esc(t.id)}" onclick="cvStudio.setTemplate('${esc(t.id)}')" title="${esc(t.preview)}">${esc(t.name)}</button>
+    `).join('');
+    if(extra > 0){
+      html += `<button class="cvs-tpl-tab" onclick="cvLibrary.open()" style="background:linear-gradient(135deg,var(--accent),var(--purple));color:#fff;border-color:transparent">+${extra} autres →</button>`;
+    }
+    w.innerHTML = html;
+    this.activeTab(this.state.template_id);
+  },
+
+  activeTab(id){
+    document.querySelectorAll('.cvs-tpl-tab').forEach(b=>{
+      b.classList.toggle('active', b.dataset.tpl === id);
+    });
+  },
+
+  setTemplate(id){
+    this.state.template_id = id;
+    this.activeTab(id);
+    this.markDirty();
+    this.scheduleRender(0);
+  },
+
+  setColor(c){
+    this.state.color = c;
+    document.getElementById('cvs-color').value = c;
+    this.markDirty();
+    this.scheduleRender(0);
+  },
+
+  onColorChange(c){
+    this.state.color = c;
+    this.markDirty();
+    this.scheduleRender(150);
+  },
+
+  markDirty(){ this.state.dirty = true; this.state.name = document.getElementById('cvs-name').value || 'Mon CV'; },
+
+  scheduleRender(delay=200){
+    if(!this.state.data) return;
+    clearTimeout(this.renderTimer);
+    this.renderTimer = setTimeout(()=>this.renderPreview(), delay);
+  },
+
+  toggle1Page(on){
+    this.state.onePage = !!on;
+    this.markDirty();
+    this.scheduleRender(0);
+    if(typeof toast === 'function'){
+      toast(on ? '📄 Mode 1 page activé — zoom plus fort si besoin'
+                : '🎨 Mode design — peut faire 2 pages si CV chargé', 'info');
+    }
+  },
+
+  async renderPreview(){
+    if(!this.state.data || this.state.rendering) return;
+    this.state.rendering = true;
+    try{
+      const r = await post('/api/cv/render', {
+        data: this.state.data,
+        template_id: this.state.template_id,
+        color: this.state.color,
+      });
+      if(r && r.html){
+        const iframe = document.getElementById('cvs-preview');
+        iframe.removeAttribute('srcdoc');
+        // WYSIWYG : applique la compaction selon le mode choisi
+        const onePage = !!this.state.onePage;
+        iframe.onload = () => {
+          try { applyPdfPreviewMode(iframe, {onePage}); } catch(e){ console.error('preview mode:', e); }
+        };
+        iframe.srcdoc = r.html;
+      }
+    } finally {
+      this.state.rendering = false;
+    }
+  },
+
+  async generate(){
+    if(this.state.data && !confirm('Régénérer le CV depuis ton profil va écraser les modifications non sauvegardées. Continuer ?')) return;
+    toast('🪄 Extraction des infos depuis ton profil...', 'info');
+    const r = await post('/api/cv/extract', {});
+    if(r.error){ toast(r.error,'error'); return; }
+    this.state.data = r.data;
+    this.state.dirty = true;
+    this.renderEditor();
+    this.scheduleRender(0);
+    toast('✨ CV généré ! Édite à droite et change le style à gauche.','success');
+  },
+
+  async save(){
+    if(!this.state.data){ toast('Génère d\'abord un CV','error'); return; }
+    this.state.name = document.getElementById('cvs-name').value || 'Mon CV';
+    const payload = {
+      name: this.state.name,
+      data: this.state.data,
+      template_id: this.state.template_id,
+      color: this.state.color,
+    };
+    let r;
+    if(this.state.docId){
+      r = await put('/api/cv/documents/'+this.state.docId, payload);
+    } else {
+      r = await post('/api/cv/documents', payload);
+      if(r && r.id) this.state.docId = r.id;
+    }
+    if(r && r.error){ toast(r.error,'error'); return; }
+    this.state.dirty = false;
+    toast('💾 CV sauvegardé','success');
+  },
+
+  async downloadPdf(){
+    if(!this.state.data){ toast('Génère d\'abord un CV','error'); return; }
+    toast('⏳ Génération PDF...','info');
+    try{
+      // Endpoint dédié /api/cv/pdf : prend data + template + color, renvoie le PDF
+      const resp = await fetch('/api/cv/pdf',{
+        method:'POST', headers:{'Content-Type':'application/json'},
+        credentials:'same-origin',
+        body: JSON.stringify({
+          data: this.state.data,
+          template_id: this.state.template_id,
+          color: this.state.color,
+          name: this.state.name || 'CV',
+          one_page: !!this.state.onePage,
+        })
+      });
+      if(!resp.ok){
+        // Essaie de récupérer l'erreur JSON
+        let msg = 'PDF impossible (' + resp.status + ')';
+        try{
+          const err = await resp.json();
+          if(err.error) msg = err.error;
+        }catch(e){}
+        toast(msg, 'error');
+        console.error('PDF generation failed:', msg);
+        return;
+      }
+      // Vérifie que c'est bien un PDF
+      const ctype = resp.headers.get('content-type') || '';
+      if(!ctype.includes('pdf')){
+        toast('Le serveur n\'a pas renvoyé un PDF', 'error');
+        return;
+      }
+      const blob = await resp.blob();
+      if(blob.size < 100){
+        toast('PDF vide ou corrompu', 'error');
+        return;
+      }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (this.state.name || 'CV').replace(/[^\w\-]/g,'_') + '.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(()=>URL.revokeObjectURL(url), 5000);
+      toast('✅ PDF téléchargé ('+ Math.round(blob.size/1024) +' Ko)','success');
+    }catch(e){
+      console.error('downloadPdf error:', e);
+      toast('Erreur réseau : ' + (e.message || e), 'error');
+    }
+  },
+
+  // ── Éditeur formulaire ────────────────────────────────────────────────────
+  renderEditor(){
+    const d = this.state.data;
+    const body = document.getElementById('cvs-editor-body');
+    if(!d){ body.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text3);font-size:13px">Génère un CV d\'abord ✨</div>'; return; }
+    body.innerHTML = `
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Identité</div>
+        <div class="cvs-row"><input placeholder="Nom complet" value="${esc(d.name||'')}" oninput="cvStudio.upd('name', this.value)"></div>
+        <div class="cvs-row"><input placeholder="Titre / poste recherché" value="${esc(d.title||'')}" oninput="cvStudio.upd('title', this.value)"></div>
+        <div class="cvs-row"><textarea placeholder="Accroche (2 phrases)" oninput="cvStudio.upd('summary', this.value)">${esc(d.summary||'')}</textarea></div>
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Contact</div>
+        <div class="cvs-row"><input placeholder="Email" value="${esc(d.contact?.email||'')}" oninput="cvStudio.upd('contact.email', this.value)"></div>
+        <div class="cvs-row"><input placeholder="Téléphone" value="${esc(d.contact?.phone||'')}" oninput="cvStudio.upd('contact.phone', this.value)"></div>
+        <div class="cvs-row"><input placeholder="Ville" value="${esc(d.contact?.location||'')}" oninput="cvStudio.upd('contact.location', this.value)"></div>
+        <div class="cvs-row"><input placeholder="LinkedIn (handle ou URL)" value="${esc(d.contact?.linkedin||'')}" oninput="cvStudio.upd('contact.linkedin', this.value)"></div>
+        <div class="cvs-row"><input placeholder="Site / portfolio" value="${esc(d.contact?.website||'')}" oninput="cvStudio.upd('contact.website', this.value)"></div>
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Expérience <button onclick="cvStudio.addItem('experience')">+ Ajouter</button></div>
+        ${(d.experience||[]).map((e,i)=>`
+          <div class="cvs-item">
+            <div class="cvs-item-head">
+              <span class="cvs-item-num">Poste #${i+1}</span>
+              <button class="btn-mini" onclick="cvStudio.removeItem('experience',${i})" title="Supprimer">✕</button>
+            </div>
+            <div class="cvs-row"><input placeholder="Poste" value="${esc(e.role||'')}" oninput="cvStudio.updIdx('experience',${i},'role', this.value)"></div>
+            <div class="cvs-row"><input placeholder="Entreprise" value="${esc(e.company||'')}" oninput="cvStudio.updIdx('experience',${i},'company', this.value)"></div>
+            <div class="cvs-row">
+              <input placeholder="Lieu" value="${esc(e.location||'')}" oninput="cvStudio.updIdx('experience',${i},'location', this.value)">
+              <input placeholder="Dates (ex: 2022-Présent)" value="${esc(e.date||'')}" oninput="cvStudio.updIdx('experience',${i},'date', this.value)">
+            </div>
+            <div class="cvs-row"><textarea placeholder="Bullets (1 par ligne)" oninput="cvStudio.updBullets('experience',${i}, this.value)">${esc((e.bullets||[]).join('\n'))}</textarea></div>
+          </div>`).join('')}
+        ${(d.experience||[]).length===0 ? '<button class="cvs-add-btn" onclick="cvStudio.addItem(\'experience\')">+ Ajouter une expérience</button>' : ''}
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Formation <button onclick="cvStudio.addItem('education')">+ Ajouter</button></div>
+        ${(d.education||[]).map((e,i)=>`
+          <div class="cvs-item">
+            <div class="cvs-item-head">
+              <span class="cvs-item-num">Diplôme #${i+1}</span>
+              <button class="btn-mini" onclick="cvStudio.removeItem('education',${i})" title="Supprimer">✕</button>
+            </div>
+            <div class="cvs-row"><input placeholder="Diplôme" value="${esc(e.degree||'')}" oninput="cvStudio.updIdx('education',${i},'degree', this.value)"></div>
+            <div class="cvs-row"><input placeholder="École / Université" value="${esc(e.school||'')}" oninput="cvStudio.updIdx('education',${i},'school', this.value)"></div>
+            <div class="cvs-row">
+              <input placeholder="Lieu" value="${esc(e.location||'')}" oninput="cvStudio.updIdx('education',${i},'location', this.value)">
+              <input placeholder="Dates" value="${esc(e.date||'')}" oninput="cvStudio.updIdx('education',${i},'date', this.value)">
+            </div>
+          </div>`).join('')}
+        ${(d.education||[]).length===0 ? '<button class="cvs-add-btn" onclick="cvStudio.addItem(\'education\')">+ Ajouter une formation</button>' : ''}
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Compétences <button onclick="cvStudio.addItem('skills')">+ Ajouter</button></div>
+        ${(d.skills||[]).map((s,i)=>`
+          <div class="cvs-row">
+            <input placeholder="Nom" value="${esc(s.name||'')}" oninput="cvStudio.updIdx('skills',${i},'name', this.value)">
+            <input type="number" min="1" max="5" placeholder="1-5" value="${s.level||4}" style="width:60px" oninput="cvStudio.updIdx('skills',${i},'level', parseInt(this.value)||4)">
+            <button class="btn-mini" onclick="cvStudio.removeItem('skills',${i})">✕</button>
+          </div>`).join('')}
+        ${(d.skills||[]).length===0 ? '<button class="cvs-add-btn" onclick="cvStudio.addItem(\'skills\')">+ Ajouter une compétence</button>' : ''}
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Langues <button onclick="cvStudio.addItem('languages')">+ Ajouter</button></div>
+        ${(d.languages||[]).map((l,i)=>`
+          <div class="cvs-row">
+            <input placeholder="Langue" value="${esc(l.name||'')}" oninput="cvStudio.updIdx('languages',${i},'name', this.value)">
+            <input placeholder="Niveau (ex: C1, Natif)" value="${esc(l.level||'')}" oninput="cvStudio.updIdx('languages',${i},'level', this.value)">
+            <button class="btn-mini" onclick="cvStudio.removeItem('languages',${i})">✕</button>
+          </div>`).join('')}
+        ${(d.languages||[]).length===0 ? '<button class="cvs-add-btn" onclick="cvStudio.addItem(\'languages\')">+ Ajouter une langue</button>' : ''}
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Certifications <button onclick="cvStudio.addItem('certifications')">+ Ajouter</button></div>
+        ${(d.certifications||[]).map((c,i)=>`
+          <div class="cvs-row">
+            <input placeholder="Nom" value="${esc(c.name||'')}" oninput="cvStudio.updIdx('certifications',${i},'name', this.value)">
+            <input placeholder="Année" value="${esc(c.date||'')}" style="width:80px" oninput="cvStudio.updIdx('certifications',${i},'date', this.value)">
+            <button class="btn-mini" onclick="cvStudio.removeItem('certifications',${i})">✕</button>
+          </div>`).join('')}
+      </div>
+
+      <div class="cvs-section-card">
+        <div class="cvs-section-title">Centres d'intérêt</div>
+        <div class="cvs-row"><input placeholder="Séparés par virgule (ex: Cyclisme, Musique, Voyages)"
+          value="${esc((d.interests||[]).join(', '))}"
+          oninput="cvStudio.updInterests(this.value)"></div>
+      </div>
+    `;
+  },
+
+  upd(path, value){
+    const parts = path.split('.');
+    let cur = this.state.data;
+    for(let i=0;i<parts.length-1;i++){
+      if(!cur[parts[i]]) cur[parts[i]] = {};
+      cur = cur[parts[i]];
+    }
+    cur[parts[parts.length-1]] = value;
+    this.markDirty();
+    this.scheduleRender();
+  },
+  updIdx(arrKey, idx, field, value){
+    if(!this.state.data[arrKey]) this.state.data[arrKey] = [];
+    if(!this.state.data[arrKey][idx]) this.state.data[arrKey][idx] = {};
+    this.state.data[arrKey][idx][field] = value;
+    this.markDirty();
+    this.scheduleRender();
+  },
+  updBullets(arrKey, idx, value){
+    const lines = value.split('\n').map(l=>l.trim()).filter(Boolean);
+    this.state.data[arrKey][idx].bullets = lines;
+    this.markDirty();
+    this.scheduleRender();
+  },
+  updInterests(value){
+    this.state.data.interests = value.split(',').map(s=>s.trim()).filter(Boolean);
+    this.markDirty();
+    this.scheduleRender();
+  },
+  addItem(arrKey){
+    if(!this.state.data[arrKey]) this.state.data[arrKey] = [];
+    const blank = {
+      experience:    {role:'',company:'',location:'',date:'',bullets:[]},
+      education:     {degree:'',school:'',location:'',date:''},
+      skills:        {name:'',level:4},
+      languages:     {name:'',level:''},
+      certifications:{name:'',date:''},
+    }[arrKey] || {};
+    this.state.data[arrKey].push(blank);
+    this.markDirty();
+    this.renderEditor();
+    this.scheduleRender();
+  },
+  removeItem(arrKey, idx){
+    this.state.data[arrKey].splice(idx, 1);
+    this.markDirty();
+    this.renderEditor();
+    this.scheduleRender();
+  },
+
+  // ── Plein écran ───────────────────────────────────────────────────────────
+  fsZoomLevel: 1,
+
+  async openFullscreen(){
+    const modal = document.getElementById('cv-fullscreen-modal');
+    if(!modal) return;
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+    // Récupère le HTML actuellement rendu et l'envoie dans l'iframe fullscreen
+    const srcIframe = document.getElementById('cvs-preview');
+    const fsIframe  = document.getElementById('cvfs-iframe');
+    // Re-render synchrone pour avoir la dernière version
+    if(this.state.data){
+      const r = await post('/api/cv/render', {
+        data: this.state.data, template_id: this.state.template_id, color: this.state.color,
+      });
+      if(r && r.html){
+        fsIframe.removeAttribute('srcdoc');
+        fsIframe.onload = () => { try { applyPdfPreviewMode(fsIframe); } catch(e){} };
+        fsIframe.srcdoc = r.html;
+      }
+    } else if(srcIframe.srcdoc){
+      fsIframe.onload = () => { try { applyPdfPreviewMode(fsIframe); } catch(e){} };
+      fsIframe.srcdoc = srcIframe.srcdoc;
+    }
+    // Nom du template courant
+    const tplName = (this.templates.find(t => t.id === this.state.template_id) || {}).name || this.state.template_id;
+    document.getElementById('cvfs-tpl-name').textContent = tplName;
+    // Auto-fit en largeur
+    this.fsZoomFit();
+  },
+
+  closeFullscreen(){
+    const modal = document.getElementById('cv-fullscreen-modal');
+    if(modal) modal.style.display = 'none';
+    document.body.style.overflow = '';
+  },
+
+  fsZoom(delta){
+    this.fsZoomLevel = Math.max(0.3, Math.min(2, this.fsZoomLevel + delta));
+    this.fsApplyZoom();
+  },
+
+  fsZoomFit(){
+    // Ajuste pour que l'iframe rentre dans la fenêtre avec un peu de marge
+    const stage = document.getElementById('cvfs-stage');
+    if(!stage) return;
+    const availW = stage.clientWidth - 40;
+    const availH = window.innerHeight - 100;
+    const scaleW = availW / 794;
+    const scaleH = availH / 1123;
+    this.fsZoomLevel = Math.min(scaleW, scaleH, 1.6);
+    this.fsApplyZoom();
+  },
+
+  fsApplyZoom(){
+    const f = document.getElementById('cvfs-iframe');
+    const pct = document.getElementById('cvfs-zoom-pct');
+    if(f){
+      f.style.transform = `scale(${this.fsZoomLevel})`;
+      // Ajuste la hauteur du conteneur pour pas avoir de scroll inutile
+      const stage = document.getElementById('cvfs-stage');
+      if(stage){
+        stage.style.minHeight = (1123 * this.fsZoomLevel + 100) + 'px';
+      }
+    }
+    if(pct) pct.textContent = Math.round(this.fsZoomLevel * 100) + '%';
+  },
+};
+
+// Raccourcis clavier : F = fullscreen, ESC = fermer, +/- zoom
+document.addEventListener('keydown', (e) => {
+  // Évite si on tape dans un input/textarea/contenteditable
+  const t = e.target;
+  if(t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  const fsOpen = document.getElementById('cv-fullscreen-modal')?.style.display === 'block';
+  if(e.key === 'Escape' && fsOpen){ cvStudio.closeFullscreen(); return; }
+  if(fsOpen && (e.key === '+' || e.key === '=')){ cvStudio.fsZoom(0.1); e.preventDefault(); return; }
+  if(fsOpen && (e.key === '-' || e.key === '_')){ cvStudio.fsZoom(-0.1); e.preventDefault(); return; }
+  // F pour ouvrir le fullscreen quand on est sur la page CV Studio
+  if(e.key === 'f' || e.key === 'F'){
+    const onCvStudio = document.getElementById('page-cvstudio')?.classList.contains('active');
+    if(onCvStudio && !fsOpen && cvStudio.state.data){
+      cvStudio.openFullscreen();
+      e.preventDefault();
+    }
+  }
+});
+
+// Re-fit au resize
+window.addEventListener('resize', () => {
+  if(document.getElementById('cv-fullscreen-modal')?.style.display === 'block'){
+    cvStudio.fsZoomFit();
+  }
+});
+
+// ══════════════════════════════════════════════════════════════════════════════
+// CV LIBRARY — galerie modal pour parcourir tous les templates
+// ══════════════════════════════════════════════════════════════════════════════
+const cvLibrary = {
+  cache: null,
+  activeCategory: 'Tous',
+  searchQuery: '',
+  selectedId: null,
+  // Icônes par catégorie
+  catIcons: {
+    'Tous':'✨','Moderne':'🎯','Premium':'👑','Créatif':'🎨','Tech':'💻',
+    'Académique':'🎓','Minimaliste':'⚪','Hospitality':'🍷','Health':'🩺',
+    'Business':'💼','Métier':'🛠️','Autres':'📄',
+  },
+  // Données fictives pour les thumbnails
+  sampleData: {
+    name: 'Marie Dupont', title: 'Designer Senior',
+    summary: 'Designer produit avec 8 ans d\'expérience. Construire des interfaces utiles et belles.',
+    contact: {email:'marie@example.com', phone:'+33 6 12 34 56', location:'Paris', linkedin:'marie-dupont', website:''},
+    experience: [
+      {role:'Lead Designer', company:'Acme Corp', location:'Paris', date:'2022 - Présent',
+       bullets:['Refonte UX complète, +35% conversion','Système de design 200+ composants','Manager 3 designers']},
+      {role:'Product Designer', company:'Globex', location:'Lyon', date:'2019 - 2022',
+       bullets:['Design app mobile (4M users)','User research lead','Workshop facilitation']},
+    ],
+    education:[{degree:'Master Design Numérique', school:'Strate École', location:'Paris', date:'2015 - 2017'}],
+    skills:[{name:'Figma',level:5},{name:'UI/UX',level:5},{name:'Prototyping',level:4},{name:'Recherche utilisateur',level:4},{name:'Design systems',level:5}],
+    languages:[{name:'Français',level:'Natif'},{name:'Anglais',level:'C1'}],
+    certifications:[{name:'NN/g UX Master',date:'2021'}],
+    interests:['Photo argentique','Cyclisme','Cuisine'],
+  },
+
+  async open(){
+    const modal = document.getElementById('cv-library-modal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+    if(!this.cache){
+      const r = await api('/api/cv/templates');
+      this.cache = r;
+    }
+    // Pré-sélectionne le template courant
+    this.selectedId = cvStudio.state.template_id || null;
+    this.renderCategories();
+    this.renderGrid();
+    this.updateActionBar();
+    // Focus sur la recherche après animation
+    setTimeout(() => document.getElementById('cvlib-search')?.focus(), 350);
+  },
+
+  close(){
+    const modal = document.getElementById('cv-library-modal');
+    modal.classList.remove('show');
+    document.body.style.overflow = '';
+  },
+
+  onSearch(q){
+    this.searchQuery = (q || '').trim().toLowerCase();
+    document.getElementById('cvlib-search-clear').style.display = this.searchQuery ? '' : 'none';
+    this.renderGrid();
+  },
+
+  clearSearch(){
+    document.getElementById('cvlib-search').value = '';
+    this.onSearch('');
+    document.getElementById('cvlib-search')?.focus();
+  },
+
+  renderCategories(){
+    const wrap = document.getElementById('cvlib-cats');
+    if(!this.cache) return;
+    const cats = this.cache.categories || ['Tous'];
+    const tpls = this.cache.templates || [];
+    wrap.innerHTML = cats.map(c => {
+      const count = c === 'Tous' ? tpls.length : tpls.filter(t => t.category === c).length;
+      const ico = this.catIcons[c] || '📁';
+      const active = c === this.activeCategory;
+      return `<button class="cvlib-cat ${active?'active':''}" onclick="cvLibrary.setCategory('${esc(c)}')">
+        <span>${ico}</span><span>${esc(c)}</span><span class="cnt">${count}</span>
+      </button>`;
+    }).join('');
+  },
+
+  setCategory(cat){
+    this.activeCategory = cat;
+    this.renderCategories();
+    this.renderGrid();
+  },
+
+  filteredTemplates(){
+    if(!this.cache) return [];
+    let tpls = this.cache.templates || [];
+    if(this.activeCategory && this.activeCategory !== 'Tous'){
+      tpls = tpls.filter(t => t.category === this.activeCategory);
+    }
+    if(this.searchQuery){
+      tpls = tpls.filter(t => {
+        const s = (t.name + ' ' + t.category + ' ' + (t.preview||'') + ' ' + (t.tags||[]).join(' ')).toLowerCase();
+        return s.includes(this.searchQuery);
+      });
+    }
+    return tpls;
+  },
+
+  renderGrid(){
+    const grid = document.getElementById('cvlib-grid');
+    const empty = document.getElementById('cvlib-empty');
+    const counter = document.getElementById('cvlib-count');
+    if(!this.cache) return;
+    const tpls = this.filteredTemplates();
+    counter.textContent = tpls.length;
+
+    if(!tpls.length){
+      grid.innerHTML = '';
+      empty.style.display = '';
+      return;
+    }
+    empty.style.display = 'none';
+
+    const previewColor = (cvStudio.state.color || '#2F5DA8');
+    const data = (cvStudio.state.data && Object.keys(cvStudio.state.data).length)
+                 ? cvStudio.state.data : this.sampleData;
+
+    grid.innerHTML = tpls.map((t, i) => {
+      const active = (this.selectedId === t.id);
+      return `
+      <div class="cvlib-card ${active?'selected':''}" data-tid="${esc(t.id)}" style="animation-delay:${Math.min(i*30,800)}ms">
+        <div class="cvlib-card-thumb loading" data-tid="${esc(t.id)}">
+          <iframe sandbox="allow-same-origin" data-tid="${esc(t.id)}"></iframe>
+          <div class="cvlib-card-hover">
+            <button onclick="event.stopPropagation();cvLibrary.previewTemplate('${esc(t.id)}')">👁️ Aperçu plein écran</button>
+          </div>
+          ${active ? '<div class="cvlib-card-badge">✓ Sélectionné</div>' : ''}
+        </div>
+        <div class="cvlib-card-foot">
+          <div class="cvlib-card-foot-row">
+            <strong class="cvlib-card-name">${esc(t.name)}</strong>
+            <span class="cvlib-card-cat">${this.catIcons[t.category]||''} ${esc(t.category)}</span>
+          </div>
+          <div class="cvlib-card-prev">${esc(t.preview)}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Single click = select + show actionbar; Double click = apply directly
+    grid.querySelectorAll('.cvlib-card').forEach(card => {
+      let clickTimer = null;
+      card.addEventListener('click', (e) => {
+        if(e.target.closest('button')) return; // bouton aperçu géré séparément
+        if(clickTimer){ clearTimeout(clickTimer); clickTimer=null; return; }
+        clickTimer = setTimeout(() => {
+          this.selectCard(card.dataset.tid);
+          clickTimer = null;
+        }, 200);
+      });
+      card.addEventListener('dblclick', (e) => {
+        if(e.target.closest('button')) return;
+        if(clickTimer){ clearTimeout(clickTimer); clickTimer=null; }
+        this.selectCard(card.dataset.tid);
+        this.applySelected();
+      });
+    });
+
+    // Lazy render iframes (étalé pour pas freezer)
+    grid.querySelectorAll('iframe[data-tid]').forEach((iframe, i) => {
+      setTimeout(async () => {
+        const tid = iframe.dataset.tid;
+        try{
+          const r = await post('/api/cv/render', {data, template_id: tid, color: previewColor});
+          if(r && r.html){
+            iframe.onload = () => { try { applyPdfPreviewMode(iframe); } catch(e){} };
+            iframe.srcdoc = r.html;
+            // Retire le skeleton quand chargé
+            const thumb = iframe.closest('.cvlib-card-thumb');
+            if(thumb){
+              setTimeout(() => thumb.classList.remove('loading'), 200);
+            }
+          }
+        }catch(e){ /* silent */ }
+      }, Math.min(i * 50, 1500));
+    });
+  },
+
+  selectCard(tid){
+    this.selectedId = tid;
+    // Update visuel : retire selected partout, ajoute sur la carte
+    document.querySelectorAll('.cvlib-card').forEach(c => {
+      c.classList.toggle('selected', c.dataset.tid === tid);
+      // Update badge
+      const oldBadge = c.querySelector('.cvlib-card-badge');
+      if(oldBadge) oldBadge.remove();
+      if(c.dataset.tid === tid){
+        const thumb = c.querySelector('.cvlib-card-thumb');
+        if(thumb && !thumb.querySelector('.cvlib-card-badge')){
+          const b = document.createElement('div');
+          b.className = 'cvlib-card-badge';
+          b.textContent = '✓ Sélectionné';
+          thumb.appendChild(b);
+        }
+      }
+    });
+    this.updateActionBar();
+  },
+
+  updateActionBar(){
+    const bar = document.getElementById('cvlib-actionbar');
+    if(!this.selectedId){ bar.style.display = 'none'; return; }
+    const tpl = (this.cache?.templates || []).find(t => t.id === this.selectedId);
+    if(!tpl){ bar.style.display = 'none'; return; }
+    bar.style.display = '';
+    document.getElementById('cvlib-selected-name').textContent =
+      `${this.catIcons[tpl.category]||''} ${tpl.name} — ${tpl.category}`;
+  },
+
+  async applySelected(){
+    if(!this.selectedId) return;
+    cvStudio.setTemplate(this.selectedId);
+    this.close();
+    if(typeof toast === 'function'){
+      const tpl = (this.cache?.templates || []).find(t => t.id === this.selectedId);
+      toast(`Template "${tpl?.name || this.selectedId}" appliqué`, 'success');
+    }
+  },
+
+  async previewSelected(){
+    if(!this.selectedId) return;
+    await this.previewTemplate(this.selectedId);
+  },
+
+  async previewTemplate(tid){
+    // Applique temporairement + ouvre fullscreen
+    const previousTpl = cvStudio.state.template_id;
+    cvStudio.setTemplate(tid);
+    // Petite attente pour que le render se déclenche
+    await new Promise(r => setTimeout(r, 250));
+    this.close();
+    cvStudio.openFullscreen();
+  },
+};
+
+// ESC ferme le modal
+document.addEventListener('keydown', (e) => {
+  const modal = document.getElementById('cv-library-modal');
+  const isOpen = modal?.classList.contains('show');
+  if(e.key === 'Escape' && isOpen){
+    cvLibrary.close();
+  }
+  // Enter = appliquer la sélection courante
+  if(e.key === 'Enter' && isOpen && cvLibrary.selectedId){
+    const tag = e.target?.tagName;
+    if(tag !== 'INPUT' || e.target.id !== 'cvlib-search'){
+      cvLibrary.applySelected();
+    }
+  }
+});
+
 // ── Settings ───────────────────────────────────────────────────────────────────
 async function loadSettings(){
-  const cv=await api('/api/cv-base');
-  if(cv.name){document.getElementById('s-cv-name').value=cv.name;document.getElementById('s-cv-status').textContent='✅ '+cv.name;}
-  // Résumé + Docs
+  // Résumé
   const d=await api('/api/docs');
   if(d.summary) document.getElementById('s-summary').value=d.summary;
-  if(d.names&&d.names.length){
-    document.getElementById('s-doc-names').value=d.names.join(', ');
-    document.getElementById('s-doc-status').textContent=`✅ ${d.names.length} document(s) — ${(d.text||'').length} caractères`;
-  }
+  // Documentation (drag & drop, fichier par fichier)
+  await docDrop.load();
   // Photo
   renderPhotoCard();
+  // Compte / RGPD (quota, vérif email)
+  await loadAccountStatus();
+}
+
+async function loadAccountStatus(){
+  const me=await api('/api/auth/me');
+  const qRow=document.getElementById('s-quota-row');
+  const banner=document.getElementById('s-verify-banner');
+  if(qRow && me.quota){
+    const {used,quota,remaining,ym}=me.quota;
+    const pct=Math.min(100, Math.round((used/Math.max(1,quota))*100));
+    const color = pct>=90 ? 'var(--red)' : pct>=70 ? 'var(--yellow)' : 'var(--green)';
+    qRow.innerHTML = `📊 Quota IA mensuel (${esc(ym)}) : <strong>${used}/${quota}</strong> appels — <span style="color:${color}">${remaining} restants</span>`;
+  }
+  if(banner){
+    banner.style.display = me.needs_verification ? '' : 'none';
+  }
+}
+
+async function resendVerification(){
+  const r=await post('/api/auth/resend-verification',{});
+  toast(r.error ? r.error : (r.already_verified ? 'Déjà vérifié' : '📧 Email envoyé'), r.error?'error':'success');
+}
+
+async function changePasswordPrompt(){
+  const me=await api('/api/auth/me');
+  const email = me.user?.email || '';
+  if(!email){ toast('Erreur — non connecté','error'); return; }
+  if(!confirm(`Un email de réinitialisation va être envoyé à ${email}. Continuer ?`)) return;
+  const r=await post('/api/auth/forgot-password',{email});
+  toast(r.error ? r.error : '📧 Lien de réinitialisation envoyé. Vérifie ta boîte mail.', r.error?'error':'success');
+}
+
+async function exportMyData(){
+  try{
+    const resp=await fetch('/api/auth/export-data',{credentials:'same-origin'});
+    if(!resp.ok){
+      if(resp.status===429){ toast('Trop de demandes — réessaye plus tard','error'); return; }
+      toast('Erreur export','error'); return;
+    }
+    const blob=await resp.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url;
+    a.download=`jobfinder_export_${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),5000);
+    toast('✅ Export téléchargé','success');
+  }catch(e){ toast('Erreur : '+e.message,'error'); }
+}
+
+async function deleteMyAccountPrompt(){
+  const pwd=prompt('⚠️ Suppression DÉFINITIVE de ton compte et de toutes tes données.\n\nTape ton mot de passe pour confirmer :');
+  if(!pwd) return;
+  if(!confirm('Es-tu vraiment sûr ? Cette action est IRRÉVERSIBLE.')) return;
+  const r=await post('/api/auth/delete-account',{password:pwd});
+  if(r.error){ toast(r.error,'error'); return; }
+  toast('Compte supprimé. Au revoir 👋','info');
+  setTimeout(()=>window.location.reload(), 1200);
+}
+
+async function loadCvPdfState(){
+  try{
+    const p=await api('/api/cv-pdf');
+    cvPdfHas=!!p.has_pdf; cvPdfName=p.name||'';
+    const nameInput=document.getElementById('s-cv-pdf-name');
+    const statusEl=document.getElementById('s-cv-pdf-status');
+    const delBtn=document.getElementById('s-cv-pdf-del');
+    if(nameInput && cvPdfHas){
+      nameInput.value=cvPdfName;
+      statusEl.style.color='var(--green)';
+      statusEl.textContent='✅ '+cvPdfName;
+      if(delBtn) delBtn.style.display='';
+    }
+    refreshAdapterPdfMode();
+  }catch(e){/* page not visible yet */}
 }
 
 async function saveSummary(){
@@ -2959,6 +4746,43 @@ async function importCV(e){
     toast('CV importé : '+file.name,'success');
   };
   reader.readAsText(file);
+}
+
+// ── CV PDF (uploadé dans Paramètres, adapté en gardant le design) ─────────────
+async function importCVPdf(e){
+  const file=e.target.files[0]; if(!file) return;
+  if(file.type!=='application/pdf' && !file.name.toLowerCase().endsWith('.pdf')){
+    toast('Ce fichier n\'est pas un PDF','error');return;
+  }
+  if(file.size>10*1024*1024){ toast('PDF trop volumineux (>10 Mo)','error'); return; }
+  const st=document.getElementById('s-cv-pdf-status');
+  st.style.color='var(--yellow)'; st.textContent='Upload en cours...';
+  try{
+    const b64=await fileToB64(file);
+    const r=await post('/api/cv-pdf',{b64,name:file.name});
+    if(r.error){ st.style.color='var(--red)'; st.textContent='❌ '+r.error; toast(r.error,'error'); return; }
+    document.getElementById('s-cv-pdf-name').value=file.name;
+    st.style.color='var(--green)'; st.textContent='✅ '+file.name;
+    document.getElementById('s-cv-pdf-del').style.display='';
+    cvPdfName=file.name; cvPdfHas=true;
+    refreshAdapterPdfMode();
+    toast('CV PDF importé : '+file.name,'success');
+  }catch(err){
+    st.style.color='var(--red)'; st.textContent='❌ '+err.message;
+    toast('Erreur upload PDF','error');
+  }
+  e.target.value='';
+}
+
+async function removeCVPdf(){
+  if(!confirm('Supprimer le CV PDF ?')) return;
+  await fetch('/api/cv-pdf',{method:'DELETE',credentials:'same-origin'});
+  document.getElementById('s-cv-pdf-name').value='';
+  document.getElementById('s-cv-pdf-status').textContent='';
+  document.getElementById('s-cv-pdf-del').style.display='none';
+  cvPdfName=''; cvPdfHas=false;
+  refreshAdapterPdfMode();
+  toast('CV PDF supprimé','info');
 }
 
 // ── Utilities ──────────────────────────────────────────────────────────────────
@@ -3036,9 +4860,9 @@ function openModal(id){
       ${stagesForApp.length?stagesForApp.map(s=>`
         <div class="stage-item" data-sid="${s.id}">
           <div>
-            <div style="font-size:12px;font-weight:600;color:var(--text)">${s.stage_type}</div>
+            <div style="font-size:12px;font-weight:600;color:var(--text)">${esc(s.stage_type)}</div>
             <div style="font-size:11px;color:var(--text3)">${s.scheduled_date?new Date(s.scheduled_date).toLocaleDateString('fr-FR',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):''}</div>
-            ${s.notes?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${s.notes}</div>`:''}
+            ${s.notes?`<div style="font-size:11px;color:var(--text2);margin-top:2px">${esc(s.notes)}</div>`:''}
           </div>
           <select class="role-select" onchange="updateStageResult(${s.id},this.value)">
             ${['En attente','Positif','Négatif','Annulé'].map(r=>`<option ${s.result===r?'selected':''}>${r}</option>`).join('')}
@@ -3665,7 +5489,7 @@ async function generateTemplate(){
         <span style="font-size:11px;color:var(--text3);margin-left:6px">Aperçu — ${name}</span>
       </div>
       <div style="height:460px;background:#fff;overflow:auto">
-        <iframe id="wiz-preview-frame" style="width:100%;height:100%;border:none;display:block" scrolling="yes"></iframe>
+        <iframe id="wiz-preview-frame" sandbox="allow-same-origin" style="width:100%;height:100%;border:none;display:block" scrolling="yes"></iframe>
       </div>
     </div>`;
   document.getElementById('wiz-preview-frame').srcdoc=tplGeneratedHTML;
@@ -3802,7 +5626,7 @@ async function previewTpl(id){
   document.getElementById('wiz-step-lbl').textContent='Aperçu';
   document.getElementById('wiz-body').innerHTML=`
     <div style="height:420px;background:var(--surface);border-radius:12px;overflow:hidden;border:1px solid var(--border)">
-      <iframe style="width:100%;height:100%;border:none" srcdoc="${data.html_content.replace(/"/g,'&quot;')}"></iframe>
+      <iframe sandbox="allow-same-origin" style="width:100%;height:100%;border:none" srcdoc="${data.html_content.replace(/"/g,'&quot;')}"></iframe>
     </div>`;
   const isAct=activeTemplateId===id;
   document.getElementById('wiz-foot').innerHTML=`
@@ -3842,7 +5666,7 @@ function renderTemplates(){
     return `
     <div class="tpl-card${isActive?' tpl-card-active':''}">
       <div class="tpl-thumb" onclick="previewTpl(${t.id})">
-        <iframe srcdoc="" data-tpl-id="${t.id}" loading="lazy"></iframe>
+        <iframe sandbox="allow-same-origin" srcdoc="" data-tpl-id="${t.id}" loading="lazy"></iframe>
         <div class="tpl-thumb-overlay"><span style="color:#fff;font-size:13px;font-weight:600">👁️ Aperçu</span></div>
         ${isActive?`<div class="tpl-active-badge">✅ Actif</div>`:''}
       </div>

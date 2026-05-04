@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<!-- meta: {"name": "Swiss Grid", "category": "Minimaliste", "preview": "Mise en page suisse 12 colonnes, typographie Inter Tight + J · optimisé A4 1 page", "tags": ["grid", "swiss", "minimal", "a4", "compact", "optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e8e6e1;font-family:'Inter Tight',sans-serif;color:#0d0d0d;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#f5f4f0;box-shadow:0 30px 80px -24px rgba(0,0,0,.18);overflow:hidden}
+
+.cv-sw{
+  --c-ink:#0d0d0d;--c-paper:#f5f4f0;--c-muted:#6a6a68;--c-accent:{{color}};--c-line:#dad8d2;
+  font-family:'Inter Tight',sans-serif;color:var(--c-ink);background:var(--c-paper);min-height:1123px
+}
+
+.sw-bar{display:flex;flex-wrap:wrap;gap:18px;border-bottom:2px solid var(--c-ink);padding:10px 32px;font-family:'JetBrains Mono',monospace;font-size:10.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--c-muted)}
+.sw-bar span{padding:0 4px;border-right:1px solid var(--c-line)}
+.sw-bar span:last-child{border-right:none;color:var(--c-accent)}
+
+.sw-hero{display:grid;grid-template-columns:repeat(12,1fr);gap:0;padding:22px 26px;border-bottom:1px solid var(--c-line);align-items:end}
+.sw-hero .photo{grid-column:span 3;width:100%;aspect-ratio:3/4;display:flex;align-items:center;justify-content:center;background:var(--c-line);color:var(--c-ink);font-family:'Inter Tight',sans-serif;font-weight:800;font-size:48px;overflow:hidden}
+.sw-hero .photo img{width:100%;height:100%;object-fit:cover;filter:grayscale(.5)}
+.sw-hero .id{grid-column:span 6;padding-left:24px}
+.sw-hero .meta-side{grid-column:span 3;padding-left:18px;border-left:1px solid var(--c-line)}
+.sw-hero .label{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--c-accent);text-transform:uppercase;letter-spacing:.18em;font-weight:500;margin-bottom:8px}
+.sw-hero h1{font-size:30px;line-height:.85;font-weight:800;letter-spacing:-.04em}
+.sw-hero h1 em{font-style:normal;color:var(--c-accent)}
+.sw-hero .role{font-size:14px;color:var(--c-muted);margin-top:14px;font-weight:500;max-width:380px;line-height:1.45;border-top:1px solid var(--c-ink);padding-top:10px}
+.sw-hero .meta-side .item{font-size:12px;line-height:1.65;padding:6px 0;border-bottom:1px solid var(--c-line)}
+.sw-hero .meta-side .item:last-child{border:none}
+.sw-hero .meta-side .item b{display:block;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--c-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:1px}
+
+.sw-accroche{padding:22px 32px;border-bottom:1px solid var(--c-line);display:grid;grid-template-columns:repeat(12,1fr)}
+.sw-accroche .num{grid-column:span 2;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c-accent);letter-spacing:.18em;text-transform:uppercase;font-weight:600;padding-top:4px}
+.sw-accroche p{grid-column:span 10;font-size:22px;line-height:1.35;font-weight:500;letter-spacing:-.01em}
+
+.sw-sec{padding:24px 32px;border-bottom:1px solid var(--c-line)}
+.sw-sec h2{display:grid;grid-template-columns:repeat(12,1fr);align-items:baseline;margin-bottom:14px;border-bottom:2px solid var(--c-ink);padding-bottom:8px}
+.sw-sec h2 .nb{grid-column:span 2;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c-accent);letter-spacing:.18em;text-transform:uppercase;font-weight:600}
+.sw-sec h2 .lbl{grid-column:span 10;font-size:24px;font-weight:800;letter-spacing:-.02em}
+
+.sw-xp{display:grid;grid-template-columns:repeat(12,1fr);padding:14px 0;border-bottom:1px solid var(--c-line)}
+.sw-xp:last-child{border:none}
+.sw-xp .when{grid-column:span 2;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c-muted);padding-top:4px}
+.sw-xp .info{grid-column:span 10}
+.sw-xp h3{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.sw-xp .co{color:var(--c-accent);font-size:13px;font-weight:600;margin:2px 0 6px}
+.sw-xp ul{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.6;color:var(--c-ink)}
+.sw-xp ul li{margin-bottom:3px}
+.sw-xp ul li::marker{color:var(--c-accent)}
+
+.sw-form{display:grid;grid-template-columns:repeat(12,1fr);padding:10px 0;border-bottom:1px solid var(--c-line);align-items:baseline}
+.sw-form:last-child{border:none}
+.sw-form .when{grid-column:span 2;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c-muted)}
+.sw-form .info{grid-column:span 10}
+.sw-form b{font-size:15px;font-weight:700;display:block}
+.sw-form span{color:var(--c-muted);font-size:12.5px;display:block;margin-top:1px}
+
+.sw-comp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-top:1px solid var(--c-line)}
+.sw-comp-grid .panel{padding:18px 16px;border-right:1px solid var(--c-line);min-height:160px}
+.sw-comp-grid .panel:last-child{border-right:none}
+.sw-comp-grid h3{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--c-accent);text-transform:uppercase;letter-spacing:.18em;margin-bottom:10px;font-weight:600}
+.sw-pill{display:inline-block;background:transparent;border:1px solid var(--c-ink);color:var(--c-ink);padding:3px 9px;font-size:11.5px;font-family:'JetBrains Mono',monospace;margin:0 4px 4px 0;font-weight:500}
+.sw-lang{display:flex;justify-content:space-between;font-size:12.5px;padding:5px 0;border-bottom:1px dashed var(--c-line)}
+.sw-lang:last-child{border:none}
+.sw-lang em{font-family:'JetBrains Mono',monospace;color:var(--c-accent);font-style:normal;font-size:10.5px;text-transform:uppercase}
+
+.sw-int{padding:18px 32px;font-size:13.5px;line-height:1.5;color:var(--c-ink)}
+.sw-int span{display:inline-block;border:1px solid var(--c-ink);padding:3px 10px;font-size:11.5px;font-family:'JetBrains Mono',monospace;margin:3px 4px 3px 0}
+
+@media (max-width:760px){body{padding:0}.cv{box-shadow:none}.sw-bar{padding:10px 20px}.sw-hero{grid-template-columns:1fr;padding:24px 20px}.sw-hero .photo,.sw-hero .id,.sw-hero .meta-side{grid-column:span 12;padding:0;border:none}.sw-hero h1{font-size:28px}.sw-comp-grid{grid-template-columns:1fr}.sw-comp-grid .panel{border-right:none;border-bottom:1px solid var(--c-line)}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-sw">
+
+<div class="sw-bar">
+  <span>CV</span><span>2026</span><span>{{name}}</span>{{#title}}<span>{{title}}</span>{{/title}}{{#contact.location}}<span>{{contact.location}}</span>{{/contact.location}}<span>● online</span>
+</div>
+
+<div class="sw-hero">
+  <div class="photo">{{{photo_or_initials}}}</div>
+  <div class="id">
+    {{#title}}<div class="label">{{title}}</div>{{/title}}
+    <h1>{{name}}<em>.</em></h1>
+    {{#summary}}<p class="role">{{summary}}</p>{{/summary}}
+  </div>
+  <div class="meta-side">
+    {{#contact.email}}<div class="item"><b>Email</b>{{contact.email}}</div>{{/contact.email}}
+    {{#contact.phone}}<div class="item"><b>Téléphone</b>{{contact.phone}}</div>{{/contact.phone}}
+    {{#contact.location}}<div class="item"><b>Ville</b>{{contact.location}}</div>{{/contact.location}}
+    {{#contact.website}}<div class="item"><b>Portfolio</b>{{contact.website}}</div>{{/contact.website}}
+    {{#contact.linkedin}}<div class="item"><b>LinkedIn</b>{{contact.linkedin}}</div>{{/contact.linkedin}}
+  </div>
+</div>
+
+{{#summary}}
+<div class="sw-accroche">
+  <div class="num">01.</div>
+  <p>{{summary}}</p>
+</div>
+{{/summary}}
+
+{{#has_experience}}
+<section class="sw-sec">
+  <h2><span class="nb">02.</span><span class="lbl">Expériences professionnelles</span></h2>
+  {{#experience}}
+  <div class="sw-xp">
+    <div class="when">{{date}}</div>
+    <div class="info">
+      <h3>{{role}}</h3>
+      <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+      {{#has_bullets}}
+      <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+      {{/has_bullets}}
+    </div>
+  </div>
+  {{/experience}}
+</section>
+{{/has_experience}}
+
+{{#has_education}}
+<section class="sw-sec">
+  <h2><span class="nb">03.</span><span class="lbl">Formation</span></h2>
+  {{#education}}
+  <div class="sw-form">
+    <div class="when">{{date}}</div>
+    <div class="info"><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+  </div>
+  {{/education}}
+</section>
+{{/has_education}}
+
+{{#has_skills}}
+<section class="sw-sec">
+  <h2><span class="nb">04.</span><span class="lbl">Compétences</span></h2>
+  <div class="sw-comp-grid">
+    <div class="panel">
+      <h3>Techniques</h3>
+      {{#skills}}<span class="sw-pill">{{name}}</span>{{/skills}}
+    </div>
+    {{#has_languages}}
+    <div class="panel">
+      <h3>Langues</h3>
+      {{#languages}}<div class="sw-lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+    </div>
+    {{/has_languages}}
+    {{#has_certifications}}
+    <div class="panel">
+      <h3>Certifications</h3>
+      {{#certifications}}<div class="sw-lang"><span>{{name}}</span><em>{{date}}</em></div>{{/certifications}}
+    </div>
+    {{/has_certifications}}
+  </div>
+</section>
+{{/has_skills}}
+
+{{#has_interests}}
+<section class="sw-sec">
+  <h2><span class="nb">05.</span><span class="lbl">Centres d'intérêt</span></h2>
+  <p class="sw-int">
+    {{#interests}}<span>{{.}}</span>{{/interests}}
+  </p>
+</section>
+{{/has_interests}}
+
+</div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

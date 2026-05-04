@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<!-- meta: {"name": "Student Fresh", "category": "Académique", "preview": "CV étudiant frais avec accent indigo et jaune surligné, head · optimisé A4 1 page", "tags": ["a4", "compact", "optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Serif+Display&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9ecf2;font-family:'DM Sans',sans-serif;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
+
+.cv-student{
+  --c-ink:#1a1d2e;--c-muted:#6b7280;--c-accent:{{color}};--c-accent-2:#fbbf24;--c-bg:#ffffff;
+  font-family:'DM Sans',sans-serif;color:var(--c-ink);background:var(--c-bg);
+  padding:22px 26px;min-height:1123px
+}
+
+.cv-student header{display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:end;padding-bottom:20px;border-bottom:3px solid var(--c-ink);margin-bottom:14px}
+.cv-student header .portrait{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid var(--c-accent-2);box-shadow:0 0 0 2px var(--c-accent);display:flex;align-items:center;justify-content:center;background:{{color_light}};color:var(--c-accent);font-family:'DM Serif Display',serif;font-weight:700;font-size:32px;overflow:hidden}
+.cv-student header .portrait img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.cv-student header h1{font-family:'DM Serif Display',serif;font-size:28px;line-height:1;font-weight:400;letter-spacing:-.02em}
+.cv-student header h1 mark{background:var(--c-accent-2);color:var(--c-ink);padding:0 6px;font-style:italic}
+.cv-student header .role{font-size:14px;color:var(--c-accent);font-weight:600;margin-top:8px}
+.cv-student header .contact{font-size:12px;text-align:right;line-height:1.5;color:var(--c-muted)}
+.cv-student header .contact strong{color:var(--c-ink);display:block}
+
+.cv-student .accroche{background:{{color_light}};border-left:4px solid var(--c-accent);padding:14px 18px;border-radius:0 8px 8px 0;font-size:14px;line-height:1.6;color:#2a2d3e;margin-bottom:24px;font-weight:500}
+
+.cv-student h2{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--c-accent);margin:24px 0 14px;font-weight:700;display:flex;align-items:center;gap:10px}
+.cv-student h2 .num{background:var(--c-accent);color:#fff;width:24px;height:24px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.cv-student h2:first-of-type{margin-top:0}
+
+.cv-student .timeline{position:relative;padding-left:22px}
+.cv-student .timeline::before{content:"";position:absolute;left:6px;top:8px;bottom:8px;width:2px;background:#e5e7eb;border-radius:2px}
+.cv-student .t-item{position:relative;margin-bottom:18px}
+.cv-student .t-item::before{content:"";position:absolute;left:-20px;top:6px;width:12px;height:12px;background:var(--c-accent-2);border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 1.5px var(--c-accent)}
+.cv-student .t-item h3{font-size:15px;color:var(--c-ink);font-weight:700}
+.cv-student .t-item .meta{font-size:12px;color:var(--c-muted);font-weight:500;margin-top:2px}
+.cv-student .t-item .meta strong{color:var(--c-accent);font-weight:600}
+.cv-student .t-item ul{margin:6px 0 0;padding-left:18px;font-size:13px;color:#3a3e50;line-height:1.55}
+.cv-student .t-item ul li{margin-bottom:2px}
+
+.cv-student .form-row{display:grid;grid-template-columns:1fr auto;gap:14px;padding:10px 0;border-bottom:1px dashed #e5e7eb;align-items:baseline}
+.cv-student .form-row:last-child{border:none}
+.cv-student .form-row strong{font-size:14.5px;color:var(--c-ink)}
+.cv-student .form-row span{display:block;font-size:12.5px;color:var(--c-muted)}
+.cv-student .form-row .when{font-size:11.5px;color:var(--c-muted);font-family:'JetBrains Mono',monospace;background:#fef9c3;padding:3px 8px;border-radius:6px;white-space:nowrap;font-weight:600}
+
+.cv-student .comp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.cv-student .comp-grid .panel h3{font-size:12px;text-transform:uppercase;letter-spacing:.1em;color:var(--c-ink);margin-bottom:10px;font-weight:700;border-bottom:2px solid var(--c-accent-2);padding-bottom:4px;display:inline-block}
+.cv-student .skill-grid span{display:inline-block;background:#1a1d2e;color:#fff;padding:5px 11px;border-radius:6px;font-size:12px;font-weight:500;margin:0 4px 5px 0}
+.cv-student .lang-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f1f3f6;font-size:12.5px}
+.cv-student .lang-row:last-child{border:none}
+
+.cv-student .interest{font-size:13.5px;line-height:1.5}
+.cv-student .interest span{display:inline-block;background:#fef9c3;border-radius:6px;padding:4px 10px;margin:3px 4px 3px 0;font-weight:500}
+
+@media (max-width:720px){body{padding:0}.cv{border-radius:0;box-shadow:none}.cv-student{padding:28px 22px}.cv-student header{grid-template-columns:1fr;gap:14px}.cv-student header h1{font-size:24px}.cv-student header .contact{text-align:left}.cv-student .comp-grid{grid-template-columns:1fr}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+
+<div class="cv">
+  <div class="cv-student">
+
+    <header>
+      <div class="portrait">{{{photo_or_initials}}}</div>
+      <div>
+        <h1>{{name}}</h1>
+        {{#title}}<div class="role">{{title}}</div>{{/title}}
+      </div>
+      <div class="contact">
+        <strong>{{name}}</strong>
+        {{#contact.email}}{{contact.email}}<br>{{/contact.email}}
+        {{#contact.phone}}{{contact.phone}}<br>{{/contact.phone}}
+        {{#contact.location}}{{contact.location}}<br>{{/contact.location}}
+        {{#contact.linkedin}}{{contact.linkedin}}{{/contact.linkedin}}
+      </div>
+    </header>
+
+    {{#summary}}<p class="accroche">{{summary}}</p>{{/summary}}
+
+    {{#has_experience}}
+    <h2><span class="num">1</span>Expériences professionnelles</h2>
+    <div class="timeline">
+      {{#experience}}
+      <div class="t-item">
+        <h3>{{role}}</h3>
+        <div class="meta"><strong>{{company}}{{#location}} · {{location}}{{/location}}</strong> — {{date}}</div>
+        {{#has_bullets}}
+        <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+        {{/has_bullets}}
+      </div>
+      {{/experience}}
+    </div>
+    {{/has_experience}}
+
+    {{#has_education}}
+    <h2><span class="num">2</span>Formation</h2>
+    {{#education}}
+    <div class="form-row">
+      <div><strong>{{degree}}</strong><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+      <div class="when">{{date}}</div>
+    </div>
+    {{/education}}
+    {{/has_education}}
+
+    {{#has_skills}}
+    <h2><span class="num">3</span>Compétences</h2>
+    <div class="comp-grid">
+      <div class="panel skill-grid">
+        <h3>Techniques</h3>
+        <div>
+          {{#skills}}<span>{{name}}</span>{{/skills}}
+        </div>
+      </div>
+      {{#has_languages}}
+      <div class="panel">
+        <h3>Langues</h3>
+        {{#languages}}<div class="lang-row"><span>{{name}} — {{level}}</span></div>{{/languages}}
+      </div>
+      {{/has_languages}}
+    </div>
+    {{/has_skills}}
+
+    {{#has_certifications}}
+    <h2><span class="num">4</span>Certifications</h2>
+    {{#certifications}}<div class="form-row"><div><strong>{{name}}</strong></div><div class="when">{{date}}</div></div>{{/certifications}}
+    {{/has_certifications}}
+
+    {{#has_interests}}
+    <h2><span class="num">5</span>Centres d'intérêt</h2>
+    <p class="interest">
+      {{#interests}}<span>{{.}}</span>{{/interests}}
+    </p>
+    {{/has_interests}}
+
+  </div>
+</div>
+
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

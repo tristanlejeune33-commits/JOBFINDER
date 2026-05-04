@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Academic Serif","category":"Académique","preview":"CV universitaire dense en PT Serif · optimisé A4 1 page","tags":["academic","research","serif","a4","compact","optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9e6dd;font-family:'PT Serif',serif;color:#1c1a14;font-size:11.5px;line-height:1.45}
+.cv{width:794px;height:1123px;margin:0 auto;background:#faf6e9;box-shadow:0 18px 50px -16px rgba(40,30,15,.18);overflow:hidden;border:1px solid #d8d2bf}
+
+.cv-ac{
+  --c-ink:#1c1a14;--c-paper:#faf6e9;--c-muted:#5d574b;--c-blue:{{color}};--c-line:#d8d2bf;
+  font-family:'PT Serif',serif;color:var(--c-ink);background:var(--c-paper);padding:26px 30px;font-size:10.5px;line-height:1.45
+}
+
+.ac-hero{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;border-bottom:2px solid var(--c-ink);padding-bottom:10px;margin-bottom:10px}
+.ac-photo{width:74px;height:90px;display:flex;align-items:center;justify-content:center;background:#e9e6dd;color:var(--c-ink);font-family:'PT Serif',serif;font-weight:700;font-size:24px;border:1px solid var(--c-ink);overflow:hidden}
+.ac-photo img{width:100%;height:100%;object-fit:cover;filter:grayscale(.85) contrast(1.05)}
+.ac-id .pre{font-family:'Inter',sans-serif;font-size:8.5px;color:var(--c-blue);text-transform:uppercase;letter-spacing:.18em;font-weight:700;margin-bottom:3px}
+.ac-id h1{font-size:26px;font-weight:700;letter-spacing:-.005em;line-height:1}
+.ac-id .role{font-style:italic;color:var(--c-ink);font-size:11.5px;margin-top:3px}
+.ac-id .meta{font-family:'Inter',sans-serif;font-size:9px;color:var(--c-muted);margin-top:6px;display:flex;flex-wrap:wrap;gap:10px}
+.ac-id .meta b{color:var(--c-ink);font-weight:600;margin-right:3px}
+
+.ac-accroche{font-style:italic;font-size:10.5px;line-height:1.5;color:var(--c-ink);padding:8px 12px;background:#f0eada;border-left:3px solid var(--c-blue);margin-bottom:12px}
+
+.ac h2{font-family:'PT Serif',serif;font-size:13px;font-weight:700;letter-spacing:.005em;border-bottom:1px solid var(--c-ink);padding-bottom:3px;margin:13px 0 7px;color:var(--c-ink);display:flex;align-items:baseline;gap:8px}
+.ac h2 .nb{font-family:'Inter',sans-serif;font-size:9px;color:var(--c-blue);font-weight:700;letter-spacing:.06em}
+.ac h2:first-of-type{margin-top:0}
+
+.ac-xp{display:grid;grid-template-columns:80px 1fr;gap:12px;padding:5px 0;border-bottom:1px dotted var(--c-line)}
+.ac-xp:last-child{border:none}
+.ac-xp .when{font-family:'Inter',sans-serif;font-size:9px;color:var(--c-blue);text-transform:uppercase;letter-spacing:.06em;font-weight:700;padding-top:2px}
+.ac-xp h3{font-size:11.5px;font-weight:700}
+.ac-xp .co{font-style:italic;color:var(--c-muted);font-size:10px;margin:1px 0 2px}
+.ac-xp ul{margin:2px 0 0;padding-left:14px;font-size:10px;line-height:1.45;color:var(--c-ink)}
+.ac-xp ul li{margin-bottom:1px}
+
+.ac-form{display:grid;grid-template-columns:80px 1fr;gap:12px;padding:5px 0;border-bottom:1px dotted var(--c-line);align-items:baseline}
+.ac-form:last-child{border:none}
+.ac-form .when{font-family:'Inter',sans-serif;font-size:9px;color:var(--c-blue);text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+.ac-form b{font-size:11px;font-weight:700;display:block}
+.ac-form span{font-style:italic;color:var(--c-muted);font-size:9.5px;display:block;margin-top:1px}
+
+.ac-comp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding-top:3px}
+.ac-comp-grid h3{font-family:'Inter',sans-serif;font-size:9px;text-transform:uppercase;letter-spacing:.18em;color:var(--c-blue);margin-bottom:5px;font-weight:700;border-bottom:1px solid var(--c-line);padding-bottom:2px}
+.ac-pill{display:inline-block;background:#f0eada;border:1px solid var(--c-line);color:var(--c-ink);padding:2px 8px;font-size:9.5px;margin:0 3px 3px 0;font-family:'Inter',sans-serif}
+.ac-lang{display:flex;justify-content:space-between;font-size:10px;padding:2px 0;border-bottom:1px dotted var(--c-line);font-style:italic}
+.ac-lang:last-child{border:none}
+.ac-lang em{font-family:'Inter',sans-serif;color:var(--c-blue);font-style:normal;font-size:9px;text-transform:uppercase;letter-spacing:.06em;font-weight:700}
+
+.ac-int{font-style:italic;font-size:10px;line-height:1.5;color:var(--c-ink)}
+.ac-int span{margin:0 3px;font-style:normal;font-family:'Inter',sans-serif;background:#f0eada;border:1px solid var(--c-line);padding:1px 7px;font-size:9px;display:inline-block}
+
+@media print{
+  body{background:#fff}
+  .cv{box-shadow:none;margin:0}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-ac ac">
+
+<div class="ac-hero">
+  <div class="ac-photo">{{{photo_or_initials}}}</div>
+  <div class="ac-id">
+    <div class="pre">Curriculum Vitae · Académique</div>
+    <h1>{{name}}</h1>
+    {{#title}}<p class="role">{{title}}</p>{{/title}}
+    <div class="meta">
+      {{#contact.email}}<span><b>Email</b> {{contact.email}}</span>{{/contact.email}}
+      {{#contact.phone}}<span><b>Tél</b> {{contact.phone}}</span>{{/contact.phone}}
+      {{#contact.location}}<span><b>Ville</b> {{contact.location}}</span>{{/contact.location}}
+      {{#contact.website}}<span><b>Site</b> {{contact.website}}</span>{{/contact.website}}
+    </div>
+  </div>
+</div>
+
+{{#summary}}<p class="ac-accroche">{{summary}}</p>{{/summary}}
+
+{{#has_experience}}
+<h2><span class="nb">§ 1.</span>Expériences professionnelles</h2>
+{{#experience}}
+<div class="ac-xp">
+  <div class="when">{{date}}</div>
+  <div>
+    <h3>{{role}}</h3>
+    <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+    {{#has_bullets}}
+    <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+    {{/has_bullets}}
+  </div>
+</div>
+{{/experience}}
+{{/has_experience}}
+
+{{#has_education}}
+<h2><span class="nb">§ 2.</span>Formation</h2>
+{{#education}}
+<div class="ac-form">
+  <div class="when">{{date}}</div>
+  <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+</div>
+{{/education}}
+{{/has_education}}
+
+{{#has_skills}}
+<h2><span class="nb">§ 3.</span>Compétences</h2>
+<div class="ac-comp-grid">
+  <div>
+    <h3>Techniques</h3>
+    {{#skills}}<span class="ac-pill">{{name}}</span>{{/skills}}
+  </div>
+  {{#has_languages}}
+  <div>
+    <h3>Langues</h3>
+    {{#languages}}<div class="ac-lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+  </div>
+  {{/has_languages}}
+</div>
+{{/has_skills}}
+
+{{#has_certifications}}
+<h2><span class="nb">§ 4.</span>Certifications &amp; distinctions</h2>
+{{#certifications}}
+<div class="ac-form">
+  <div class="when">{{date}}</div>
+  <div><b>{{name}}</b></div>
+</div>
+{{/certifications}}
+{{/has_certifications}}
+
+{{#has_interests}}
+<h2><span class="nb">§ 5.</span>Centres d'intérêt</h2>
+<p class="ac-int">{{#interests}}<span>{{.}}</span>{{/interests}}</p>
+{{/has_interests}}
+
+</div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<!-- meta: {"name": "Code Minimal", "category": "Tech", "preview": "CV au look README markdown, fond blanc, accent vert, monospa · optimisé A4 1 page", "tags": ["a4", "compact", "optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9ecf2;font-family:'JetBrains Mono',monospace;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
+
+.cv-codemin{
+  --c-ink:#0a0a0a;--c-muted:#6b7280;--c-accent:{{color}};--c-line:#e5e7eb;
+  font-family:'JetBrains Mono',monospace;color:var(--c-ink);
+  padding:22px 26px;background:#fff;min-height:1123px;font-size:13px;line-height:1.5
+}
+
+.cv-codemin .top{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:center}
+.cv-codemin .top .portrait{width:72px;height:72px;border-radius:8px;object-fit:cover;background:var(--c-line);display:flex;align-items:center;justify-content:center;color:var(--c-accent);font-weight:700;font-size:24px;overflow:hidden}
+.cv-codemin .top .portrait img{width:100%;height:100%;object-fit:cover;display:block}
+.cv-codemin h1{font-size:26.0px;font-weight:700;letter-spacing:-.02em}
+.cv-codemin h1::before{content:"# ";color:var(--c-accent)}
+.cv-codemin .role{color:var(--c-muted);font-size:13px;margin-top:4px}
+.cv-codemin .role::before{content:"> ";color:var(--c-accent)}
+.cv-codemin .meta{color:var(--c-muted);font-size:11.5px;margin-top:14px;padding-bottom:18px;border-bottom:1px dashed var(--c-line)}
+.cv-codemin .meta span{margin-right:14px;display:inline-block}
+
+.cv-codemin .accroche{margin:18px 0 6px;color:#374151;font-size:13px;line-height:1.65}
+.cv-codemin .accroche::before{content:"// ";color:var(--c-accent);font-weight:700}
+
+.cv-codemin h2{font-size:14px;font-weight:700;margin:24px 0 12px;color:var(--c-ink)}
+.cv-codemin h2::before{content:"## ";color:var(--c-accent)}
+.cv-codemin h3{font-size:13px;font-weight:700}
+
+.cv-codemin .xp{margin-bottom:14px;padding-bottom:12px;border-bottom:1px dashed var(--c-line)}
+.cv-codemin .xp:last-child{border:none}
+.cv-codemin .xp .row{display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.cv-codemin .xp .date{color:var(--c-muted);font-size:11px}
+.cv-codemin .xp .co{color:var(--c-accent);font-size:12px;margin-bottom:4px}
+.cv-codemin .xp ul{margin:6px 0 0;padding-left:18px;color:#374151;font-size:12.5px;line-height:1.65}
+.cv-codemin .xp ul li{margin-bottom:2px}
+
+.cv-codemin .form-row{padding:8px 0;border-bottom:1px dashed var(--c-line);font-size:12.5px;display:flex;justify-content:space-between;gap:12px;align-items:baseline}
+.cv-codemin .form-row:last-child{border:none}
+.cv-codemin .form-row b{font-weight:700}
+.cv-codemin .form-row span{color:var(--c-muted);display:block;font-size:11.5px}
+.cv-codemin .form-row .when{color:var(--c-muted);white-space:nowrap;font-size:11px}
+
+.cv-codemin .comp h3{margin-top:14px;font-size:12px;color:var(--c-accent);font-weight:700}
+.cv-codemin .comp h3::before{content:"### ";color:var(--c-muted)}
+.cv-codemin .stack{font-size:12px;color:var(--c-muted)}
+.cv-codemin .stack code{background:#f3f4f6;color:var(--c-ink);padding:2px 7px;border-radius:3px;font-size:11px;margin:0 4px 4px 0;display:inline-block}
+.cv-codemin .lang-line{display:flex;justify-content:space-between;font-size:12.5px;padding:4px 0;border-bottom:1px dotted var(--c-line)}
+.cv-codemin .lang-line:last-child{border:none}
+.cv-codemin .lang-line span:last-child{color:var(--c-accent)}
+
+.cv-codemin .interest{font-size:12.5px;color:#374151;line-height:1.5}
+.cv-codemin .interest code{background:#f3f4f6;color:var(--c-ink);padding:2px 7px;border-radius:3px;font-size:11px;margin:0 3px 3px 0;display:inline-block}
+
+@media (max-width:720px){body{padding:0}.cv{border-radius:0;box-shadow:none}.cv-codemin{padding:32px 22px}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-codemin">
+
+<div class="top">
+  <div class="portrait">{{{photo_or_initials}}}</div>
+  <div>
+    <h1>{{name}}</h1>
+    {{#title}}<div class="role">{{title}}</div>{{/title}}
+  </div>
+</div>
+<div class="meta">
+  {{#contact.email}}<span>{{contact.email}}</span>{{/contact.email}}
+  {{#contact.phone}}<span>{{contact.phone}}</span>{{/contact.phone}}
+  {{#contact.location}}<span>{{contact.location}}</span>{{/contact.location}}
+  {{#contact.linkedin}}<span>{{contact.linkedin}}</span>{{/contact.linkedin}}
+  {{#contact.website}}<span>{{contact.website}}</span>{{/contact.website}}
+</div>
+
+{{#summary}}<p class="accroche">{{summary}}</p>{{/summary}}
+
+{{#has_experience}}
+<h2>Expériences professionnelles</h2>
+{{#experience}}
+<div class="xp">
+  <div class="row"><h3>{{role}}</h3><span class="date">{{date}}</span></div>
+  <div class="co">@ {{company}}{{#location}} · {{location}}{{/location}}</div>
+  {{#has_bullets}}
+  <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+  {{/has_bullets}}
+</div>
+{{/experience}}
+{{/has_experience}}
+
+{{#has_education}}
+<h2>Formation</h2>
+{{#education}}
+<div class="form-row">
+  <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+  <div class="when">{{date}}</div>
+</div>
+{{/education}}
+{{/has_education}}
+
+{{#has_skills}}
+<h2>Compétences</h2>
+<div class="comp">
+  <h3>Techniques</h3>
+  <div class="stack">
+    {{#skills}}<code>{{name}}</code>{{/skills}}
+  </div>
+  {{#has_languages}}
+  <h3>Langues</h3>
+  {{#languages}}<div class="lang-line"><span>{{name}}</span><span>{{level}}</span></div>{{/languages}}
+  {{/has_languages}}
+</div>
+{{/has_skills}}
+
+{{#has_certifications}}
+<h2>Certifications</h2>
+{{#certifications}}<div class="form-row"><div><b>{{name}}</b></div><div class="when">{{date}}</div></div>{{/certifications}}
+{{/has_certifications}}
+
+{{#has_interests}}
+<h2>Centres d'intérêt</h2>
+<p class="interest">
+  {{#interests}}<code>{{.}}</code>{{/interests}}
+</p>
+{{/has_interests}}
+
+</div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

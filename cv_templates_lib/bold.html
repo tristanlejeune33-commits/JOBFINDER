@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Bold","category":"Créatif","preview":"Hero asymétrique · Archivo Black · optimisé A4 1 page","tags":["a4","compact","optimisé","bold"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>{{name}} — CV</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@300;400;500;600;700;800;900&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:{{color}};
+  --primary-d:{{color_dark}};
+  --primary-l:{{color_light}};
+  --ink:#0a0a0a;
+  --ink2:#3a3a3a;
+  --ink3:#7a7a7a;
+  --paper:#fff;
+  --line:#e8e8e8;
+}
+body{font-family:'Archivo',sans-serif;background:#e0e2e8;color:var(--ink);font-size:11.5px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.cv{
+  width:794px;height:1123px;margin:0 auto;background:var(--paper);
+  box-shadow:0 14px 50px rgba(0,0,0,.15);position:relative;overflow:hidden;
+}
+
+/* ── HERO ASYMMETRIQUE ──────────────────────────────────────────────────── */
+.hero{position:relative;padding:24px 32px 22px;background:var(--ink);color:#fff;overflow:hidden}
+.hero::before{
+  content:'';position:absolute;top:0;right:-80px;width:280px;height:120%;
+  background:var(--primary);transform:skewX(-12deg);transform-origin:top;z-index:0;
+}
+.hero::after{
+  content:'';position:absolute;bottom:-30px;left:-30px;width:120px;height:120px;
+  border-radius:50%;background:var(--primary-d);opacity:.4;z-index:0;
+}
+.hero-grid{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;position:relative;z-index:1}
+.hero-text{position:relative}
+.eyebrow{font-size:8.5px;font-weight:700;letter-spacing:.4em;text-transform:uppercase;color:var(--primary-l);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.eyebrow::before{content:'';width:24px;height:2px;background:var(--primary-l)}
+.name{font-family:'Archivo Black',sans-serif;font-size:34px;font-weight:900;line-height:.95;letter-spacing:-.04em;color:#fff;text-transform:uppercase;margin-bottom:6px}
+.title{font-size:11.5px;font-weight:600;color:#fff;margin-bottom:10px;letter-spacing:.02em}
+.title strong{background:var(--primary);padding:1px 7px;color:var(--ink);font-weight:800}
+.contact-grid{display:flex;flex-wrap:wrap;gap:9px;font-size:9.5px;color:rgba(255,255,255,.85);font-weight:500}
+.contact-grid span{display:flex;align-items:center;gap:5px}
+.contact-grid span::before{content:'';width:3px;height:3px;background:var(--primary);border-radius:50%}
+
+.photo{width:90px;height:90px;background:var(--primary);border:3px solid #fff;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--ink);font-family:'Archivo Black',sans-serif;font-size:32px;font-weight:900;box-shadow:0 8px 20px rgba(0,0,0,.4);transform:rotate(-3deg);position:relative;z-index:2}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+/* ── BODY ─────────────────────────────────────────────────────────────── */
+.body-cv{padding:18px 32px 18px;position:relative}
+
+/* ── SUMMARY BIG ─────────────────────────────────────────────────────────── */
+.summary{font-size:11px;line-height:1.45;color:var(--ink);font-weight:500;margin-bottom:14px;padding:10px 14px;background:var(--primary-l);border-left:4px solid var(--primary);position:relative}
+.summary::before{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:0 16px 16px 0;border-color:transparent var(--primary) transparent transparent}
+
+/* ── SECTIONS ─────────────────────────────────────────────────────────── */
+.section{margin-bottom:14px}
+.section-title{font-family:'Archivo Black',sans-serif;font-size:14px;font-weight:900;color:var(--ink);text-transform:uppercase;letter-spacing:-.02em;margin-bottom:8px;padding-bottom:4px;border-bottom:2.5px solid var(--ink);position:relative}
+.section-title::after{content:'';position:absolute;bottom:-2.5px;left:0;width:38px;height:2.5px;background:var(--primary)}
+
+/* ── EXPERIENCE — CARDS BOLD ────────────────────────────────────────────── */
+.exp{background:#fff;border:1.5px solid var(--ink);padding:8px 12px;margin-bottom:7px;position:relative}
+.exp-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:3px;padding-bottom:3px;border-bottom:1.5px dashed var(--ink)}
+.exp-role{font-family:'Archivo Black',sans-serif;font-size:11.5px;font-weight:900;color:var(--ink);text-transform:uppercase;letter-spacing:-.01em;line-height:1.1}
+.exp-date{font-size:8.5px;font-weight:700;color:#fff;background:var(--ink);padding:2px 7px;letter-spacing:.05em;flex-shrink:0;text-transform:uppercase}
+.exp-co{font-size:10px;color:var(--primary-d);font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em}
+.exp-co::before{content:'▸ '}
+.exp-desc{list-style:none;margin-top:3px}
+.exp-desc li{padding-left:14px;position:relative;font-size:9.8px;color:var(--ink2);line-height:1.42;margin-bottom:1px;font-weight:500}
+.exp-desc li::before{content:'■';position:absolute;left:0;top:1px;color:var(--primary);font-size:9px}
+
+/* ── 2 COLS ────────────────────────────────────────────────────────────── */
+.split{display:grid;grid-template-columns:1.2fr 1fr;gap:18px;margin-bottom:14px}
+.split .section{margin-bottom:0}
+.split .section-title{font-size:12px}
+
+/* ── EDUCATION ─────────────────────────────────────────────────────── */
+.edu-item{padding:6px 10px;background:var(--ink);color:#fff;margin-bottom:5px;position:relative}
+.edu-item::after{content:'';position:absolute;top:0;right:0;width:0;height:0;border-style:solid;border-width:10px 10px 0 0;border-color:var(--primary) transparent transparent transparent}
+.edu-deg{font-family:'Archivo Black',sans-serif;font-size:10.5px;font-weight:900;text-transform:uppercase;letter-spacing:-.01em;line-height:1.2}
+.edu-school{font-size:9.5px;color:rgba(255,255,255,.75);margin-top:1px;font-weight:500}
+.edu-date{font-size:9px;color:var(--primary);font-weight:700;letter-spacing:.05em;margin-top:1px;text-transform:uppercase}
+
+/* ── SKILLS — TAGS BOLD ──────────────────────────────────────────────────── */
+.skills-grid{display:flex;flex-wrap:wrap;gap:4px}
+.skill-tag{background:var(--ink);color:#fff;padding:3px 9px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;display:inline-flex;align-items:center;gap:5px;border:1.5px solid var(--ink)}
+
+/* ── LANGUAGES ─────────────────────────────────────────────────────── */
+.lang-row{display:flex;justify-content:space-between;align-items:center;padding:4px 9px;background:#f5f5f5;border:1.5px solid var(--ink);margin-bottom:4px}
+.lang-name{font-weight:800;font-size:10.5px;color:var(--ink);text-transform:uppercase;letter-spacing:.03em}
+.lang-level{font-size:8.5px;color:#fff;font-weight:800;background:var(--primary);padding:2px 6px;letter-spacing:.06em;text-transform:uppercase}
+
+/* ── CERTIFICATIONS ────────────────────────────────────────────────────────── */
+.cert-list{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.cert-item{padding:5px 9px;background:var(--primary-l);border-left:3px solid var(--primary);font-size:10px;font-weight:600;color:var(--ink)}
+.cert-item small{display:block;font-size:9px;color:var(--ink3);font-weight:500;margin-top:1px;letter-spacing:.04em}
+
+/* ── INTERESTS ──────────────────────────────────────────────────────────── */
+.interest{display:inline-block;border:1.5px solid var(--ink);padding:2px 8px;font-size:9.5px;color:var(--ink);margin:0 4px 3px 0;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.interest:nth-child(odd){background:var(--primary);border-color:var(--primary)}
+
+@media print{
+  body{background:#fff}
+  .cv{box-shadow:none;margin:0}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="cv">
+  <header class="hero">
+    <div class="hero-grid">
+      <div class="hero-text">
+        <div class="eyebrow">{{#title}}{{title}}{{/title}}{{^title}}Curriculum Vitæ{{/title}}</div>
+        <h1 class="name">{{name}}</h1>
+        {{#title}}<div class="title">Disponible pour <strong>{{title}}</strong></div>{{/title}}
+        <div class="contact-grid">
+          {{#contact.email}}<span>{{contact.email}}</span>{{/contact.email}}
+          {{#contact.phone}}<span>{{contact.phone}}</span>{{/contact.phone}}
+          {{#contact.location}}<span>{{contact.location}}</span>{{/contact.location}}
+          {{#contact.linkedin}}<span>in/{{contact.linkedin}}</span>{{/contact.linkedin}}
+        </div>
+      </div>
+      <div class="photo">{{{photo_or_initials}}}</div>
+    </div>
+  </header>
+
+  <div class="body-cv">
+    {{#summary}}<div class="summary">{{summary}}</div>{{/summary}}
+
+    {{#has_experience}}
+    <section class="section">
+      <div class="section-title">Expérience</div>
+      {{#experience}}
+      <div class="exp">
+        <div class="exp-head">
+          <div class="exp-role">{{role}}</div>
+          <div class="exp-date">{{date}}</div>
+        </div>
+        <div class="exp-co">{{company}}{{#location}} — {{location}}{{/location}}</div>
+        {{#has_bullets}}<ul class="exp-desc">{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>{{/has_bullets}}
+      </div>
+      {{/experience}}
+    </section>
+    {{/has_experience}}
+
+    <div class="split">
+      <div>
+        {{#has_education}}
+        <section class="section">
+          <div class="section-title">Formation</div>
+          {{#education}}
+          <div class="edu-item">
+            <div class="edu-deg">{{degree}}</div>
+            <div class="edu-school">{{school}}{{#location}} — {{location}}{{/location}}</div>
+            <div class="edu-date">{{date}}</div>
+          </div>
+          {{/education}}
+        </section>
+        {{/has_education}}
+      </div>
+
+      <div>
+        {{#has_languages}}
+        <section class="section">
+          <div class="section-title">Langues</div>
+          {{#languages}}<div class="lang-row"><span class="lang-name">{{name}}</span><span class="lang-level">{{level}}</span></div>{{/languages}}
+        </section>
+        {{/has_languages}}
+      </div>
+    </div>
+
+    {{#has_skills}}
+    <section class="section">
+      <div class="section-title">Skills</div>
+      <div class="skills-grid">
+        {{#skills}}<span class="skill-tag">{{name}}</span>{{/skills}}
+      </div>
+    </section>
+    {{/has_skills}}
+
+    {{#has_certifications}}
+    <section class="section">
+      <div class="section-title">Certifications</div>
+      <div class="cert-list">
+        {{#certifications}}<div class="cert-item">{{name}}{{#date}}<small>{{date}}</small>{{/date}}</div>{{/certifications}}
+      </div>
+    </section>
+    {{/has_certifications}}
+
+    {{#has_interests}}
+    <section class="section" style="margin-bottom:0">
+      <div class="section-title">Intérêts</div>
+      {{#interests}}<span class="interest">{{.}}</span>{{/interests}}
+    </section>
+    {{/has_interests}}
+  </div>
+</div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

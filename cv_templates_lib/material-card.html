@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<!-- meta: {"name": "Material Card", "category": "Moderne", "preview": "Cartes flottantes Material Design, hero gradient indigo, amb · optimisé A4 1 page", "tags": ["material", "cards", "gradient", "a4", "compact", "optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#eef2f6;font-family:'Inter',sans-serif;color:#1e293b;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#fff;box-shadow:0 12px 36px -8px rgba(15,23,42,.18),0 0 0 1px rgba(15,23,42,.04);border-radius:16px;overflow:hidden}
+
+.cv-mc{
+  --c-ink:#1e293b;--c-paper:#fff;--c-muted:#64748b;
+  --c-indigo:{{color}};--c-indigo-d:{{color_dark}};--c-amber:#f59e0b;--c-soft:#f1f5f9;--c-line:#e2e8f0;
+  font-family:'Inter',sans-serif;color:var(--c-ink);background:var(--c-paper);min-height:1123px;padding:22px 26px
+}
+
+.mc-hero{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:center;padding:24px;background:linear-gradient(135deg,var(--c-indigo) 0%,var(--c-indigo-d) 100%);border-radius:18px;color:#fff;margin-bottom:20px;box-shadow:0 10px 30px -8px rgba(80,70,229,.35)}
+.mc-photo{width:115px;height:115px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:#fff;color:var(--c-indigo);font-weight:800;font-size:42px;border:4px solid #fff;box-shadow:0 6px 18px rgba(0,0,0,.2);overflow:hidden}
+.mc-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.mc-id h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
+.mc-id .role{color:#c7d2fe;font-size:14.5px;font-weight:500;margin-top:4px}
+
+.mc-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:22px}
+.mc-meta .tile{padding:14px;background:var(--c-soft);border-radius:14px;font-size:12.5px;line-height:1.4;border:1px solid var(--c-line)}
+.mc-meta .tile b{display:block;color:var(--c-muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;font-weight:700}
+.mc-meta .tile span{font-weight:600;color:var(--c-ink)}
+
+.mc-accroche{padding:18px 22px;background:#fff7ed;border-left:4px solid var(--c-amber);border-radius:0 12px 12px 0;font-size:14px;line-height:1.6;color:#7c2d12;margin-bottom:24px;font-weight:500}
+
+.mc h2{font-size:14px;text-transform:uppercase;letter-spacing:.12em;color:var(--c-indigo);margin:24px 0 12px;font-weight:700;display:flex;align-items:center;gap:10px}
+.mc h2::before{content:"";width:6px;height:18px;background:var(--c-indigo);border-radius:99px}
+
+.mc-xp{padding:18px 22px;background:#fff;border:1px solid var(--c-line);border-radius:14px;margin-bottom:8px;box-shadow:0 2px 8px -2px rgba(15,23,42,.06)}
+.mc-xp .row{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.mc-xp h3{font-size:15.5px;font-weight:700}
+.mc-xp .when{font-size:11.5px;color:var(--c-indigo);background:#ede9fe;padding:4px 10px;border-radius:99px;white-space:nowrap;font-weight:600}
+.mc-xp .co{color:var(--c-amber);font-size:13px;font-weight:600;margin:4px 0 6px}
+.mc-xp ul{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.6;color:#475569}
+.mc-xp ul li{margin-bottom:3px}
+.mc-xp ul li::marker{color:var(--c-indigo)}
+
+.mc-form{padding:14px 18px;background:#fff;border:1px solid var(--c-line);border-radius:12px;margin-bottom:6px;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center;box-shadow:0 1px 4px rgba(15,23,42,.04)}
+.mc-form b{display:block;font-size:14.5px;font-weight:700}
+.mc-form span{display:block;color:var(--c-muted);font-size:12.5px;margin-top:1px}
+.mc-form .when{font-size:11.5px;color:var(--c-muted);font-weight:600;white-space:nowrap}
+
+.mc-skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.mc-skill-grid .panel{padding:18px 20px;background:#fff;border:1px solid var(--c-line);border-radius:14px;box-shadow:0 2px 8px -2px rgba(15,23,42,.05)}
+.mc-skill-grid .panel h3{font-size:13px;font-weight:700;color:var(--c-indigo);margin-bottom:10px;text-transform:uppercase;letter-spacing:.06em}
+
+.mc-pill{display:inline-block;background:#ede9fe;color:var(--c-indigo);padding:4px 10px;border-radius:99px;font-size:12px;font-weight:500;margin:0 4px 5px 0}
+.mc-lang{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--c-line);font-size:13px}
+.mc-lang:last-child{border:none}
+.mc-lang em{color:var(--c-indigo);font-style:normal;font-size:11.5px;font-weight:700;background:#ede9fe;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.04em}
+
+.mc-int{padding:18px 22px;background:linear-gradient(135deg,#fef3c7,#fff);border-radius:14px;font-size:14px;line-height:1.5;color:#7c2d12;border:1px solid #fde68a}
+.mc-int span{display:inline-block;background:#fff;color:#92400e;padding:4px 11px;border-radius:99px;margin:3px 4px 3px 0;font-size:12px;font-weight:600;border:1px solid #fde68a}
+
+@media (max-width:760px){body{padding:0}.cv{border-radius:0;box-shadow:none}.cv-mc{padding:28px 22px}.mc-hero{grid-template-columns:1fr;text-align:center}.mc-photo{margin:0 auto}.mc-meta{grid-template-columns:1fr 1fr}.mc-skill-grid{grid-template-columns:1fr}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-mc mc">
+
+<div class="mc-hero">
+  <div class="mc-photo">{{{photo_or_initials}}}</div>
+  <div class="mc-id">
+    <h1>{{name}}</h1>
+    {{#title}}<div class="role">{{title}}</div>{{/title}}
+  </div>
+</div>
+
+<div class="mc-meta">
+  {{#contact.email}}<div class="tile"><b>Email</b><span>{{contact.email}}</span></div>{{/contact.email}}
+  {{#contact.phone}}<div class="tile"><b>Téléphone</b><span>{{contact.phone}}</span></div>{{/contact.phone}}
+  {{#contact.location}}<div class="tile"><b>Ville</b><span>{{contact.location}}</span></div>{{/contact.location}}
+  {{#contact.linkedin}}<div class="tile"><b>LinkedIn</b><span>{{contact.linkedin}}</span></div>{{/contact.linkedin}}
+  {{#contact.website}}<div class="tile"><b>Site web</b><span>{{contact.website}}</span></div>{{/contact.website}}
+</div>
+
+{{#summary}}<p class="mc-accroche">{{summary}}</p>{{/summary}}
+
+{{#has_experience}}
+<h2>Expériences professionnelles</h2>
+{{#experience}}
+<div class="mc-xp">
+  <div class="row"><h3>{{role}}</h3><span class="when">{{date}}</span></div>
+  <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+  {{#has_bullets}}
+  <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+  {{/has_bullets}}
+</div>
+{{/experience}}
+{{/has_experience}}
+
+{{#has_education}}
+<h2>Formation</h2>
+{{#education}}
+<div class="mc-form">
+  <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+  <span class="when">{{date}}</span>
+</div>
+{{/education}}
+{{/has_education}}
+
+{{#has_skills}}
+<h2>Compétences</h2>
+<div class="mc-skill-grid">
+  <div class="panel">
+    <h3>Techniques</h3>
+    {{#skills}}<span class="mc-pill">{{name}}</span>{{/skills}}
+  </div>
+  {{#has_languages}}
+  <div class="panel">
+    <h3>Langues</h3>
+    {{#languages}}<div class="mc-lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+  </div>
+  {{/has_languages}}
+</div>
+{{/has_skills}}
+
+{{#has_certifications}}
+<h2>Certifications</h2>
+{{#certifications}}
+<div class="mc-form">
+  <div><b>{{name}}</b></div>
+  <span class="when">{{date}}</span>
+</div>
+{{/certifications}}
+{{/has_certifications}}
+
+{{#has_interests}}
+<h2>Centres d'intérêt</h2>
+<p class="mc-int">
+  {{#interests}}<span>{{.}}</span>{{/interests}}
+</p>
+{{/has_interests}}
+
+</div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

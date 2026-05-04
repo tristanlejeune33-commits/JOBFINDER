@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Data Scientist","category":"Tech","preview":"Sidebar slate sombre, accent cyan, badges ambre, Inter + JetBrains Mono · optimisé A4 1 page","tags":["a4","compact","optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#e9ecf2;font-family:'Inter',sans-serif;min-height:100vh;font-size:11.5px;line-height:1.45}
+.cv{width:794px;height:1123px;margin:0 auto;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
+
+.cv-ds{
+  --c-ink:#0f172a;--c-cyan:{{color}};--c-amber:#fde68a;--c-amber-d:#92400e;--c-muted:#64748b;
+  font-family:'Inter',sans-serif;color:var(--c-ink);display:grid;grid-template-columns:34% 66%;font-size:10.5px;line-height:1.42
+}
+
+.cv-ds aside{background:#0f172a;color:#e2e8f0;padding:24px 22px}
+.cv-ds aside .portrait{width:84px;height:84px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;border:3px solid var(--c-cyan);background:#1e293b;color:#fff;font-family:'JetBrains Mono',monospace;font-weight:700;font-size:24px;overflow:hidden}
+.cv-ds aside .portrait img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+.cv-ds aside h1{text-align:center;font-size:18px;font-weight:700;color:#fff;line-height:1.1}
+.cv-ds aside .role{text-align:center;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--c-cyan);margin-top:3px}
+.cv-ds aside h3{font-size:9.5px;text-transform:uppercase;letter-spacing:.14em;color:var(--c-amber);margin:13px 0 6px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.cv-ds aside h3::before{content:"# "}
+.cv-ds aside .ln{font-size:9.8px;padding:3px 0;display:flex;justify-content:space-between;border-bottom:1px solid #1e293b;color:#cbd5e1;gap:6px}
+.cv-ds aside .ln:last-child{border:none}
+.cv-ds aside .ln span:first-child{color:#94a3b8;font-size:9px;text-transform:uppercase;font-family:'JetBrains Mono',monospace}
+
+.cv-ds main{padding:24px 26px;background:#fff}
+.cv-ds main .accroche{font-size:10.5px;line-height:1.5;color:#334155;border-left:3px solid var(--c-cyan);padding:4px 0 4px 12px;margin-bottom:13px;font-weight:500}
+.cv-ds main h2{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--c-ink);margin:13px 0 7px;font-weight:700;display:flex;align-items:center;gap:6px}
+.cv-ds main h2::before{content:"#";color:var(--c-cyan);font-family:'JetBrains Mono',monospace;font-weight:700}
+.cv-ds main h2:first-of-type{margin-top:0}
+
+.cv-ds .item{margin-bottom:7px;padding-bottom:6px;border-bottom:1px solid #f1f5f9}
+.cv-ds .item:last-child{border:none}
+.cv-ds .item .row{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.cv-ds .item h3{font-size:11.5px;font-weight:700;line-height:1.2}
+.cv-ds .item .date{font-size:9.2px;color:var(--c-muted);font-family:'JetBrains Mono',monospace}
+.cv-ds .item .co{color:var(--c-cyan);font-weight:600;font-size:10px;margin:1px 0 3px}
+.cv-ds .item ul{margin:2px 0 0;padding-left:14px;font-size:10px;line-height:1.4;color:#475569}
+.cv-ds .item ul li{margin-bottom:1.5px}
+
+.cv-ds .form{padding:5px 11px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:5px;margin-bottom:4px;display:grid;grid-template-columns:1fr auto;gap:10px;align-items:baseline}
+.cv-ds .form b{display:block;font-weight:700;font-size:10.5px}
+.cv-ds .form span{color:var(--c-cyan);font-size:9.5px;display:block;margin-top:0}
+.cv-ds .form .when{color:var(--c-cyan);font-size:9px;font-family:'JetBrains Mono',monospace;white-space:nowrap;background:rgba(0,0,0,.05);padding:2px 6px;border-radius:3px}
+
+.cv-ds .pill{display:inline-block;background:rgba(0,0,0,.05);border:1px solid var(--c-cyan);color:var(--c-cyan);padding:2px 8px;border-radius:4px;font-size:9.5px;font-family:'JetBrains Mono',monospace;margin:0 3px 3px 0}
+
+.cv-ds .interest{font-size:10px;color:#475569;line-height:1.5}
+.cv-ds .interest span{display:inline-block;background:#fef3c7;color:var(--c-amber-d);padding:2px 8px;border-radius:4px;margin:2px 3px 2px 0;font-size:9.5px;font-family:'JetBrains Mono',monospace;font-weight:500}
+
+@media print{
+  body{background:#fff}
+  .cv{box-shadow:none;margin:0}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-ds">
+
+<aside>
+  <div class="portrait">{{{photo_or_initials}}}</div>
+  <h1>{{name}}</h1>
+  {{#title}}<div class="role">{{title}}</div>{{/title}}
+
+  <h3>Coordonnées</h3>
+  {{#contact.email}}<div class="ln"><span>email</span><span>{{contact.email}}</span></div>{{/contact.email}}
+  {{#contact.phone}}<div class="ln"><span>tél</span><span>{{contact.phone}}</span></div>{{/contact.phone}}
+  {{#contact.location}}<div class="ln"><span>ville</span><span>{{contact.location}}</span></div>{{/contact.location}}
+  {{#contact.linkedin}}<div class="ln"><span>linkedin</span><span>{{contact.linkedin}}</span></div>{{/contact.linkedin}}
+  {{#contact.website}}<div class="ln"><span>web</span><span>{{contact.website}}</span></div>{{/contact.website}}
+
+  {{#has_languages}}
+  <h3>Compétences linguistiques</h3>
+  {{#languages}}<div class="ln"><span>{{name}}</span><span>{{level}}</span></div>{{/languages}}
+  {{/has_languages}}
+</aside>
+
+<main>
+
+  {{#summary}}<p class="accroche">{{summary}}</p>{{/summary}}
+
+  {{#has_experience}}
+  <h2>Expériences professionnelles</h2>
+  {{#experience}}
+  <div class="item">
+    <div class="row"><h3>{{role}}</h3><span class="date">{{date}}</span></div>
+    <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+    {{#has_bullets}}
+    <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+    {{/has_bullets}}
+  </div>
+  {{/experience}}
+  {{/has_experience}}
+
+  {{#has_education}}
+  <h2>Formation</h2>
+  {{#education}}
+  <div class="form">
+    <div><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/education}}
+  {{/has_education}}
+
+  {{#has_skills}}
+  <h2>Compétences techniques</h2>
+  <div>
+    {{#skills}}<span class="pill">{{name}}</span>{{/skills}}
+  </div>
+  {{/has_skills}}
+
+  {{#has_certifications}}
+  <h2>Certifications</h2>
+  {{#certifications}}<div class="form"><div><b>{{name}}</b></div><span class="when">{{date}}</span></div>{{/certifications}}
+  {{/has_certifications}}
+
+  {{#has_interests}}
+  <h2>Centres d'intérêt</h2>
+  <p class="interest">
+    {{#interests}}<span>{{.}}</span>{{/interests}}
+  </p>
+  {{/has_interests}}
+</main>
+
+</div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

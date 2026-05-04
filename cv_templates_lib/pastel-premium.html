@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<!-- meta: {"name": "Pastel Premium", "category": "Premium", "preview": "Pastels sauge/pêche/lavande, photo ronde flottante, typograp · optimisé A4 1 page", "tags": ["a4", "compact", "optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{name}} — CV</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#f5f1ec;font-family:'Inter',sans-serif;color:#22201d;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#fbf8f4;box-shadow:0 30px 80px -20px rgba(40,30,15,.15);border-radius:32px;overflow:hidden;position:relative}
+
+.cv-pp{
+  --c-ink:#22201d;--c-paper:#fbf8f4;--c-muted:#7a7466;
+  --c-sage:#a8bba4;--c-sage-d:{{color}};--c-peach:#f4c0a8;--c-peach-d:{{color_dark}};
+  --c-lav:#c5b9d6;--c-lav-d:#7a6a92;
+  font-family:'Inter',sans-serif;color:var(--c-ink);min-height:1123px
+}
+
+.pp-hero{padding:22px 26px 32px;display:grid;grid-template-columns:auto 1fr;gap:30px;align-items:center;position:relative}
+.pp-hero::before{content:"";position:absolute;top:30px;right:50px;width:160px;height:160px;background:#f4c0a8;border-radius:50%;filter:blur(50px);opacity:.5;z-index:0}
+.pp-hero::after{content:"";position:absolute;bottom:-60px;left:200px;width:200px;height:200px;background:#a8bba4;border-radius:50%;filter:blur(60px);opacity:.45;z-index:0}
+.pp-hero>*{position:relative;z-index:2}
+
+.pp-photo{width:160px;height:160px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;border:6px solid #fff;box-shadow:0 12px 30px -10px rgba(40,30,15,.2);background:#f4dfa3;color:var(--c-peach-d);font-family:'Instrument Serif',serif;font-weight:600;font-size:54px;overflow:hidden}
+.pp-photo img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
+
+.pp-id .av{display:inline-flex;align-items:center;gap:8px;background:rgba(168,187,164,.25);color:var(--c-sage-d);padding:6px 14px;border-radius:99px;font-size:12px;font-weight:600}
+.pp-id h1{font-family:'Instrument Serif',serif;font-size:30px;line-height:1;font-weight:400;margin:14px 0 4px;letter-spacing:-.02em}
+.pp-id .role{color:var(--c-peach-d);font-weight:600;font-size:14px;margin-top:4px}
+.pp-id .accroche{font-size:15.5px;color:#3a3530;font-weight:500;max-width:440px;line-height:1.55;margin-top:6px}
+.pp-id .meta{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+.pp-id .meta span{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.85);border:1px solid rgba(40,30,15,.06);padding:6px 11px;border-radius:99px;font-size:12px;color:var(--c-ink);font-weight:500}
+
+.pp-body{padding:0 44px 40px}
+
+.pp h2{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.18em;color:var(--c-muted);margin:30px 0 16px;font-weight:500;display:flex;align-items:center;gap:10px}
+.pp h2::before{content:"";width:18px;height:18px;border-radius:50%;background:var(--c-peach)}
+
+.pp-xp{padding:18px 22px;background:#fff;border-radius:20px;border:1px solid rgba(40,30,15,.06);margin-bottom:10px}
+.pp-xp .row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.pp-xp h3{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;letter-spacing:-.01em}
+.pp-xp .when{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c-muted);background:rgba(244,192,168,.3);padding:4px 9px;border-radius:99px;white-space:nowrap;font-weight:500}
+.pp-xp .co{color:var(--c-peach-d);font-weight:600;font-size:13px;margin:2px 0 8px}
+.pp-xp ul{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.5;color:#4a4540}
+.pp-xp ul li{margin-bottom:4px}
+.pp-xp ul li::marker{color:var(--c-sage-d)}
+
+.pp-form{padding:14px 20px;background:#fff;border-radius:18px;border:1px solid rgba(40,30,15,.06);margin-bottom:8px;display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.pp-form .info b{display:block;font-family:'Instrument Serif',serif;font-size:18px;font-weight:400;letter-spacing:-.01em}
+.pp-form .info span{display:block;color:var(--c-muted);font-size:13px;margin-top:1px}
+.pp-form .when{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c-lav-d);background:rgba(197,185,214,.3);padding:4px 9px;border-radius:99px;white-space:nowrap;font-weight:500}
+
+.pp-skill-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.pp-skill-grid .panel{padding:20px 22px;background:#fff;border-radius:22px;border:1px solid rgba(40,30,15,.06)}
+.pp-skill-grid .panel h3{font-family:'Instrument Serif',serif;font-size:20px;font-weight:400;margin-bottom:12px}
+
+.pp-tool{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.7);color:var(--c-ink);padding:5px 11px;border-radius:99px;font-size:12px;font-weight:500;margin:0 4px 5px 0;border:1px solid rgba(40,30,15,.05)}
+
+.pp-lang{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(40,30,15,.06);font-size:13px}
+.pp-lang:last-child{border:none}
+.pp-lang em{font-family:'JetBrains Mono',monospace;color:var(--c-peach-d);font-style:normal;font-size:11px;letter-spacing:.04em;text-transform:uppercase;font-weight:600}
+
+.pp-int{padding:22px 24px;background:linear-gradient(135deg,#fff,#fbeec8);border-radius:22px;border:1px solid rgba(40,30,15,.06);font-family:'Instrument Serif',serif;font-style:italic;font-size:18px;line-height:1.55;color:#3a3530}
+.pp-int span{display:inline-block;background:#fff;color:var(--c-ink);padding:5px 12px;border-radius:99px;font-size:13px;font-weight:500;margin:4px 4px 4px 0;border:1px solid rgba(40,30,15,.05);font-style:normal;font-family:'Inter',sans-serif}
+
+@media (max-width:760px){body{padding:0}.cv{border-radius:0}.pp-hero{padding:28px 22px;grid-template-columns:1fr;text-align:center}.pp-photo{margin:0 auto}.pp-id .meta{justify-content:center}.pp-body{padding:0 22px 28px}.pp-skill-grid{grid-template-columns:1fr}}
+@media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}.pp-hero::before,.pp-hero::after{display:none}@page{size:A4;margin:0}}
+</style>
+</head>
+<body>
+<div class="cv"><div class="cv-pp pp">
+
+<div class="pp-hero">
+  <div class="pp-photo">{{{photo_or_initials}}}</div>
+  <div class="pp-id">
+    <span class="av">Curriculum Vitae</span>
+    <h1>{{name}}</h1>
+    {{#title}}<div class="role">{{title}}</div>{{/title}}
+    {{#summary}}<p class="accroche">{{summary}}</p>{{/summary}}
+    <div class="meta">
+      {{#contact.email}}<span>{{contact.email}}</span>{{/contact.email}}
+      {{#contact.phone}}<span>{{contact.phone}}</span>{{/contact.phone}}
+      {{#contact.location}}<span>{{contact.location}}</span>{{/contact.location}}
+      {{#contact.linkedin}}<span>{{contact.linkedin}}</span>{{/contact.linkedin}}
+    </div>
+  </div>
+</div>
+
+<div class="pp-body">
+
+  {{#has_experience}}
+  <h2>Expériences professionnelles</h2>
+  {{#experience}}
+  <div class="pp-xp">
+    <div class="row"><h3>{{role}}</h3><span class="when">{{date}}</span></div>
+    <div class="co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+    {{#has_bullets}}
+    <ul>{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>
+    {{/has_bullets}}
+  </div>
+  {{/experience}}
+  {{/has_experience}}
+
+  {{#has_education}}
+  <h2>Formation</h2>
+  {{#education}}
+  <div class="pp-form">
+    <div class="info"><b>{{degree}}</b><span>{{school}}{{#location}} · {{location}}{{/location}}</span></div>
+    <span class="when">{{date}}</span>
+  </div>
+  {{/education}}
+  {{/has_education}}
+
+  {{#has_skills}}
+  <h2>Compétences</h2>
+  <div class="pp-skill-grid">
+    <div class="panel">
+      <h3>Techniques</h3>
+      {{#skills}}<span class="pp-tool">{{name}}</span>{{/skills}}
+    </div>
+    {{#has_languages}}
+    <div class="panel">
+      <h3>Langues</h3>
+      {{#languages}}<div class="pp-lang"><span>{{name}}</span><em>{{level}}</em></div>{{/languages}}
+    </div>
+    {{/has_languages}}
+  </div>
+  {{/has_skills}}
+
+  {{#has_certifications}}
+  <h2>Certifications</h2>
+  {{#certifications}}<div class="pp-form"><div class="info"><b>{{name}}</b></div><span class="when">{{date}}</span></div>{{/certifications}}
+  {{/has_certifications}}
+
+  {{#has_interests}}
+  <h2>Centres d'intérêt</h2>
+  <p class="pp-int">
+    {{#interests}}<span>{{.}}</span>{{/interests}}
+  </p>
+  {{/has_interests}}
+
+</div>
+
+</div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>

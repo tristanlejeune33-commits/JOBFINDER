@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<!-- meta: {"name":"Moderne","category":"Moderne","preview":"Sidebar gradient · 2 colonnes · optimisé A4 1 page","tags":["a4","compact","optimisé"]} -->
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>{{name}} — CV</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:{{color}};
+  --primary-d:{{color_dark}};
+  --primary-l:{{color_light}};
+  --ink:#0f172a;
+  --ink2:#334155;
+  --ink3:#64748b;
+  --paper:#fff;
+  --line:#e5e8ec;
+}
+body{font-family:'Inter',sans-serif;background:#dde1e8;color:var(--ink);font-size:11.5px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.cv{
+  width:794px;height:1123px;margin:0 auto;background:var(--paper);
+  display:grid;grid-template-columns:38% 62%;
+  box-shadow:0 12px 50px rgba(0,0,0,.12);position:relative;overflow:hidden;
+}
+.cv::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--primary),var(--primary-d));z-index:10}
+
+/* ── SIDEBAR ──────────────────────────────────────────────────────────────── */
+.sidebar{background:linear-gradient(165deg,var(--primary),var(--primary-d));color:#fff;padding:24px 22px;position:relative;overflow:hidden}
+.sidebar::before{content:'';position:absolute;top:-60px;right:-60px;width:180px;height:180px;border-radius:50%;background:rgba(255,255,255,.08)}
+.sidebar::after{content:'';position:absolute;bottom:-40px;left:-60px;width:140px;height:140px;border-radius:50%;background:rgba(0,0,0,.08)}
+.photo-wrap{position:relative;z-index:1;display:flex;justify-content:center;margin-bottom:14px}
+.photo{
+  width:84px;height:84px;border-radius:50%;border:3px solid rgba(255,255,255,.4);
+  overflow:hidden;background:rgba(255,255,255,.15);display:flex;align-items:center;
+  justify-content:center;color:#fff;font-family:'Space Grotesk',sans-serif;
+  font-size:30px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.18)
+}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+
+.s-title{
+  font-family:'Space Grotesk',sans-serif;font-size:9.5px;font-weight:700;
+  letter-spacing:.16em;text-transform:uppercase;margin:14px 0 7px;
+  display:flex;align-items:center;gap:8px;position:relative;z-index:1;
+}
+.s-title::before{content:'';width:14px;height:2px;background:#fff;border-radius:99px;flex-shrink:0}
+.s-title:first-of-type{margin-top:0}
+
+.contact-item{
+  display:flex;align-items:flex-start;gap:7px;margin-bottom:5px;
+  font-size:10px;line-height:1.35;word-break:break-word;position:relative;z-index:1;
+}
+.contact-item .ico{
+  flex-shrink:0;width:18px;height:18px;border-radius:5px;background:rgba(255,255,255,.18);
+  display:inline-flex;align-items:center;justify-content:center;font-size:10px
+}
+
+.skill{margin-bottom:6px;position:relative;z-index:1}
+.skill-row{display:flex;justify-content:space-between;align-items:center;font-size:10px;font-weight:500;margin-bottom:3px}
+.skill-bar{height:3px;background:rgba(255,255,255,.2);border-radius:99px;overflow:hidden}
+.skill-bar-fill{height:100%;background:#fff;border-radius:99px;box-shadow:0 0 6px rgba(255,255,255,.4)}
+
+.lang{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:10px;margin-bottom:4px;padding:3px 8px;background:rgba(255,255,255,.1);
+  border-radius:6px;position:relative;z-index:1;
+}
+.lang-name{font-weight:600}
+.lang-level{font-size:9px;font-weight:600;background:rgba(255,255,255,.18);padding:1px 6px;border-radius:99px;letter-spacing:.04em}
+
+.interest{
+  display:inline-block;background:rgba(255,255,255,.13);padding:2px 8px;border-radius:99px;
+  font-size:9.5px;font-weight:500;margin:0 3px 3px 0;border:1px solid rgba(255,255,255,.18);
+  position:relative;z-index:1;
+}
+
+/* ── MAIN CONTENT ─────────────────────────────────────────────────────────── */
+.content{padding:24px 26px;background:var(--paper);position:relative}
+.header{margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line);position:relative}
+.header::after{content:'';position:absolute;bottom:-1px;left:0;width:48px;height:2px;background:var(--primary);border-radius:99px}
+.name{font-family:'Space Grotesk',sans-serif;font-size:26px;font-weight:700;line-height:1;margin-bottom:3px;letter-spacing:-.02em;color:var(--ink)}
+.title{font-size:11.5px;color:var(--primary);font-weight:600;letter-spacing:.02em}
+.title::before{content:'▸ ';color:var(--primary)}
+.summary{margin-top:8px;font-size:10.5px;color:var(--ink2);line-height:1.5}
+
+.section{margin-top:13px}
+.section-title{
+  font-family:'Space Grotesk',sans-serif;font-size:9.5px;font-weight:700;color:var(--ink);
+  text-transform:uppercase;letter-spacing:.18em;margin-bottom:9px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-title::before{content:'';width:24px;height:2px;background:var(--primary);border-radius:99px;flex-shrink:0}
+.section-title::after{content:'';flex:1;height:1px;background:var(--line)}
+
+/* Experience */
+.exp{position:relative;padding-left:16px;margin-bottom:9px;border-left:2px solid var(--primary-l)}
+.exp:last-child{border-left:2px solid transparent;padding-bottom:0;margin-bottom:0}
+.exp::before{content:'';position:absolute;left:-7px;top:1px;width:12px;height:12px;border-radius:50%;background:var(--primary);border:2px solid var(--paper);box-shadow:0 0 0 1.5px var(--primary)}
+.exp-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:5px;margin-bottom:1px}
+.exp-role{font-family:'Space Grotesk',sans-serif;font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.2}
+.exp-date{font-size:9px;color:var(--primary-d);font-weight:600;background:var(--primary-l);padding:1px 7px;border-radius:99px;letter-spacing:.04em;flex-shrink:0;text-transform:uppercase}
+.exp-co{font-size:10.5px;color:var(--ink2);font-weight:500;margin-bottom:3px;display:flex;align-items:center;gap:6px}
+.exp-co::before{content:'◆';color:var(--primary);font-size:8px}
+.exp-desc{list-style:none;margin-top:2px}
+.exp-desc li{padding-left:13px;position:relative;font-size:10px;color:var(--ink2);line-height:1.4;margin-bottom:1px}
+.exp-desc li::before{content:'';position:absolute;left:0;top:6px;width:6px;height:1.5px;background:var(--primary);border-radius:99px}
+
+/* Education compact */
+.edu-item{padding:5px 9px;background:linear-gradient(135deg,#fff,var(--primary-l));border-radius:6px;margin-bottom:4px;border:1px solid var(--line);position:relative;overflow:hidden}
+.edu-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--primary)}
+.edu-deg{font-family:'Space Grotesk',sans-serif;font-size:10.5px;font-weight:700;color:var(--ink);margin-left:5px;line-height:1.25}
+.edu-school{font-size:9.5px;color:var(--ink2);margin-left:5px;line-height:1.3}
+.edu-date{font-size:9px;color:var(--ink3);margin-left:5px;font-weight:500}
+
+/* Certifications */
+.cert-item{font-size:10px;color:var(--ink2);margin-bottom:3px;padding-left:16px;position:relative;line-height:1.35}
+.cert-item::before{content:'✓';position:absolute;left:0;top:0;width:12px;height:12px;background:var(--primary);color:#fff;border-radius:50%;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+@media print{
+  body{background:#fff}
+  .cv{box-shadow:none;margin:0}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+<div class="cv">
+  <aside class="sidebar">
+    <div class="photo-wrap"><div class="photo">{{{photo_or_initials}}}</div></div>
+
+    <div class="s-title">Contact</div>
+    {{#contact.email}}<div class="contact-item"><span class="ico">✉</span><span>{{contact.email}}</span></div>{{/contact.email}}
+    {{#contact.phone}}<div class="contact-item"><span class="ico">☎</span><span>{{contact.phone}}</span></div>{{/contact.phone}}
+    {{#contact.location}}<div class="contact-item"><span class="ico">⌘</span><span>{{contact.location}}</span></div>{{/contact.location}}
+    {{#contact.linkedin}}<div class="contact-item"><span class="ico">in</span><span>{{contact.linkedin}}</span></div>{{/contact.linkedin}}
+    {{#contact.website}}<div class="contact-item"><span class="ico">🌐</span><span>{{contact.website}}</span></div>{{/contact.website}}
+
+    {{#has_skills}}
+    <div class="s-title">Compétences</div>
+    {{#skills}}
+    <div class="skill">
+      <div class="skill-row"><span>{{name}}</span></div>
+      <div class="skill-bar"><div class="skill-bar-fill" style="width:{{level_pct}}%"></div></div>
+    </div>
+    {{/skills}}
+    {{/has_skills}}
+
+    {{#has_languages}}
+    <div class="s-title">Langues</div>
+    {{#languages}}<div class="lang"><span class="lang-name">{{name}}</span><span class="lang-level">{{level}}</span></div>{{/languages}}
+    {{/has_languages}}
+
+    {{#has_interests}}
+    <div class="s-title">Intérêts</div>
+    <div>{{#interests}}<span class="interest">{{.}}</span>{{/interests}}</div>
+    {{/has_interests}}
+  </aside>
+
+  <main class="content">
+    <header class="header">
+      <h1 class="name">{{name}}</h1>
+      {{#title}}<div class="title">{{title}}</div>{{/title}}
+      {{#summary}}<div class="summary">{{summary}}</div>{{/summary}}
+    </header>
+
+    {{#has_experience}}
+    <section class="section">
+      <div class="section-title">Expérience</div>
+      {{#experience}}
+      <div class="exp">
+        <div class="exp-head">
+          <div class="exp-role">{{role}}</div>
+          <div class="exp-date">{{date}}</div>
+        </div>
+        <div class="exp-co">{{company}}{{#location}} · {{location}}{{/location}}</div>
+        {{#has_bullets}}<ul class="exp-desc">{{#bullets}}<li>{{.}}</li>{{/bullets}}</ul>{{/has_bullets}}
+      </div>
+      {{/experience}}
+    </section>
+    {{/has_experience}}
+
+    {{#has_education}}
+    <section class="section">
+      <div class="section-title">Formation</div>
+      {{#education}}
+      <div class="edu-item">
+        <div class="edu-deg">{{degree}}</div>
+        <div class="edu-school">{{school}}{{#location}} — {{location}}{{/location}}</div>
+        <div class="edu-date">{{date}}</div>
+      </div>
+      {{/education}}
+    </section>
+    {{/has_education}}
+
+    {{#has_certifications}}
+    <section class="section">
+      <div class="section-title">Certifications</div>
+      {{#certifications}}<div class="cert-item">{{name}}{{#date}} <span style="color:var(--ink3);font-size:9.5px">· {{date}}</span>{{/date}}</div>{{/certifications}}
+    </section>
+    {{/has_certifications}}
+  </main>
+</div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
+</body>
+</html>
