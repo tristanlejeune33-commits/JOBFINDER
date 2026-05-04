@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- meta: {"name":"Mesh Creative","category":"Créatif","preview":"Hero gradient pêche/sauge/prune avec serif XXL Fraunces et timeline expérience."} -->
+<!-- meta: {"name": "Mesh Creative", "category": "Créatif", "preview": "Hero gradient pêche/sauge/prune avec serif XXL Fraunces et t · optimisé A4 1 page", "tags": ["a4", "compact", "optimisé"]} -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
@@ -10,16 +10,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#f6f1ea;font-family:'Inter',sans-serif;color:#1a1816;padding:28px;min-height:100vh}
-.cv{max-width:940px;margin:0 auto;background:#fffaf3;box-shadow:0 30px 80px -20px rgba(60,30,10,.18);border-radius:20px;overflow:hidden;position:relative}
+body{background:#f6f1ea;font-family:'Inter',sans-serif;color:#1a1816;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#fffaf3;box-shadow:0 30px 80px -20px rgba(60,30,10,.18);border-radius:20px;overflow:hidden;position:relative}
 
 .cv-mesh{
   --c-ink:#1a1816;--c-muted:#766e62;--c-paper:#fffaf3;
   --c-peach:{{color}};--c-plum:{{color_dark}};--c-sage:#5a7556;
-  font-family:'Inter',sans-serif;color:var(--c-ink);min-height:1200px
+  font-family:'Inter',sans-serif;color:var(--c-ink);min-height:1123px
 }
 
-.mesh-hero{position:relative;padding:48px 48px 40px;background:
+.mesh-hero{position:relative;padding:22px 26px 40px;background:
   radial-gradient(900px 500px at 0% 0%, #ffd6c0 0%, transparent 55%),
   radial-gradient(800px 600px at 100% 0%, #c5d6c0 0%, transparent 55%),
   radial-gradient(1000px 700px at 50% 100%, #f8d8a8 0%, transparent 60%),
@@ -31,14 +31,14 @@ body{background:#f6f1ea;font-family:'Inter',sans-serif;color:#1a1816;padding:28p
 
 .mesh-id .label{font-family:'Space Mono',monospace;font-size:11px;color:var(--c-plum);text-transform:uppercase;letter-spacing:.32em;margin-bottom:14px}
 .mesh-id .label::before{content:"●  ";color:var(--c-peach)}
-.mesh-id h1{font-family:'Fraunces',serif;font-size:68px;font-weight:600;line-height:.88;letter-spacing:-.035em}
+.mesh-id h1{font-family:'Fraunces',serif;font-size:30px;font-weight:600;line-height:.88;letter-spacing:-.035em}
 .mesh-id .role{font-family:'Fraunces',serif;font-style:italic;font-weight:400;color:var(--c-plum);font-size:24px;margin-top:6px;letter-spacing:-.01em}
 .mesh-id .accroche{font-size:14.5px;color:#3a3530;margin-top:14px;font-weight:500;max-width:380px;line-height:1.55}
 .mesh-id .meta{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;font-size:12.5px;color:#3a3530}
 .mesh-id .meta span{display:inline-flex;align-items:center;gap:4px}
 .mesh-id .meta b{font-family:'Space Mono',monospace;color:var(--c-plum);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase}
 
-.mesh-body{padding:38px 48px}
+.mesh-body{padding:22px 26px}
 
 .mesh h2{font-family:'Fraunces',serif;font-size:13px;text-transform:uppercase;letter-spacing:.32em;color:var(--c-plum);margin:30px 0 16px;font-weight:600;display:flex;align-items:center;gap:14px}
 .mesh h2:first-child{margin-top:0}
@@ -73,7 +73,7 @@ body{background:#f6f1ea;font-family:'Inter',sans-serif;color:#1a1816;padding:28p
 .mesh-int{padding:18px 22px;background:linear-gradient(135deg,{{color_dark}},#492338);color:#fffaf3;border-radius:14px;font-family:'Fraunces',serif;font-style:italic;font-size:16px;line-height:1.6}
 .mesh-int span{display:inline-block;background:rgba(255,250,243,.15);border:1px solid rgba(255,250,243,.2);color:#fffaf3;padding:4px 11px;border-radius:99px;font-size:12.5px;font-weight:500;font-style:normal;font-family:'Inter',sans-serif;margin:3px 4px 3px 0}
 
-@media (max-width:760px){body{padding:0}.cv{border-radius:0}.mesh-hero{padding:30px 22px}.mesh-h-grid{grid-template-columns:1fr;gap:18px}.mesh-photo{width:130px;height:160px}.mesh-id h1{font-size:56px}.mesh-body{padding:24px 22px}.mesh-skill-grid{grid-template-columns:1fr}}
+@media (max-width:760px){body{padding:0}.cv{border-radius:0}.mesh-hero{padding:30px 22px}.mesh-h-grid{grid-template-columns:1fr;gap:18px}.mesh-photo{width:130px;height:160px}.mesh-id h1{font-size:28px}.mesh-body{padding:24px 22px}.mesh-skill-grid{grid-template-columns:1fr}}
 @media print{body{background:#fff;padding:0}.cv{max-width:none;box-shadow:none;border-radius:0}@page{size:A4;margin:0}}
 </style>
 </head>
@@ -154,5 +154,48 @@ body{background:#f6f1ea;font-family:'Inter',sans-serif;color:#1a1816;padding:28p
 </div>
 
 </div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
 </body>
 </html>

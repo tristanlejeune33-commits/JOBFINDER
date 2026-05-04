@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- meta: {"name":"Tech","category":"Tech","preview":"Terminal dark · monospace · optimisé A4 1 page","tags":["a4","compact","optimisé","tech","dark"]} -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -20,93 +21,95 @@
   --green:#3fb950;
   --yellow:#d29922;
 }
-body{font-family:'Inter',sans-serif;background:#0a0c10;color:var(--ink);font-size:13px;line-height:1.55;-webkit-font-smoothing:antialiased}
-.cv{max-width:794px;min-height:1123px;margin:0 auto;background:var(--bg);box-shadow:0 16px 60px rgba(0,0,0,.4);position:relative;overflow:hidden}
+body{font-family:'Inter',sans-serif;background:#0a0c10;color:var(--ink);font-size:11.5px;line-height:1.45;-webkit-font-smoothing:antialiased}
+.cv{
+  width:794px;height:1123px;margin:0 auto;background:var(--bg);
+  box-shadow:0 14px 50px rgba(0,0,0,.4);position:relative;overflow:hidden;
+}
 
 /* ── BARRE OS-LIKE ──────────────────────────────────────────────────────── */
-.titlebar{height:32px;background:var(--bg-2);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 14px;gap:8px}
-.titlebar .dots{display:flex;gap:6px}
-.titlebar .dots span{width:11px;height:11px;border-radius:50%}
+.titlebar{height:24px;background:var(--bg-2);border-bottom:1px solid var(--line);display:flex;align-items:center;padding:0 12px;gap:6px}
+.titlebar .dots{display:flex;gap:5px}
+.titlebar .dots span{width:9px;height:9px;border-radius:50%}
 .titlebar .dots .r{background:#ff5f56}
 .titlebar .dots .y{background:#ffbd2e}
 .titlebar .dots .g{background:#27c93f}
-.titlebar .filename{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3);margin:0 auto;letter-spacing:.02em}
+.titlebar .filename{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink3);margin:0 auto;letter-spacing:.02em}
 
 /* ── HEADER TERMINAL ─────────────────────────────────────────────────────── */
-.hero{padding:36px 38px 28px;background:var(--bg);border-bottom:1px solid var(--line);position:relative}
+.hero{padding:18px 26px 16px;background:var(--bg);border-bottom:1px solid var(--line);position:relative}
 .hero::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--primary),transparent)}
-.hero-grid{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:center}
-.prompt{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--green);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.hero-grid{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:center}
+.prompt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);margin-bottom:5px;display:flex;align-items:center;gap:6px}
 .prompt::before{content:'$';color:var(--ink3)}
 .prompt .cmd{color:var(--ink);font-weight:500}
 .prompt .arg{color:var(--primary)}
 
-.name{font-family:'Inter',sans-serif;font-size:38px;font-weight:800;line-height:1.05;letter-spacing:-.02em;color:var(--ink);margin-bottom:6px}
-.name::before{content:'> ';color:var(--primary);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:30px}
-.title{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--primary);margin-bottom:14px;letter-spacing:.02em}
+.name{font-family:'Inter',sans-serif;font-size:26px;font-weight:800;line-height:1.05;letter-spacing:-.02em;color:var(--ink);margin-bottom:3px}
+.name::before{content:'> ';color:var(--primary);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:22px}
+.title{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--primary);margin-bottom:8px;letter-spacing:.02em}
 .title::before{content:'@role: ';color:var(--ink3);font-weight:300}
-.contact-grid{display:flex;flex-wrap:wrap;gap:14px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink2);font-weight:400}
-.contact-grid span{display:flex;align-items:center;gap:6px;padding:4px 10px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px}
+.contact-grid{display:flex;flex-wrap:wrap;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink2);font-weight:400}
+.contact-grid span{display:flex;align-items:center;gap:4px;padding:2px 7px;background:var(--bg-2);border:1px solid var(--line);border-radius:3px}
 .contact-grid span .k{color:var(--ink3)}
 .contact-grid span .v{color:var(--primary)}
 
-.photo{width:120px;height:120px;border-radius:8px;border:2px solid var(--primary);overflow:hidden;background:var(--bg-2);display:flex;align-items:center;justify-content:center;color:var(--primary);font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:700;box-shadow:0 0 0 4px var(--bg),0 0 24px rgba(0,0,0,.5),inset 0 0 0 1px var(--line)}
+.photo{width:80px;height:80px;border-radius:6px;border:2px solid var(--primary);overflow:hidden;background:var(--bg-2);display:flex;align-items:center;justify-content:center;color:var(--primary);font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;box-shadow:0 0 0 3px var(--bg),0 0 18px rgba(0,0,0,.5),inset 0 0 0 1px var(--line)}
 .photo img{width:100%;height:100%;object-fit:cover;display:block}
 
 /* ── BODY ─────────────────────────────────────────────────────────────────── */
-.body-cv{padding:32px 38px 36px}
+.body-cv{padding:16px 26px 18px}
 
 /* ── SUMMARY — code block ────────────────────────────────────────────────── */
-.summary{background:var(--bg-2);border:1px solid var(--line);border-radius:8px;padding:18px 22px;margin-bottom:30px;position:relative;overflow:hidden}
-.summary::before{content:'README.md';position:absolute;top:0;right:0;padding:3px 10px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink3);background:var(--bg-3);border-bottom:1px solid var(--line);border-left:1px solid var(--line);border-bottom-left-radius:6px}
-.summary p{font-size:13px;line-height:1.7;color:var(--ink2);margin-top:14px}
+.summary{background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:10px 14px;margin-bottom:14px;position:relative;overflow:hidden}
+.summary::before{content:'README.md';position:absolute;top:0;right:0;padding:2px 8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--ink3);background:var(--bg-3);border-bottom:1px solid var(--line);border-left:1px solid var(--line);border-bottom-left-radius:4px}
+.summary p{font-size:10.5px;line-height:1.55;color:var(--ink2);margin-top:8px}
 
 /* ── SECTIONS ─────────────────────────────────────────────────────────── */
-.section{margin-bottom:30px}
-.section-title{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--ink);margin-bottom:18px;display:flex;align-items:center;gap:10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
-.section-title::before{content:'#';color:var(--primary);font-size:18px;font-weight:700}
-.section-title .count{margin-left:auto;font-size:10px;color:var(--ink3);background:var(--bg-2);padding:2px 8px;border-radius:99px;border:1px solid var(--line);font-weight:500}
+.section{margin-bottom:14px}
+.section-title{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--ink);margin-bottom:8px;display:flex;align-items:center;gap:8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+.section-title::before{content:'#';color:var(--primary);font-size:14px;font-weight:700}
 
 /* ── EXPERIENCE — git log style ─────────────────────────────────────────── */
-.exp{background:var(--bg-2);border:1px solid var(--line);border-radius:6px;padding:16px 20px;margin-bottom:12px;position:relative;transition:.2s}
-.exp::before{content:'';position:absolute;top:0;bottom:0;left:0;width:3px;background:var(--primary);border-radius:6px 0 0 6px}
-.exp-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:6px}
-.exp-role{font-size:15px;font-weight:700;color:var(--ink)}
-.exp-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink3);background:var(--bg-3);padding:3px 9px;border-radius:4px;border:1px solid var(--line);font-weight:500}
-.exp-co{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--primary);font-weight:500;margin-bottom:8px}
+.exp{background:var(--bg-2);border:1px solid var(--line);border-radius:5px;padding:8px 12px;margin-bottom:6px;position:relative}
+.exp::before{content:'';position:absolute;top:0;bottom:0;left:0;width:2.5px;background:var(--primary);border-radius:5px 0 0 5px}
+.exp-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;margin-bottom:2px}
+.exp-role{font-size:11.5px;font-weight:700;color:var(--ink);line-height:1.2}
+.exp-date{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3);background:var(--bg-3);padding:2px 7px;border-radius:3px;border:1px solid var(--line);font-weight:500}
+.exp-co{font-family:'JetBrains Mono',monospace;font-size:9.8px;color:var(--primary);font-weight:500;margin-bottom:3px}
 .exp-co::before{content:'@'}
-.exp-desc{list-style:none;margin-top:8px}
-.exp-desc li{padding-left:20px;position:relative;font-size:12.5px;color:var(--ink2);line-height:1.6;margin-bottom:4px}
-.exp-desc li::before{content:'+';position:absolute;left:0;color:var(--green);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:13px}
+.exp-desc{list-style:none;margin-top:3px}
+.exp-desc li{padding-left:14px;position:relative;font-size:9.8px;color:var(--ink2);line-height:1.45;margin-bottom:1px}
+.exp-desc li::before{content:'+';position:absolute;left:0;color:var(--green);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:10px}
 
 /* ── 2 cols ──────────────────────────────────────────────────────────────── */
-.split{display:grid;grid-template-columns:1.2fr 1fr;gap:24px}
+.split{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;margin-bottom:14px}
+.split .section{margin-bottom:0}
 
 /* ── EDUCATION ─────────────────────────────────────────────────────────────── */
-.edu-item{padding:12px 14px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;margin-bottom:8px;border-left:3px solid var(--primary)}
-.edu-deg{font-size:13px;font-weight:600;color:var(--ink)}
-.edu-school{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--ink2);margin-top:1px}
-.edu-date{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--ink3);margin-top:3px;letter-spacing:.05em}
+.edu-item{padding:6px 10px;background:var(--bg-2);border:1px solid var(--line);border-radius:5px;margin-bottom:5px;border-left:2.5px solid var(--primary)}
+.edu-deg{font-size:10.5px;font-weight:600;color:var(--ink);line-height:1.2}
+.edu-school{font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink2);margin-top:1px}
+.edu-date{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--ink3);margin-top:1px;letter-spacing:.05em}
 
 /* ── SKILLS — terminal tags ──────────────────────────────────────────────── */
-.skills-grid{display:flex;flex-wrap:wrap;gap:5px}
-.skill-tag{font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--bg-2);color:var(--primary);padding:5px 10px;border-radius:4px;border:1px solid var(--line);font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.skills-grid{display:flex;flex-wrap:wrap;gap:4px}
+.skill-tag{font-family:'JetBrains Mono',monospace;font-size:9.5px;background:var(--bg-2);color:var(--primary);padding:3px 8px;border-radius:3px;border:1px solid var(--line);font-weight:500;display:inline-flex;align-items:center;gap:5px}
 .skill-tag::before{content:'>';color:var(--green);font-weight:700}
-.skill-tag .lvl{color:var(--ink3);font-size:10px}
 
 /* ── LANGUAGES ─────────────────────────────────────────────────────────── */
-.lang-row{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--bg-2);border:1px solid var(--line);border-radius:6px;margin-bottom:5px}
-.lang-name{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--ink);font-weight:500}
-.lang-level{font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--primary);background:rgba(0,0,0,.2);padding:2px 8px;border-radius:4px;font-weight:500}
+.lang-row{display:flex;justify-content:space-between;align-items:center;padding:4px 9px;background:var(--bg-2);border:1px solid var(--line);border-radius:5px;margin-bottom:4px}
+.lang-name{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink);font-weight:500}
+.lang-level{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--primary);background:rgba(0,0,0,.2);padding:1px 6px;border-radius:3px;font-weight:500}
 
 /* ── CERTIFICATIONS ─────────────────────────────────────────────────────── */
-.cert-list{display:flex;flex-wrap:wrap;gap:6px}
-.cert-item{padding:5px 11px;background:var(--bg-2);border:1px solid var(--line);border-radius:4px;font-size:11.5px;color:var(--ink2);font-weight:500;display:inline-flex;align-items:center;gap:6px}
+.cert-list{display:flex;flex-wrap:wrap;gap:5px}
+.cert-item{padding:3px 9px;background:var(--bg-2);border:1px solid var(--line);border-radius:3px;font-size:10px;color:var(--ink2);font-weight:500;display:inline-flex;align-items:center;gap:5px}
 .cert-item::before{content:'✓';color:var(--green);font-weight:700}
-.cert-item small{color:var(--ink3);font-family:'JetBrains Mono',monospace;font-size:10px}
+.cert-item small{color:var(--ink3);font-family:'JetBrains Mono',monospace;font-size:9px}
 
 /* ── INTERESTS ──────────────────────────────────────────────────────────── */
-.interest{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink2);margin-right:14px;margin-bottom:4px}
+.interest{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--ink2);margin-right:10px;margin-bottom:3px}
 .interest::before{content:'#';color:var(--primary);font-weight:700;margin-right:1px}
 
 @media print{
@@ -162,7 +165,7 @@ body{font-family:'Inter',sans-serif;background:#0a0c10;color:var(--ink);font-siz
     <div class="split">
       <div>
         {{#has_education}}
-        <section class="section" style="margin-bottom:0">
+        <section class="section">
           <div class="section-title">education</div>
           {{#education}}
           <div class="edu-item">
@@ -176,7 +179,7 @@ body{font-family:'Inter',sans-serif;background:#0a0c10;color:var(--ink);font-siz
       </div>
       <div>
         {{#has_languages}}
-        <section class="section" style="margin-bottom:0">
+        <section class="section">
           <div class="section-title">languages</div>
           {{#languages}}<div class="lang-row"><span class="lang-name">{{name}}</span><span class="lang-level">{{level}}</span></div>{{/languages}}
         </section>
@@ -185,7 +188,7 @@ body{font-family:'Inter',sans-serif;background:#0a0c10;color:var(--ink);font-siz
     </div>
 
     {{#has_skills}}
-    <section class="section" style="margin-top:30px">
+    <section class="section">
       <div class="section-title">skills</div>
       <div class="skills-grid">
         {{#skills}}<span class="skill-tag">{{name}}</span>{{/skills}}
@@ -203,12 +206,55 @@ body{font-family:'Inter',sans-serif;background:#0a0c10;color:var(--ink);font-siz
     {{/has_certifications}}
 
     {{#has_interests}}
-    <section class="section">
+    <section class="section" style="margin-bottom:0">
       <div class="section-title">interests</div>
       {{#interests}}<span class="interest">{{.}}</span>{{/interests}}
     </section>
     {{/has_interests}}
   </div>
 </div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
 </body>
 </html>

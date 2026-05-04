@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- meta: {"name":"Marketing Pro","category":"Business","preview":"Hero bleu nuit dégradé avec accents dorés et accroche italique Lora, look agence."} -->
+<!-- meta: {"name": "Marketing Pro", "category": "Business", "preview": "Hero bleu nuit dégradé avec accents dorés et accroche italiq · optimisé A4 1 page", "tags": ["a4", "compact", "optimisé"]} -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
@@ -10,16 +10,16 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lora:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#e9ecf2;font-family:'Inter',sans-serif;padding:24px;min-height:100vh}
-.cv{max-width:900px;margin:0 auto;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
+body{background:#e9ecf2;font-family:'Inter',sans-serif;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
 
 .cv-mkt{
   --c-navy:{{color}};--c-gold:{{color_dark}};--c-ink:#0f172a;--c-muted:#64748b;--c-soft:{{color_light}};
-  font-family:'Inter',sans-serif;color:var(--c-ink);min-height:1180px
+  font-family:'Inter',sans-serif;color:var(--c-ink);min-height:1123px
 }
 
-.cv-mkt .hero{background:linear-gradient(135deg,{{color}} 0%,{{color_dark}} 100%);color:#fff;padding:38px 44px;display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center}
-.cv-mkt .hero h1{font-size:34px;font-weight:800;letter-spacing:-.02em}
+.cv-mkt .hero{background:linear-gradient(135deg,{{color}} 0%,{{color_dark}} 100%);color:#fff;padding:22px 26px;display:grid;grid-template-columns:1fr auto;gap:30px;align-items:center}
+.cv-mkt .hero h1{font-size:24px;font-weight:800;letter-spacing:-.02em}
 .cv-mkt .hero .role{font-family:'Lora',serif;font-style:italic;color:#fde68a;font-size:15px;margin-top:6px}
 .cv-mkt .hero .contact{margin-top:14px;font-size:12.5px;color:#bfdbfe}
 .cv-mkt .hero .contact span{margin-right:14px}
@@ -30,7 +30,7 @@ body{background:#e9ecf2;font-family:'Inter',sans-serif;padding:24px;min-height:1
 .cv-mkt .accroche::before{content:"\201C ";color:var(--c-gold);font-weight:700}
 .cv-mkt .accroche::after{content:" \201D";color:var(--c-gold);font-weight:700}
 
-.cv-mkt .body{padding:32px 44px}
+.cv-mkt .body{padding:22px 26px}
 .cv-mkt h2{font-size:13px;text-transform:uppercase;letter-spacing:.14em;color:var(--c-navy);margin:24px 0 14px;font-weight:700;border-bottom:2px solid var(--c-gold);padding-bottom:5px;display:inline-block}
 .cv-mkt h2:first-of-type{margin-top:0}
 
@@ -55,7 +55,7 @@ body{background:#e9ecf2;font-family:'Inter',sans-serif;padding:24px;min-height:1
 .cv-mkt .lang-line:last-child{border:none}
 .cv-mkt .lang-line em{font-style:normal;color:var(--c-gold);font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
 
-.cv-mkt .interest{font-family:'Lora',serif;font-style:italic;font-size:14.5px;line-height:1.7;color:#475569;padding:14px 16px;background:#fffbeb;border-radius:6px;border-left:4px solid var(--c-gold)}
+.cv-mkt .interest{font-family:'Lora',serif;font-style:italic;font-size:14.5px;line-height:1.5;color:#475569;padding:14px 16px;background:#fffbeb;border-radius:6px;border-left:4px solid var(--c-gold)}
 .cv-mkt .interest span:not(:last-child)::after{content:" · "}
 
 @media (max-width:720px){body{padding:0}.cv{border-radius:0;box-shadow:none}.cv-mkt .hero{grid-template-columns:1fr;padding:28px 22px;text-align:center}.cv-mkt .hero .portrait{margin:0 auto}.cv-mkt .accroche,.cv-mkt .body{padding-left:22px;padding-right:22px}.cv-mkt .comp-grid{grid-template-columns:1fr}}
@@ -136,5 +136,48 @@ body{background:#e9ecf2;font-family:'Inter',sans-serif;padding:24px;min-height:1
 </div>
 
 </div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- meta: {"name":"Pastel Premium","category":"Premium","preview":"Pastels sauge/pêche/lavande, photo ronde flottante, typographie Instrument Serif éditoriale."} -->
+<!-- meta: {"name": "Pastel Premium", "category": "Premium", "preview": "Pastels sauge/pêche/lavande, photo ronde flottante, typograp · optimisé A4 1 page", "tags": ["a4", "compact", "optimisé"]} -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
@@ -10,17 +10,17 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#f5f1ec;font-family:'Inter',sans-serif;color:#22201d;padding:28px;min-height:100vh}
-.cv{max-width:940px;margin:0 auto;background:#fbf8f4;box-shadow:0 30px 80px -20px rgba(40,30,15,.15);border-radius:32px;overflow:hidden;position:relative}
+body{background:#f5f1ec;font-family:'Inter',sans-serif;color:#22201d;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#fbf8f4;box-shadow:0 30px 80px -20px rgba(40,30,15,.15);border-radius:32px;overflow:hidden;position:relative}
 
 .cv-pp{
   --c-ink:#22201d;--c-paper:#fbf8f4;--c-muted:#7a7466;
   --c-sage:#a8bba4;--c-sage-d:{{color}};--c-peach:#f4c0a8;--c-peach-d:{{color_dark}};
   --c-lav:#c5b9d6;--c-lav-d:#7a6a92;
-  font-family:'Inter',sans-serif;color:var(--c-ink);min-height:1200px
+  font-family:'Inter',sans-serif;color:var(--c-ink);min-height:1123px
 }
 
-.pp-hero{padding:42px 44px 32px;display:grid;grid-template-columns:auto 1fr;gap:30px;align-items:center;position:relative}
+.pp-hero{padding:22px 26px 32px;display:grid;grid-template-columns:auto 1fr;gap:30px;align-items:center;position:relative}
 .pp-hero::before{content:"";position:absolute;top:30px;right:50px;width:160px;height:160px;background:#f4c0a8;border-radius:50%;filter:blur(50px);opacity:.5;z-index:0}
 .pp-hero::after{content:"";position:absolute;bottom:-60px;left:200px;width:200px;height:200px;background:#a8bba4;border-radius:50%;filter:blur(60px);opacity:.45;z-index:0}
 .pp-hero>*{position:relative;z-index:2}
@@ -29,7 +29,7 @@ body{background:#f5f1ec;font-family:'Inter',sans-serif;color:#22201d;padding:28p
 .pp-photo img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
 
 .pp-id .av{display:inline-flex;align-items:center;gap:8px;background:rgba(168,187,164,.25);color:var(--c-sage-d);padding:6px 14px;border-radius:99px;font-size:12px;font-weight:600}
-.pp-id h1{font-family:'Instrument Serif',serif;font-size:62px;line-height:1;font-weight:400;margin:14px 0 4px;letter-spacing:-.02em}
+.pp-id h1{font-family:'Instrument Serif',serif;font-size:30px;line-height:1;font-weight:400;margin:14px 0 4px;letter-spacing:-.02em}
 .pp-id .role{color:var(--c-peach-d);font-weight:600;font-size:14px;margin-top:4px}
 .pp-id .accroche{font-size:15.5px;color:#3a3530;font-weight:500;max-width:440px;line-height:1.55;margin-top:6px}
 .pp-id .meta{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
@@ -45,7 +45,7 @@ body{background:#f5f1ec;font-family:'Inter',sans-serif;color:#22201d;padding:28p
 .pp-xp h3{font-family:'Instrument Serif',serif;font-size:22px;font-weight:400;letter-spacing:-.01em}
 .pp-xp .when{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--c-muted);background:rgba(244,192,168,.3);padding:4px 9px;border-radius:99px;white-space:nowrap;font-weight:500}
 .pp-xp .co{color:var(--c-peach-d);font-weight:600;font-size:13px;margin:2px 0 8px}
-.pp-xp ul{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.7;color:#4a4540}
+.pp-xp ul{margin:6px 0 0;padding-left:18px;font-size:13.5px;line-height:1.5;color:#4a4540}
 .pp-xp ul li{margin-bottom:4px}
 .pp-xp ul li::marker{color:var(--c-sage-d)}
 
@@ -146,5 +146,48 @@ body{background:#f5f1ec;font-family:'Inter',sans-serif;color:#22201d;padding:28p
 </div>
 
 </div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
 </body>
 </html>

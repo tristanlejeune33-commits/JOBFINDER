@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- meta: {"name":"Open Source Dark","category":"Tech","preview":"Mode dark style GitHub, panneaux gris carbone, accent bleu et vert lime."} -->
+<!-- meta: {"name": "Open Source Dark", "category": "Tech", "preview": "Mode dark style GitHub, panneaux gris carbone, accent bleu e · optimisé A4 1 page", "tags": ["a4", "compact", "optimisé"]} -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
@@ -10,18 +10,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#010409;font-family:'Inter',sans-serif;padding:24px;min-height:100vh}
-.cv{max-width:900px;margin:0 auto;background:#0d1117;box-shadow:0 10px 30px rgba(0,0,0,.5);border-radius:8px;overflow:hidden;border:1px solid #21262d}
+body{background:#010409;font-family:'Inter',sans-serif;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#0d1117;box-shadow:0 10px 30px rgba(0,0,0,.5);border-radius:8px;overflow:hidden;border:1px solid #21262d}
 
 .cv-osd{
   --c-bg:#0d1117;--c-panel:#161b22;--c-text:#c9d1d9;--c-muted:#8b949e;
   --c-accent:{{color}};--c-green:{{color_dark}};--c-border:#30363d;
   font-family:'Inter',sans-serif;color:var(--c-text);background:var(--c-bg);
-  display:grid;grid-template-columns:62% 38%;min-height:1180px
+  display:grid;grid-template-columns:62% 38%;min-height:1123px
 }
 
-.cv-osd main{padding:42px 36px;border-right:1px solid var(--c-border)}
-.cv-osd main .accroche{font-size:13.5px;line-height:1.7;color:var(--c-text);border-left:3px solid var(--c-green);padding:6px 0 6px 14px;margin-bottom:24px;font-weight:500}
+.cv-osd main{padding:22px 26px;border-right:1px solid var(--c-border)}
+.cv-osd main .accroche{font-size:13.5px;line-height:1.5;color:var(--c-text);border-left:3px solid var(--c-green);padding:6px 0 6px 14px;margin-bottom:24px;font-weight:500}
 .cv-osd h2{font-size:13px;font-weight:600;color:#fff;text-transform:uppercase;letter-spacing:.1em;margin:24px 0 14px;display:flex;align-items:center;gap:8px}
 .cv-osd h2::before{content:"";width:4px;height:14px;background:var(--c-green);border-radius:2px}
 .cv-osd h2:first-of-type{margin-top:0}
@@ -41,16 +41,16 @@ body{background:#010409;font-family:'Inter',sans-serif;padding:24px;min-height:1
 
 .cv-osd .comp-pill{display:inline-block;background:rgba(88,166,255,.1);border:1px solid rgba(88,166,255,.3);color:var(--c-accent);padding:4px 10px;border-radius:4px;font-size:11px;font-family:'JetBrains Mono',monospace;margin:0 4px 5px 0}
 
-.cv-osd .interest{padding:14px 16px;background:var(--c-panel);border:1px solid var(--c-border);border-radius:8px;font-size:12.5px;color:var(--c-text);line-height:1.7}
+.cv-osd .interest{padding:14px 16px;background:var(--c-panel);border:1px solid var(--c-border);border-radius:8px;font-size:12.5px;color:var(--c-text);line-height:1.5}
 .cv-osd .interest span{display:inline-block;background:rgba(63,185,80,.08);border:1px solid rgba(63,185,80,.25);color:var(--c-green);padding:3px 9px;border-radius:4px;font-size:11.5px;font-family:'JetBrains Mono',monospace;margin:3px 4px 3px 0}
 
-.cv-osd aside{padding:42px 30px}
-.cv-osd aside .portrait{width:120px;height:120px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:2px solid var(--c-border);background:#1f2937;color:var(--c-accent);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:32px;overflow:hidden}
+.cv-osd aside{padding:22px 26px}
+.cv-osd aside .portrait{width:84px;height:84px;border-radius:50%;object-fit:cover;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;border:2px solid var(--c-border);background:#1f2937;color:var(--c-accent);font-family:'JetBrains Mono',monospace;font-weight:700;font-size:32px;overflow:hidden}
 .cv-osd aside .portrait img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
-.cv-osd aside h1{text-align:center;font-size:22px;color:#fff;font-weight:700}
+.cv-osd aside h1{text-align:center;font-size:22.0px;color:#fff;font-weight:700}
 .cv-osd aside .role{text-align:center;color:var(--c-accent);font-size:12.5px;margin-top:8px;font-weight:500}
 .cv-osd aside h3{font-size:11px;text-transform:uppercase;letter-spacing:.12em;color:var(--c-muted);margin:24px 0 10px;font-weight:600}
-.cv-osd aside ul{list-style:none;font-size:12.5px;line-height:1.85}
+.cv-osd aside ul{list-style:none;font-size:12.5px;line-height:1.5}
 .cv-osd aside ul li{display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--c-border);gap:6px}
 .cv-osd aside ul li:last-child{border:none}
 .cv-osd aside ul li span:last-child{color:var(--c-green);font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right}
@@ -131,5 +131,48 @@ body{background:#010409;font-family:'Inter',sans-serif;padding:24px;min-height:1
 </aside>
 
 </div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
 </body>
 </html>

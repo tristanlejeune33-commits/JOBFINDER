@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- meta: {"name":"Sustainability Eco","category":"Moderne","preview":"Palette kraft + sage + cream, motif pointillé organique, typo Lora pour vibe RSE.","tags":["eco","sustainability","green","organic"]} -->
+<!-- meta: {"name": "Sustainability Eco", "category": "Moderne", "preview": "Palette kraft + sage + cream, motif pointillé organique, typ · optimisé A4 1 page", "tags": ["eco", "sustainability", "green", "organic", "a4", "compact", "optimisé"]} -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
@@ -10,21 +10,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#e7e1d3;font-family:'Inter',sans-serif;color:#3a3528;padding:28px;min-height:100vh}
-.cv{max-width:920px;margin:0 auto;background:#f6f1e3;box-shadow:0 18px 50px -16px rgba(60,50,20,.18);overflow:hidden;border-radius:14px}
+body{background:#e7e1d3;font-family:'Inter',sans-serif;color:#3a3528;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#f6f1e3;box-shadow:0 18px 50px -16px rgba(60,50,20,.18);overflow:hidden;border-radius:14px}
 
 .cv-se{
   --c-ink:#3a3528;--c-paper:#f6f1e3;--c-muted:#7a6f5c;--c-line:#dccfae;
   --c-sage:{{color}};--c-sage-d:{{color_dark}};--c-kraft:#a07b4a;--c-cream:#fdf9ed;--c-soft:#ede5cf;
-  font-family:'Inter',sans-serif;color:var(--c-ink);background:var(--c-paper);min-height:1200px;padding:42px 48px;background-image:radial-gradient(circle at 1px 1px,rgba(120,105,70,.12) 1px,transparent 0);background-size:24px 24px
+  font-family:'Inter',sans-serif;color:var(--c-ink);background:var(--c-paper);min-height:1123px;padding:22px 26px;background-image:radial-gradient(circle at 1px 1px,rgba(120,105,70,.12) 1px,transparent 0);background-size:24px 24px
 }
 
 .se-hero{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:center;background:var(--c-cream);padding:28px;border-radius:16px;border:1px solid var(--c-line);margin-bottom:18px}
-.se-photo{width:130px;height:130px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--c-soft);color:var(--c-sage-d);font-family:'Lora',serif;font-weight:600;font-size:42px;border:5px solid var(--c-paper);box-shadow:0 0 0 1px var(--c-sage);overflow:hidden}
+.se-photo{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--c-soft);color:var(--c-sage-d);font-family:'Lora',serif;font-weight:600;font-size:42px;border:5px solid var(--c-paper);box-shadow:0 0 0 1px var(--c-sage);overflow:hidden}
 .se-photo img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 .se-id .tag{display:inline-flex;align-items:center;gap:6px;background:var(--c-sage);color:#fff;padding:5px 13px;border-radius:99px;font-size:11.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase}
 .se-id .tag::before{content:"🌱"}
-.se-id h1{font-family:'Lora',serif;font-size:38px;font-weight:600;letter-spacing:-.01em;margin:10px 0 4px;line-height:1.05}
+.se-id h1{font-family:'Lora',serif;font-size:24px;font-weight:600;letter-spacing:-.01em;margin:10px 0 4px;line-height:1.05}
 .se-id .role{font-family:'Lora',serif;font-style:italic;color:var(--c-sage-d);font-size:15.5px;font-weight:500}
 .se-id .meta{margin-top:12px;display:flex;flex-wrap:wrap;gap:14px;font-size:12.5px;color:var(--c-muted)}
 .se-id .meta b{color:var(--c-ink);font-weight:600;margin-right:4px}
@@ -142,5 +142,48 @@ body{background:#e7e1d3;font-family:'Inter',sans-serif;color:#3a3528;padding:28p
 {{/has_interests}}
 
 </div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
 </body>
 </html>

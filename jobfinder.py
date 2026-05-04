@@ -2178,38 +2178,47 @@ def _html_to_pdf_response(html_content, name, one_page=False):
                     pass
                 page.wait_for_timeout(800)
 
-                # ── Mesure et zoom LÉGER si presque-fit, sinon laisse 2 pages ─
-                # Philosophie : préserver le design des templates. On applique
-                # un zoom UNIQUEMENT s'il reste léger (≥ 0.88, presque invisible
-                # à l'œil), sinon on accepte 2 pages pour rester lisible.
+                # ── Auto-fit JS embedded dans les templates ───────────────────
+                # Les templates v2 contiennent un script qui applique CSS zoom
+                # sur .cv pour faire tenir le contenu sur 1 page A4. On laisse
+                # ce script s'exécuter (déjà fait via wait_for_timeout(800) +
+                # fonts.ready ci-dessus) puis on vérifie qu'il a bien réussi.
                 A4_H = 1123
-                content_h = page.evaluate("""() => {
-                    const root = document.querySelector('.cv') || document.body;
-                    return Math.max(
-                        root.scrollHeight, root.offsetHeight,
-                        document.body.scrollHeight,
-                        document.documentElement.scrollHeight
-                    );
+                # Délai supplémentaire pour l'auto-fit JS (mesure + zoom CSS)
+                page.wait_for_timeout(250)
+                autofit_info = page.evaluate("""() => {
+                    const cv = document.querySelector('.cv');
+                    if (!cv) return {applied:false, h:0};
+                    const applied = cv.classList.contains('autofit-applied');
+                    const z = parseFloat(cv.dataset.autofitZoom || '1');
+                    return {
+                        applied: applied,
+                        zoom: z,
+                        h: Math.max(cv.scrollHeight, document.body.scrollHeight),
+                    };
                 }""")
-                zoom = 1.0
                 pages_target = 1
-                if content_h and content_h > A4_H:
-                    overflow_ratio = content_h / A4_H
-                    if one_page:
-                        # Mode "1 page forcée" : zoom plus fort (floor 0.62)
-                        zoom = max(0.62, A4_H / content_h * 0.99)
-                        page.add_style_tag(content=f"html {{ zoom: {zoom}; }}")
-                        page.wait_for_timeout(150)
-                        log.info(f"pdf 1-page-forced: content_h={content_h}px zoom={zoom:.3f}")
-                    elif overflow_ratio <= 1.28:
-                        # Mode design : zoom léger (floor 0.78), design préservé
-                        zoom = max(0.78, A4_H / content_h * 0.99)
-                        page.add_style_tag(content=f"html {{ zoom: {zoom}; }}")
-                        page.wait_for_timeout(150)
-                        log.info(f"pdf light-zoom: content_h={content_h}px zoom={zoom:.3f}")
-                    else:
-                        pages_target = 2
-                        log.info(f"pdf 2-pages: content_h={content_h}px (overflow {overflow_ratio:.1%})")
+                if autofit_info.get("applied"):
+                    log.info(f"pdf autofit-JS: zoom={autofit_info.get('zoom'):.3f} (template-driven)")
+                else:
+                    # Fallback : si le template n'a pas d'auto-fit JS (ancien template),
+                    # on applique l'ancien zoom CSS sur html.
+                    content_h = autofit_info.get("h") or 0
+                    if content_h and content_h > A4_H:
+                        overflow_ratio = content_h / A4_H
+                        if one_page:
+                            zoom = max(0.62, A4_H / content_h * 0.99)
+                            page.add_style_tag(content=f"html {{ zoom: {zoom}; }}")
+                            page.wait_for_timeout(150)
+                            log.info(f"pdf legacy 1-page-forced: content_h={content_h}px zoom={zoom:.3f}")
+                        elif overflow_ratio <= 1.28:
+                            zoom = max(0.78, A4_H / content_h * 0.99)
+                            page.add_style_tag(content=f"html {{ zoom: {zoom}; }}")
+                            page.wait_for_timeout(150)
+                            log.info(f"pdf legacy light-zoom: content_h={content_h}px zoom={zoom:.3f}")
+                        else:
+                            pages_target = 2
+                            log.info(f"pdf legacy 2-pages: content_h={content_h}px")
 
                 page_ranges = "1" if (one_page or pages_target == 1) else "1-2"
 

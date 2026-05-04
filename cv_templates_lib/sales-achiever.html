@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- meta: {"name":"Sales Achiever","category":"Business","preview":"CV commercial avec accent vert émeraude, dates en pastille soft et pills colorés."} -->
+<!-- meta: {"name": "Sales Achiever", "category": "Business", "preview": "CV commercial avec accent vert émeraude, dates en pastille s · optimisé A4 1 page", "tags": ["a4", "compact", "optimisé"]} -->
 <html lang="fr">
 <head>
 <meta charset="UTF-8" />
@@ -10,20 +10,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#e9ecf2;font-family:'Inter',sans-serif;padding:24px;min-height:100vh}
-.cv{max-width:900px;margin:0 auto;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
+body{background:#e9ecf2;font-family:'Inter',sans-serif;font-size:11.5px;line-height:1.45}
+.cv{width:794px;margin:0 auto;background:#fff;box-shadow:0 10px 30px rgba(0,0,0,.12);border-radius:6px;overflow:hidden}
 
 .cv-sales{
   --c-ink:#0f172a;--c-muted:#64748b;--c-green:{{color}};--c-soft:{{color_light}};
-  font-family:'Inter',sans-serif;color:var(--c-ink);padding:40px 44px;min-height:1180px;background:#fff
+  font-family:'Inter',sans-serif;color:var(--c-ink);padding:22px 26px;min-height:1123px;background:#fff
 }
 
 .cv-sales .hero{display:grid;grid-template-columns:auto 1fr auto;gap:24px;align-items:center;padding-bottom:22px;border-bottom:1px solid #e2e8f0;margin-bottom:18px}
 .cv-sales .hero .portrait{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid var(--c-green);display:flex;align-items:center;justify-content:center;background:var(--c-soft);color:var(--c-green);font-weight:700;font-size:32px;overflow:hidden}
 .cv-sales .hero .portrait img{width:100%;height:100%;object-fit:cover;display:block;border-radius:50%}
-.cv-sales .hero h1{font-size:30px;font-weight:800;letter-spacing:-.02em}
+.cv-sales .hero h1{font-size:30.0px;font-weight:800;letter-spacing:-.02em}
 .cv-sales .hero .role{color:var(--c-green);font-size:14px;font-weight:600;margin-top:4px}
-.cv-sales .hero .contact{font-size:12.5px;color:var(--c-muted);text-align:right;line-height:1.85}
+.cv-sales .hero .contact{font-size:12.5px;color:var(--c-muted);text-align:right;line-height:1.5}
 .cv-sales .hero .contact strong{color:var(--c-ink);display:block}
 
 .cv-sales .accroche{background:var(--c-soft);border-left:4px solid var(--c-green);border-radius:0 8px 8px 0;padding:14px 18px;font-size:14px;line-height:1.6;color:#1f2937;margin-bottom:24px;font-weight:500}
@@ -52,7 +52,7 @@ body{background:#e9ecf2;font-family:'Inter',sans-serif;padding:24px;min-height:1
 .cv-sales .lang-line:last-child{border:none}
 .cv-sales .lang-line em{font-style:normal;color:var(--c-green);font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 
-.cv-sales .interest{font-size:13.5px;color:#475569;line-height:1.7}
+.cv-sales .interest{font-size:13.5px;color:#475569;line-height:1.5}
 .cv-sales .interest span{display:inline-block;background:var(--c-soft);border:1px solid #d1fae5;color:var(--c-green);padding:4px 11px;border-radius:99px;margin:3px 4px 3px 0;font-size:12.5px;font-weight:500}
 
 @media (max-width:720px){body{padding:0}.cv{border-radius:0;box-shadow:none}.cv-sales{padding:28px 22px}.cv-sales .hero{grid-template-columns:1fr;text-align:center}.cv-sales .hero .portrait{margin:0 auto}.cv-sales .hero .contact{text-align:center}.cv-sales .xp{grid-template-columns:1fr;gap:6px}.cv-sales .comp-grid{grid-template-columns:1fr}}
@@ -134,5 +134,48 @@ body{background:#e9ecf2;font-family:'Inter',sans-serif;padding:24px;min-height:1
 {{/has_interests}}
 
 </div></div>
+<script>
+(function(){
+  function fit(){
+    var cv = document.querySelector('.cv');
+    if(!cv) return;
+    var html = document.documentElement, body = document.body;
+    // Reset complet
+    cv.style.transform = ''; cv.style.transformOrigin = '';
+    cv.style.width = '794px'; cv.style.height = '';
+    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
+    body.style.margin = '0';
+    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    // Mesure du contenu naturel à 794 de large
+    var natural = cv.scrollHeight;
+    var A4W = 794, A4H = 1123;
+    // Verrouille toujours html+body à exactement A4 (préview iframe + PDF)
+    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
+    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
+    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
+    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
+    if (natural > A4H + 4) {
+      var z = Math.max(0.62, (A4H/natural)*0.99);
+      // CSS box compensée : post-scale visuel = 794×1123
+      cv.style.width = (A4W/z) + 'px';
+      cv.style.height = (A4H/z) + 'px';
+      cv.style.transformOrigin = 'top left';
+      cv.style.transform = 'scale(' + z + ')';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = z.toFixed(3);
+    } else {
+      cv.style.width = A4W + 'px';
+      cv.style.height = A4H + 'px';
+      cv.style.transform = '';
+      cv.classList.add('autofit-applied');
+      cv.dataset.autofitZoom = '1.000';
+    }
+  }
+  function go(){ setTimeout(fit, 80); }
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
+  else if (document.readyState === 'complete') go();
+  else window.addEventListener('load', go);
+})();
+</script>
 </body>
 </html>
