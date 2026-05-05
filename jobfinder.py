@@ -2218,11 +2218,18 @@ def _html_to_pdf_response(html_content, name, one_page=False):
                 elif natural_h and natural_h < A4_H * 0.94:
                     zoom = min(1.40, (A4_H / natural_h) * 0.99)
                 # 3) Applique le scale + verrouille html/body à A4 strict
+                #    CRUCIAL : margin:0 sur .cv pour qu'il colle au coin haut-gauche
+                #    du body. Sinon margin:0 auto centre le .cv et le transform:scale
+                #    avec origin top-left fait déborder le contenu à droite.
                 page.evaluate(f"""() => {{
                     const cv = document.querySelector('.cv');
                     const html = document.documentElement, body = document.body;
                     html.style.cssText = 'width:{A4_W}px;height:{A4_H}px;margin:0;padding:0;overflow:hidden';
-                    body.style.cssText = 'width:{A4_W}px;height:{A4_H}px;margin:0;padding:0;overflow:hidden';
+                    body.style.cssText = 'width:{A4_W}px;height:{A4_H}px;margin:0;padding:0;overflow:hidden;display:block';
+                    cv.style.margin = '0';
+                    cv.style.position = 'absolute';
+                    cv.style.top = '0';
+                    cv.style.left = '0';
                     if (Math.abs({zoom} - 1) > 0.01) {{
                         cv.style.width = ({A4_W}/{zoom}) + 'px';
                         cv.style.height = ({A4_H}/{zoom}) + 'px';
