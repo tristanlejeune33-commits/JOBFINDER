@@ -203,25 +203,38 @@ body{font-family:'Archivo',sans-serif;background:#e0e2e8;color:var(--ink);font-s
     var cv = document.querySelector('.cv');
     if(!cv) return;
     var html = document.documentElement, body = document.body;
-    cv.style.transform = 'none'; cv.style.transformOrigin = 'top left';
-    cv.style.width = '794px'; cv.style.height = 'auto'; cv.style.overflow = 'visible';
-    body.style.cssText = 'width:794px;height:auto;margin:0;padding:0;overflow:visible';
-    html.style.cssText = 'width:794px;height:auto;margin:0;padding:0;overflow:visible';
-    void cv.offsetHeight;
-    var natural = cv.scrollHeight;
     var A4W = 794, A4H = 1123;
+    // Reset complet : .cv + tous les descendants
+    cv.style.transform = 'none';
+    cv.style.width = A4W + 'px';
+    cv.style.height = 'auto';
+    cv.style.minHeight = '0';
+    cv.style.margin = '0';
+    cv.style.overflow = 'visible';
+    cv.querySelectorAll('*').forEach(function(el){ el.style.minHeight = '0'; });
+    body.style.cssText = 'width:'+A4W+'px;height:auto;margin:0;padding:0;overflow:visible';
+    html.style.cssText = 'width:'+A4W+'px;height:auto;margin:0;padding:0;overflow:visible';
+    void cv.offsetHeight;
+    // Mesure et calcul zoom
+    var natural = cv.scrollHeight;
     var z = 1;
     if (natural > A4H + 4) {
       z = Math.max(0.62, (A4H/natural)*0.99);
     } else if (natural > 0 && natural < A4H * 0.94) {
-      z = Math.min(1.40, A4H/natural * 0.99);
+      z = Math.min(1.40, (A4H/natural) * 0.99);
     }
+    // Verrouille html/body a A4 strict + applique le scale
     html.style.cssText = 'width:'+A4W+'px;height:'+A4H+'px;margin:0;padding:0;overflow:hidden';
-    body.style.cssText = 'width:'+A4W+'px;height:'+A4H+'px;margin:0;padding:0;overflow:hidden';
-    if (z !== 1) {
+    body.style.cssText = 'width:'+A4W+'px;height:'+A4H+'px;margin:0;padding:0;overflow:hidden;display:block';
+    cv.style.margin = '0';
+    cv.style.position = 'absolute';
+    cv.style.top = '0';
+    cv.style.left = '0';
+    if (Math.abs(z - 1) > 0.01) {
       cv.style.width = (A4W/z) + 'px';
       cv.style.height = (A4H/z) + 'px';
       cv.style.overflow = 'hidden';
+      cv.style.transformOrigin = 'top left';
       cv.style.transform = 'scale(' + z + ')';
     } else {
       cv.style.width = A4W + 'px';
