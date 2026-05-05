@@ -2178,49 +2178,63 @@ def _html_to_pdf_response(html_content, name, one_page=False):
                     pass
                 page.wait_for_timeout(800)
 
-                # ── Auto-fit JS embedded dans les templates ───────────────────
-                # Les templates v2 contiennent un script qui applique CSS zoom
-                # sur .cv pour faire tenir le contenu sur 1 page A4. On laisse
-                # ce script s'exécuter (déjà fait via wait_for_timeout(800) +
-                # fonts.ready ci-dessus) puis on vérifie qu'il a bien réussi.
+                # ── Auto-fit DÉTERMINISTE côté serveur ────────────────────────
+                # On ne fait PLUS confiance au JS embedded (timing fonts.ready
+                # peut foirer en headless). Le serveur mesure et applique
+                # explicitement le scale, override ce que fait le JS.
+                A4_W = 794
                 A4_H = 1123
-                # Délai supplémentaire pour l'auto-fit JS (mesure + zoom CSS)
-                page.wait_for_timeout(250)
-                autofit_info = page.evaluate("""() => {
+                # Délai pour laisser les fonts charger
+                page.wait_for_timeout(300)
+                # 1) Reset complet du .cv pour mesurer la hauteur naturelle
+                page.evaluate("""() => {
                     const cv = document.querySelector('.cv');
-                    if (!cv) return {applied:false, h:0};
-                    const applied = cv.classList.contains('autofit-applied');
-                    const z = parseFloat(cv.dataset.autofitZoom || '1');
-                    return {
-                        applied: applied,
-                        zoom: z,
-                        h: Math.max(cv.scrollHeight, document.body.scrollHeight),
-                    };
+                    if (!cv) return;
+                    const html = document.documentElement, body = document.body;
+                    cv.style.transform = 'none';
+                    cv.style.width = '794px';
+                    cv.style.height = 'auto';
+                    cv.style.overflow = 'visible';
+                    body.style.cssText = 'width:794px;height:auto;margin:0;padding:0;overflow:visible';
+                    html.style.cssText = 'width:794px;height:auto;margin:0;padding:0;overflow:visible';
+                    void cv.offsetHeight;
                 }""")
+                page.wait_for_timeout(120)
+                natural_h = page.evaluate("""() => {
+                    const cv = document.querySelector('.cv');
+                    return cv ? cv.scrollHeight : 0;
+                }""")
+                # 2) Compute zoom (compress si trop chargé, upscale si trop léger)
+                zoom = 1.0
+                if natural_h and natural_h > A4_H + 4:
+                    zoom = max(0.62, (A4_H / natural_h) * 0.99)
+                elif natural_h and natural_h < A4_H * 0.94:
+                    zoom = min(1.40, (A4_H / natural_h) * 0.99)
+                # 3) Applique le scale + verrouille html/body à A4 strict
+                page.evaluate(f"""() => {{
+                    const cv = document.querySelector('.cv');
+                    const html = document.documentElement, body = document.body;
+                    html.style.cssText = 'width:{A4_W}px;height:{A4_H}px;margin:0;padding:0;overflow:hidden';
+                    body.style.cssText = 'width:{A4_W}px;height:{A4_H}px;margin:0;padding:0;overflow:hidden';
+                    if (Math.abs({zoom} - 1) > 0.01) {{
+                        cv.style.width = ({A4_W}/{zoom}) + 'px';
+                        cv.style.height = ({A4_H}/{zoom}) + 'px';
+                        cv.style.overflow = 'hidden';
+                        cv.style.transformOrigin = 'top left';
+                        cv.style.transform = 'scale({zoom})';
+                    }} else {{
+                        cv.style.width = '{A4_W}px';
+                        cv.style.height = '{A4_H}px';
+                        cv.style.overflow = 'hidden';
+                        cv.style.transform = 'none';
+                    }}
+                    cv.classList.add('autofit-applied');
+                    cv.dataset.autofitZoom = '{zoom:.3f}';
+                }}""")
+                page.wait_for_timeout(180)
+                log.info(f"pdf server-autofit: natural_h={natural_h}px zoom={zoom:.3f}")
                 pages_target = 1
-                if autofit_info.get("applied"):
-                    log.info(f"pdf autofit-JS: zoom={autofit_info.get('zoom'):.3f} (template-driven)")
-                else:
-                    # Fallback : si le template n'a pas d'auto-fit JS (ancien template),
-                    # on applique l'ancien zoom CSS sur html.
-                    content_h = autofit_info.get("h") or 0
-                    if content_h and content_h > A4_H:
-                        overflow_ratio = content_h / A4_H
-                        if one_page:
-                            zoom = max(0.62, A4_H / content_h * 0.99)
-                            page.add_style_tag(content=f"html {{ zoom: {zoom}; }}")
-                            page.wait_for_timeout(150)
-                            log.info(f"pdf legacy 1-page-forced: content_h={content_h}px zoom={zoom:.3f}")
-                        elif overflow_ratio <= 1.28:
-                            zoom = max(0.78, A4_H / content_h * 0.99)
-                            page.add_style_tag(content=f"html {{ zoom: {zoom}; }}")
-                            page.wait_for_timeout(150)
-                            log.info(f"pdf legacy light-zoom: content_h={content_h}px zoom={zoom:.3f}")
-                        else:
-                            pages_target = 2
-                            log.info(f"pdf legacy 2-pages: content_h={content_h}px")
-
-                page_ranges = "1" if (one_page or pages_target == 1) else "1-2"
+                page_ranges = "1"
 
                 pdf_bytes = page.pdf(
                     format="A4",
