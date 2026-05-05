@@ -2186,7 +2186,8 @@ def _html_to_pdf_response(html_content, name, one_page=False):
                 A4_H = 1123
                 # Délai pour laisser les fonts charger
                 page.wait_for_timeout(300)
-                # 1) Reset complet du .cv pour mesurer la hauteur naturelle
+                # 1) Reset complet : .cv + TOUS ses descendants (certains ont
+                #    min-height:1123px qui force la mesure à 1123 systématiquement)
                 page.evaluate("""() => {
                     const cv = document.querySelector('.cv');
                     if (!cv) return;
@@ -2194,12 +2195,18 @@ def _html_to_pdf_response(html_content, name, one_page=False):
                     cv.style.transform = 'none';
                     cv.style.width = '794px';
                     cv.style.height = 'auto';
+                    cv.style.minHeight = '0';
                     cv.style.overflow = 'visible';
+                    // Reset min-height sur tous les descendants pour éviter
+                    // que .cv-aurora/.cv-bt/etc. forcent 1123px
+                    cv.querySelectorAll('*').forEach(function(el){
+                        el.style.minHeight = '0';
+                    });
                     body.style.cssText = 'width:794px;height:auto;margin:0;padding:0;overflow:visible';
                     html.style.cssText = 'width:794px;height:auto;margin:0;padding:0;overflow:visible';
                     void cv.offsetHeight;
                 }""")
-                page.wait_for_timeout(120)
+                page.wait_for_timeout(150)
                 natural_h = page.evaluate("""() => {
                     const cv = document.querySelector('.cv');
                     return cv ? cv.scrollHeight : 0;
