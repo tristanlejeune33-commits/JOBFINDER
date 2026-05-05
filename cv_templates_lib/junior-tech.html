@@ -134,39 +134,36 @@ body{background:#0f172a;font-family:'Inter',sans-serif;font-size:11.5px;line-hei
     var cv = document.querySelector('.cv');
     if(!cv) return;
     var html = document.documentElement, body = document.body;
-    cv.style.transform = ''; cv.style.transformOrigin = '';
-    cv.style.width = '794px'; cv.style.height = '';
-    body.style.width = ''; body.style.height = ''; body.style.overflow = '';
-    body.style.margin = '0';
-    html.style.width = ''; html.style.height = ''; html.style.overflow = '';
+    cv.style.transform = 'none'; cv.style.transformOrigin = 'top left';
+    cv.style.width = '794px'; cv.style.height = 'auto'; cv.style.overflow = 'visible';
+    body.style.cssText = 'width:794px;height:auto;margin:0;padding:0;overflow:visible';
+    html.style.cssText = 'width:794px;height:auto;margin:0;padding:0;overflow:visible';
+    void cv.offsetHeight;
     var natural = cv.scrollHeight;
     var A4W = 794, A4H = 1123;
-    html.style.width = A4W + 'px'; html.style.height = A4H + 'px';
-    html.style.overflow = 'hidden'; html.style.margin = '0'; html.style.padding = '0';
-    body.style.width = A4W + 'px'; body.style.height = A4H + 'px';
-    body.style.overflow = 'hidden'; body.style.margin = '0'; body.style.padding = '0';
     var z = 1;
     if (natural > A4H + 4) {
-      // CV chargé : shrink pour faire tenir
       z = Math.max(0.62, (A4H/natural)*0.99);
-    } else if (natural > 0 && natural < A4H * 0.92) {
-      // CV léger : upscale pour remplir la page
-      z = Math.min(1.35, A4H/natural * 0.985);
+    } else if (natural > 0 && natural < A4H * 0.94) {
+      z = Math.min(1.40, A4H/natural * 0.99);
     }
+    html.style.cssText = 'width:'+A4W+'px;height:'+A4H+'px;margin:0;padding:0;overflow:hidden';
+    body.style.cssText = 'width:'+A4W+'px;height:'+A4H+'px;margin:0;padding:0;overflow:hidden';
     if (z !== 1) {
       cv.style.width = (A4W/z) + 'px';
       cv.style.height = (A4H/z) + 'px';
-      cv.style.transformOrigin = 'top left';
+      cv.style.overflow = 'hidden';
       cv.style.transform = 'scale(' + z + ')';
     } else {
       cv.style.width = A4W + 'px';
       cv.style.height = A4H + 'px';
-      cv.style.transform = '';
+      cv.style.overflow = 'hidden';
+      cv.style.transform = 'none';
     }
     cv.classList.add('autofit-applied');
     cv.dataset.autofitZoom = z.toFixed(3);
   }
-  function go(){ setTimeout(fit, 80); }
+  function go(){ setTimeout(fit, 100); }
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(go);
   else if (document.readyState === 'complete') go();
   else window.addEventListener('load', go);
